@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>objs/wahoo.obj</file>
+        <file>objs/wahoo.bmp</file>
+        <file>objs/tower_top.png</file>
+        <file>objs/tower_top.obj</file>
+    </qresource>
+</RCC>
