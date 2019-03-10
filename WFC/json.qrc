@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>json/knots.json</file>
+        <file>json/ex.json</file>
+    </qresource>
+</RCC>

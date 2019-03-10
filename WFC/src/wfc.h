@@ -12,6 +12,7 @@ public:
     // TODO: add limit to number of iterations?
 
 private:
+    void setup(std::string jsonFilename);
     void extractPatterns();
     void buildPropogator();
 
@@ -27,8 +28,23 @@ private:
     bool findLowestEntropy(glm::vec3& cell, std::vector<int>& indices);
 
     glm::vec3 dim;
-    std::vector<std::string> tiles;
-    // TODO: some sort of data structure for relationships
+
+    std::vector<std::string> tileNames;
+
+    int pixelSize;
+    int voxelSize;
+
     std::vector<std::vector<std::vector<std::vector<bool>>>> wave;
+    std::vector<std::vector<std::vector<bool>>> changes;
+    std::vector<std::vector<std::vector<int>>> observed;
+    std::vector<float> stationary;
+    std::vector<std::vector<std::vector<bool>>> propogator;
+
+    int ground;
+    bool perioidic;
+
+    std::vector<float> logProg;
+    float logT;
+
 
 };

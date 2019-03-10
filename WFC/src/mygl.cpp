@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QApplication>
 #include <QKeyEvent>
+#include "wfc.h"
 
 
 MyGL::MyGL(QWidget *parent)
@@ -59,6 +60,8 @@ void MyGL::initializeGL()
 
     tileGrid = new TileGrid(10, 10, 10);
     tileGrid->createTiles();
+
+    WFC wfc = WFC(5, 5, 5);
 
     // Create and set up the diffuse shader
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");

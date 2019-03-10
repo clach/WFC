@@ -15,7 +15,8 @@ FORMS += forms/mainwindow.ui \
     forms/cameracontrolshelp.ui
 
 RESOURCES += glsl.qrc \
-    objs.qrc
+    objs.qrc \
+    json.qrc
 
 *-clang*|*-g++* {
     message("Enabling additional warnings")
