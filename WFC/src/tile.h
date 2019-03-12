@@ -8,9 +8,12 @@ public:
     Tile();
     //Tile(char* objName, char* textureName);
     virtual ~Tile();
-    void setTileMesh(char* objName, char* textureName);
+    void setName(std::string name);
+    //void setTileMesh(char* objName, char* textureName);
     void createTileMesh();
     void drawTileMesh(ShaderProgram& sp);
+
+    void setTransform(const glm::mat4 transform);
 
     void setRot(const glm::vec3 rot);
     void setTrans(const glm::vec3 trans);

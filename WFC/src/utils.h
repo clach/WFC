@@ -4,7 +4,6 @@
 #include <string>
 #include <cmath>
 
-
 static const float PI = 3.14159265358979323846f;
 
 /// Float approximate-equality comparison

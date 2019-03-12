@@ -38,7 +38,7 @@ private:
 
     Mesh someMesh;
 
-    TileGrid* tileGrid;
+    TileGrid tileGrid;
 
 public:
     explicit MyGL(QWidget *parent = 0);

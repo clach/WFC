@@ -12,7 +12,7 @@ MyGL::MyGL(QWidget *parent)
       m_geomCylinder(this), m_geomSphere(this),
       m_quad(this), someMesh(this),
       m_progLambert(this), m_progFlat(this), prog_skeleton(this),
-      m_glCamera(), tileGrid(nullptr)
+      m_glCamera(), tileGrid()
 {}
 
 MyGL::~MyGL()
@@ -58,10 +58,9 @@ void MyGL::initializeGL()
 
     createMeshes();
 
-    tileGrid = new TileGrid(10, 10, 10);
-    tileGrid->createTiles();
-
     WFC wfc = WFC(5, 5, 5);
+    tileGrid = wfc.run(":/json/knots.json");
+    tileGrid.createTiles();
 
     // Create and set up the diffuse shader
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
@@ -110,9 +109,9 @@ void MyGL::paintGL()
     m_progLambert.draw(m_quad);
 
     m_progLambert.setModelMatrix(glm::scale(glm::mat4(), glm::vec3(0.05)));
-    m_progLambert.draw(someMesh);
+    //m_progLambert.draw(someMesh);
 
-    tileGrid->drawTiles(m_progLambert);
+    tileGrid.drawTiles(m_progLambert);
 
 }
 

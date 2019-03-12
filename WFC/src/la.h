@@ -10,6 +10,8 @@
 #    include <glm/gtx/string_cast.hpp>
 // For glm::value_ptr.
 #    include <glm/gtc/type_ptr.hpp>
+// For glm::eulerAngle
+# include <glm/gtx/euler_angles.hpp>
 //#undef GLM_CIS460
 
 #include <QMatrix4x4>

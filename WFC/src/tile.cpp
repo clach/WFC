@@ -7,23 +7,18 @@ Tile::Tile() :
 {}
 
 Tile::~Tile() {
-    delete mesh;
+    // TODO
 }
 
-void Tile::createTileMesh() {
-    //this->objName = objName;
-    //this->textureName = textureName;
-    if (objName != nullptr) {
-        mesh->createFromOBJ(objName, textureName);
-        mesh->loadTexture();
-    }
+void Tile::setName(std::string name) {
+    std::string objNameString = name + ".obj";
+    objName = &objNameString[0u];
+    std::string textureNameString = name + ".png";
+    textureName = &textureNameString[0u];
 }
 
-void Tile::drawTileMesh(ShaderProgram& sp){
-    if (objName != nullptr) {
-        sp.setModelMatrix(modelMat);
-        sp.draw(*mesh);
-    }
+void Tile::setTransform(glm::mat4 transform) {
+    modelMat = transform;
 }
 
 void Tile::setTrans(glm::vec3 trans) {
@@ -39,4 +34,18 @@ void Tile::setRot(glm::vec3 rot) {
 void Tile::setScale(glm::vec3 scale) {
     scaleMat = glm::scale(glm::mat4(), scale);
     modelMat = transMat * rotMat * scaleMat;
+}
+
+void Tile::createTileMesh() {
+    if (objName != nullptr) {
+        mesh->createFromOBJ(objName, textureName);
+        mesh->loadTexture();
+    }
+}
+
+void Tile::drawTileMesh(ShaderProgram& sp){
+    if (objName != nullptr) {
+        sp.setModelMatrix(modelMat);
+        sp.draw(*mesh);
+    }
 }

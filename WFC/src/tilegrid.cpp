@@ -2,61 +2,62 @@
 
 TileGrid::TileGrid() : TileGrid(0, 0, 0)
 {
-
-}
-
-TileGrid::TileGrid(int xDim, int yDim) : TileGrid(xDim, yDim, 0)
-{
-
 }
 
 TileGrid::TileGrid(int xDim, int yDim, int zDim) :
-    dim(glm::vec3(xDim, yDim, zDim)), tilesArr(new Tile[xDim * yDim * zDim])
+    dim(glm::vec3(xDim, yDim, zDim))
 {
-    /*
-    if (zDim != 0) {
-        tiles.reserve(xDim * yDim * zDim);
-        for (int i = 0; i < xDim * yDim * zDim; i++) {
-            tiles.at(i) = new Tile();
+    for (int x = 0; x < dim.x; x++) {
+        std::vector<std::vector<Tile>> tilesY;
+        for (int y = 0; y < dim.y; y++) {
+            std::vector<Tile> tilesZ;
+            for (int z = 0; z < dim.z; z++) {
+                tilesZ.push_back(Tile());
+            }
+            tilesY.push_back(tilesZ);
         }
-    } else {
-        tiles.reserve(xDim * yDim);
-        for (int i = 0; i < xDim * yDim; i++) {
-            tiles.at(i) = new Tile();
-        }
-    }*/
+        tiles.push_back(tilesY);
+    }
 }
 
 TileGrid::~TileGrid() {
-
+    // TODO
 }
 
-Tile* TileGrid::getTileAt(int x, int y) const {
-    //return tileGrid.at(x * y);
-    return nullptr;
+Tile& TileGrid::getTileAt(int x, int y, int z) {
+    if (x < 0 || x >= dim.x || y < 0 || y >= dim.x || z < 0 || z >= dim.z) {
+        // TODO: throw some error
+        throw "out of bounds!";
+    }
+    return tiles[x][y][z];
 }
 
-Tile* TileGrid::getTileAt(int x, int y, int z) const {
-    return tiles.at(x * dim[1] * dim[2] + y * dim[0] + z);
-}
-
-void TileGrid::setTileAt(Tile* tile, int x, int y) {
-    //tileGrid.at()
-}
-
-void TileGrid::setTileAt(Tile* tile, int x, int y, int z) {
-    tiles.at(x * dim[1] * dim[2] + y * dim[0] + z) = tile;
+void TileGrid::setTileAt(Tile& tile, int x, int y, int z) {
+    if (x < 0 || x >= dim.x || y < 0 || y >= dim.x || z < 0 || z >= dim.z) {
+        // TODO: throw some error
+        throw "out of bounds!";
+    }
+    tiles[x][y][z] = tile;
 }
 
 void TileGrid::createTiles() {
-    for (Tile* t : tiles) {
-        t->createTileMesh();
+    for (int x = 0; x < dim.x; x++) {
+        for (int y = 0; y < dim.y; y++) {
+            for (int z = 0; z < dim.z; z++) {
+                tiles[x][y][z].createTileMesh();
+            }
+        }
     }
 }
 
 void TileGrid::drawTiles(ShaderProgram& sp) {
-    for (Tile* t : tiles) {
-        t->drawTileMesh(sp);
+    // TODO: also need to set model matrix
+    for (int x = 0; x < dim.x; x++) {
+        for (int y = 0; y < dim.y; y++) {
+            for (int z = 0; z < dim.z; z++) {
+                tiles[x][y][z].drawTileMesh(sp);
+            }
+        }
     }
 }
 
