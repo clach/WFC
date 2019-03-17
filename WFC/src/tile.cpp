@@ -1,16 +1,24 @@
 #include "tile.h"
 
-Tile::Tile(GLWidget277 *context) :
-    objName(""), textureName(""),
+Tile::Tile(GLWidget277 *context, std::string tileset) :
+    objName(""), textureName(""), tileset(tileset),
     modelMat(glm::mat4()), context(context), mesh(context)
-{}
+{
+}
 
+Tile::Tile(GLWidget277 *context, std::string tileset, std::string name) :
+    objName(""), textureName(""), tileset(tileset),
+    modelMat(glm::mat4()), context(context), mesh(context)
+{
+    setName(name);
+}
 
 Tile::Tile(const Tile &tile) : mesh(tile.context) {
     this->objName = tile.objName;
     this->textureName = tile.textureName;
     this->modelMat = tile.modelMat;
     this->context = tile.context;
+    this->tileset = tile.tileset;
 }
 
 Tile& Tile::operator=(Tile& tile) {
@@ -18,6 +26,7 @@ Tile& Tile::operator=(Tile& tile) {
     this->textureName = tile.textureName;
     this->modelMat = tile.modelMat;
     this->context = tile.context;
+    this->tileset = tile.tileset;
     return *this;
 }
 
@@ -28,8 +37,8 @@ Tile::~Tile() {
 
 void Tile::setName(std::string name) {
     if (name != "empty") {
-        objName = ":/objs/knots/" + name + ".obj";
-        textureName = ":/objs/knots/" + name + ".png";
+        objName = ":/objs/" + tileset + "/" + name + ".obj";
+        textureName = ":/objs/" + tileset + "/" + name + ".png";
     }
 }
 

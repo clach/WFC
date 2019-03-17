@@ -59,10 +59,9 @@ void MyGL::initializeGL()
 
     createMeshes();
 
-
-    // TODO: make these input
+    // TODO: make these into input
     std::string tileset = "knots";
-    WFC wfc = WFC(this, tileset, 3, 3, 1);
+    WFC wfc = WFC(this, tileset, 5, 1, 5);
     tileGrid = wfc.run();
     tileGrid.createTiles();
 

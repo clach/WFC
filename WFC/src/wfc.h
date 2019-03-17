@@ -32,7 +32,7 @@ private:
 
     TileGrid outputObservations() const;
 
-    std::string jsonFilename;
+    std::string tileset;
 
     // desired dimensions of grid to fill with WFC
     glm::vec3 dim;

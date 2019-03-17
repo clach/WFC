@@ -1,18 +1,18 @@
 #include "tilegrid.h"
 
-TileGrid::TileGrid() : TileGrid(nullptr, 0, 0, 0)
+TileGrid::TileGrid() : TileGrid(nullptr, "", 0, 0, 0)
 {
 }
 
-TileGrid::TileGrid(GLWidget277 *context, int xDim, int yDim, int zDim) :
-    dim(glm::vec3(xDim, yDim, zDim)), context(context)
+TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim, int zDim) :
+    dim(glm::vec3(xDim, yDim, zDim)), context(context), tileset(tileset)
 {
     for (int x = 0; x < dim.x; x++) {
         std::vector<std::vector<Tile>> tilesY;
         for (int y = 0; y < dim.y; y++) {
             std::vector<Tile> tilesZ;
             for (int z = 0; z < dim.z; z++) {
-                tilesZ.push_back(Tile(context));
+                tilesZ.push_back(Tile(context, tileset));
             }
             tilesY.push_back(tilesZ);
         }
@@ -25,17 +25,17 @@ TileGrid::~TileGrid() {
 }
 
 Tile& TileGrid::getTileAt(int x, int y, int z) {
-    if (x < 0 || x >= dim.x || y < 0 || y >= dim.x || z < 0 || z >= dim.z) {
-        // TODO: throw some error
+    if (x < 0 || x >= dim.x || y < 0 || y >= dim.y || z < 0 || z >= dim.z) {
+        // TODO: throw more meaningful error
         throw "out of bounds!";
     }
     return tiles[x][y][z];
 }
 
 void TileGrid::setTileAt(Tile tile, int x, int y, int z) {
-    if (x < 0 || x >= dim.x || y < 0 || y >= dim.x || z < 0 || z >= dim.z) {
-        // TODO: throw some error
-        throw "out of bounds!";
+    if (x < 0 || x >= dim.x || y < 0 || y >= dim.y || z < 0 || z >= dim.z) {
+        // TODO: throw more meaningful error
+        throw "out of bounds";
     }
     tiles[x][y][z] = tile;
 }

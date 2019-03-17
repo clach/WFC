@@ -5,7 +5,8 @@
 class Tile
 {
 public:
-    Tile(GLWidget277 *context);
+    Tile(GLWidget277 *context, std::string tileset);
+    Tile(GLWidget277 *context, std::string tileset, std::string name);
 
     Tile(const Tile &tile2); // copy constructor
 
@@ -23,12 +24,14 @@ public:
 private:
     GLWidget277 *context;
 
+    std::string tileset;
     std::string objName;
     std::string textureName;
 
     Mesh mesh;
 
     glm::mat4 modelMat;
+
 
 };
 

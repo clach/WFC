@@ -15,7 +15,7 @@
 
 WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
     context(context), dim(glm::vec3(x, y, z)), periodic(false), voxelSize(1), actionCount(0),
-    jsonFilename(":/json/" + tileset + ".json")
+    tileset(tileset)
 {
 }
 
@@ -46,6 +46,7 @@ void WFC::setup() {
     // parse json file //////////////////////////////////////////////////////////////////////
     QString jsonString;
     QFile jsonFile;
+    std::string jsonFilename = ":/json/" + tileset + ".json";
     jsonFile.setFileName(QString::fromStdString(jsonFilename));
     jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
     jsonString = jsonFile.readAll();
@@ -258,12 +259,14 @@ void WFC::setup() {
             propagator[1][action[D][2]][action[U][2]] = true;
         }
         else if (neighborType == "vertical") {
-            for (int g = 0; g < 8; g++) {
-                propagator[4][action[L][g]][action[R][g]] = true;
+            for (int j = 0; j < 8; j++) {
+                propagator[4][action[L][j]][action[R][j]] = true;
             }
         }
     }
 
+    // copy over mirrored relationships for x, y, z directions
+    // (ex: if I can put t1 to the left of t2, I can put t2 to the right of t1)
     for (int t2 = 0; t2 < actionCount; t2++) {
         for (int t1 = 0; t1 < actionCount; t1++) {
             propagator[2][t2][t1] = propagator[0][t1][t2];
@@ -298,7 +301,7 @@ bool WFC::observe()
             }
 
             wave[cell.x][cell.y][cell.z] = bools;
-            changes[cell.z][cell.y][cell.z] = true;
+            changes[cell.x][cell.y][cell.z] = true;
         }
     }
     catch (char* c) {
@@ -321,7 +324,7 @@ bool WFC::propogate()
                     // we are checking to see if there are changes in cell 2 given
                     // the bool values in cell 1
                     // (cell 1 is adjacent cell in some direction based on d)
-                    // direction order: -x, +y, +x, +z, -z (TODO: change this, or not)
+                    // direction order: -x, +y, +x, -y, +z, -z (TODO: change this, or not)
                     int x1 = x2;
                     int y1 = y2;
                     int z1 = z2;
@@ -481,7 +484,7 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
                 }
 
                 // use random noise to break entropy ties
-                double noise = ((double) rand() / RAND_MAX) / 10000;
+                double noise = ((double) rand() / RAND_MAX) / 1000;
                 if (entropy == -1) {
                     // something went wrong, not a single valid tile for cell xyz
                     // TODO: implement backtracking?
@@ -519,13 +522,13 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
 }
 
 TileGrid WFC::outputObservations() const {
-    TileGrid tileGrid = TileGrid(context, dim.x, dim.y, dim.z);
+    TileGrid tileGrid = TileGrid(context, tileset, dim.x, dim.y, dim.z);
 
     for (int x = 0; x < dim.x; x++) {
         for (int y = 0; y < dim.y; y++) {
             for (int z = 0; z < dim.z; z++) {
                 int tileIndex = observed[x][y][z];
-                Tile tile = Tile(context);
+                Tile tile = Tile(context, tileset);
 
                 //tile.setName("cube");
 
@@ -535,13 +538,14 @@ TileGrid WFC::outputObservations() const {
                 glm::mat4 rotMat = tileRotations[tileIndex];
                 //rotMat = glm::mat4();
                 float offset = voxelSize / 2.f;
-                glm::mat4 transMat = glm::translate(glm::mat4(),
+                glm::mat4 trans1Mat = glm::translate(glm::mat4(),
                                                     glm::vec3(offset + voxelSize * x, offset + voxelSize * y, offset + voxelSize * z));
                 glm::mat4 scaleMat = glm::mat4();
+                // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
                 glm::mat4 trans2Mat = glm::translate(glm::mat4(),
                                                      glm::vec3(0, -offset, 0));
 
-                glm::mat4 fullTransform = transMat * rotMat * scaleMat * trans2Mat;
+                glm::mat4 fullTransform = trans1Mat * rotMat * scaleMat * trans2Mat;
 
                 tile.setTransform(fullTransform);
                 tileGrid.setTileAt(tile, x, y, z);
