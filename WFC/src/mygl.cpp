@@ -109,7 +109,6 @@ void MyGL::paintGL()
     m_progFlat.draw(m_quad);
 
     //m_progLambert.setModelMatrix(glm::scale(glm::mat4(), glm::vec3(0.05)));
-
     //m_progLambert.draw(someMesh);
 
     tileGrid.drawTiles(m_progLambert);
@@ -129,36 +128,50 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     // statement were used, but I really dislike their
     // syntax so I chose to be lazy and use a long
     // chain of if statements instead
-    if (e->key() == Qt::Key_Escape) {
+
+    switch (e->key()) {
+    case Qt::Key_Escape:
         QApplication::quit();
-    } else if (e->key() == Qt::Key_Right) {
+        break;
+    case Qt::Key_Right:
         m_glCamera.RotateAboutUp(-amount);
-    } else if (e->key() == Qt::Key_Left) {
+        break;
+    case Qt::Key_Left:
         m_glCamera.RotateAboutUp(amount);
-    } else if (e->key() == Qt::Key_Up) {
+        break;
+    case Qt::Key_Up:
         m_glCamera.RotateAboutRight(-amount);
-    } else if (e->key() == Qt::Key_Down) {
+        break;
+    case Qt::Key_Down:
         m_glCamera.RotateAboutRight(amount);
-    } else if (e->key() == Qt::Key_1) {
+        break;
+    case Qt::Key_1:
         m_glCamera.fovy += amount;
-    } else if (e->key() == Qt::Key_2) {
+        break;
+    case Qt::Key_2:
         m_glCamera.fovy -= amount;
-    } else if (e->key() == Qt::Key_W) {
-        //m_glCamera.TranslateAlongLook(amount);
+        break;
+    case Qt::Key_W:
         m_glCamera.TranslateAlongForward(amount);
-    } else if (e->key() == Qt::Key_S) {
-        //m_glCamera.TranslateAlongLook(amount);
+        break;
+    case Qt::Key_S:
         m_glCamera.TranslateAlongForward(-amount);
-    } else if (e->key() == Qt::Key_D) {
+        break;
+    case Qt::Key_D:
         m_glCamera.TranslateAlongRight(amount);
-    } else if (e->key() == Qt::Key_A) {
+        break;
+    case Qt::Key_A:
         m_glCamera.TranslateAlongRight(-amount);
-    } else if (e->key() == Qt::Key_Q) {
+        break;
+    case Qt::Key_Q:
         m_glCamera.TranslateAlongUp(-amount);
-    } else if (e->key() == Qt::Key_E) {
+        break;
+    case Qt::Key_E:
         m_glCamera.TranslateAlongUp(amount);
-    } else if (e->key() == Qt::Key_R) {
+        break;
+    case Qt::Key_R:
         m_glCamera = Camera(this->width(), this->height());
+        break;
     }
 
     m_glCamera.RecomputeAttributes();

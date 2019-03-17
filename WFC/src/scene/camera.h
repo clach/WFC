@@ -38,6 +38,8 @@ public:
     glm::mat4 getViewProj();
 
     void RecomputeAttributes();
+    void RecomputeAttributes2();
+
 
     void RotateAboutUp(float deg);
     void RotateAboutRight(float deg);

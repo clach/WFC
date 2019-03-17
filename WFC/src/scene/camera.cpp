@@ -71,13 +71,16 @@ glm::mat4 Camera::getViewProj()
                             width / (float)height, near_clip, far_clip) * glm::lookAt(glm::vec3(eye), glm::vec3(ref), glm::vec3(up));
 }
 
+
 void Camera::RotateAboutUp(float deg)
 {
-    glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(deg), glm::vec3(up));
+    glm::mat4 rotation = glm::rotate(glm::mat4(), glm::radians(deg), glm::vec3(up));
+
     forward = rotation * forward;
     right = rotation * right;
     RecomputeAttributes();
 }
+
 void Camera::RotateAboutRight(float deg)
 {
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(deg), glm::vec3(right));
@@ -98,6 +101,7 @@ void Camera::TranslateAlongRight(float amt)
     eye += glm::vec4(translation, 0);
     ref += glm::vec4(translation, 0);
 }
+
 void Camera::TranslateAlongUp(float amt)
 {
     glm::vec3 translation = glm::vec3(up) * amt;

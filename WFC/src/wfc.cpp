@@ -248,19 +248,29 @@ void WFC::setup() {
 
         if (neighborType == "horizontal")
         {
+            // this is -x (0)
             propagator[0][R][L] = true;
             propagator[0][action[R][6]][action[L][6]] = true;
             propagator[0][action[L][4]][action[R][4]] = true;
             propagator[0][action[L][2]][action[R][2]] = true;
 
-            propagator[1][U][D] = true;
-            propagator[1][action[D][6]][action[U][6]] = true;
-            propagator[1][action[U][4]][action[D][4]] = true;
-            propagator[1][action[D][2]][action[U][2]] = true;
+            // this should be..... +z (4)
+            propagator[4][U][D] = true;
+            propagator[4][action[D][6]][action[U][6]] = true;
+            propagator[4][action[U][4]][action[D][4]] = true;
+            propagator[4][action[D][2]][action[U][2]] = true;
+//            propagator[1][U][D] = true;
+//            propagator[1][action[D][6]][action[U][6]] = true;
+//            propagator[1][action[U][4]][action[D][4]] = true;
+//            propagator[1][action[D][2]][action[U][2]] = true;
         }
         else if (neighborType == "vertical") {
             for (int j = 0; j < 8; j++) {
-                propagator[4][action[L][j]][action[R][j]] = true;
+                // this should correspond to +y (1)
+                propagator[3][action[L][j]][action[R][j]] = true;
+
+                //propagator[1][action[L][j]][action[R][j]] = true;
+                //propagator[4][action[L][j]][action[R][j]] = true;
             }
         }
     }
@@ -270,7 +280,9 @@ void WFC::setup() {
     for (int t2 = 0; t2 < actionCount; t2++) {
         for (int t1 = 0; t1 < actionCount; t1++) {
             propagator[2][t2][t1] = propagator[0][t1][t2];
-            propagator[3][t2][t1] = propagator[1][t1][t2];
+            propagator[1][t2][t1] = propagator[3][t1][t2];
+
+            //propagator[3][t2][t1] = propagator[1][t1][t2];
             propagator[5][t2][t1] = propagator[4][t1][t2];
         }
     }

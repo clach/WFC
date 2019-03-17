@@ -33,7 +33,7 @@ out vec4 fs_LightVec;       // The direction in which our virtual light lies, re
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
 out vec2 fs_UV;
 
-const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
+const vec4 lightPos = vec4(10, 20, 0, 1); //The position of our virtual light, which is used to compute the shading of
                                         //the geometry in the fragment shader.
 
 void main()
