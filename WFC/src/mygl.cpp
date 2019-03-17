@@ -23,6 +23,7 @@ MyGL::~MyGL()
     m_geomSphere.destroy();
     m_quad.destroy();
     someMesh.destroy();
+    tileGrid.destroyTiles();
 }
 
 void MyGL::initializeGL()
@@ -58,8 +59,11 @@ void MyGL::initializeGL()
 
     createMeshes();
 
-    WFC wfc = WFC(5, 5, 5);
-    tileGrid = wfc.run(":/json/knots.json");
+
+    // TODO: make these input
+    std::string tileset = "knots";
+    WFC wfc = WFC(this, tileset, 3, 3, 1);
+    tileGrid = wfc.run();
     tileGrid.createTiles();
 
     // Create and set up the diffuse shader
@@ -67,11 +71,7 @@ void MyGL::initializeGL()
     // Create and set up the flat lighting shader
     m_progFlat.create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
-    // Set a color with which to draw geometry since you won't have one
-    // defined until you implement the Node classes.
-    // This makes your geometry render green.
-    m_progLambert.setGeometryColor(glm::vec4(1.0,0,0,1));
-
+    m_progLambert.setGeometryColor(glm::vec4(1.0, 0, 0, 1.0));
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
@@ -106,9 +106,11 @@ void MyGL::paintGL()
     m_progLambert.setViewProjMatrix(m_glCamera.getViewProj());
     m_progLambert.setModelMatrix(glm::mat4());
 
-    m_progLambert.draw(m_quad);
+    m_progFlat.setModelMatrix(glm::translate(glm::mat4(), glm::vec3(0.0, -1.0, 0.0)));
+    m_progFlat.draw(m_quad);
 
-    m_progLambert.setModelMatrix(glm::scale(glm::mat4(), glm::vec3(0.05)));
+    //m_progLambert.setModelMatrix(glm::scale(glm::mat4(), glm::vec3(0.05)));
+
     //m_progLambert.draw(someMesh);
 
     tileGrid.drawTiles(m_progLambert);
@@ -171,7 +173,7 @@ void MyGL::updateMeshScene() {
 }
 
 void MyGL::createMeshes() {
-    someMesh.createFromOBJ(":/objs/tower_top.obj", ":/objs/tower_top.png");
-    //someMesh.createFromOBJ(":/objs/wahoo.obj", ":/objs/wahoo.bmp");
+    //someMesh.createFromOBJ(":/objs/tower_top.obj", ":/objs/tower_top.png");
+    someMesh.createFromOBJ(":/objs/wahoo.obj", ":/objs/wahoo.bmp");
     someMesh.loadTexture();
 }

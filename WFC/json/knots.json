@@ -1,7 +1,7 @@
 {  
    "tileset":{  
-      "pixelsize":8,
-      "voxelsize":3,
+      "pixelSize":8,
+      "voxelSize":3,
       "tiles":[  
          {  
             "name":"down",

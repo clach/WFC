@@ -13,7 +13,9 @@
 // i, j, k used for everything else
 
 
-WFC::WFC(int x, int y, int z) : dim(glm::vec3(x, y, z)), periodic(false)
+WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
+    context(context), dim(glm::vec3(x, y, z)), periodic(false), voxelSize(1), actionCount(0),
+    jsonFilename(":/json/" + tileset + ".json")
 {
 }
 
@@ -22,11 +24,11 @@ WFC::~WFC()
     // TODO
 }
 
-TileGrid WFC::run(std::string jsonFilename)
+TileGrid WFC::run()
 {
     // TODO: set rand seed each time?
 
-    setup(jsonFilename);
+    setup();
 
     while (true) {
         if (observe()) { // returns true when WFC is complete
@@ -40,7 +42,7 @@ TileGrid WFC::run(std::string jsonFilename)
     return outputObservations();
 }
 
-void WFC::setup(std::string jsonFilename) {
+void WFC::setup() {
     // parse json file //////////////////////////////////////////////////////////////////////
     QString jsonString;
     QFile jsonFile;
@@ -53,6 +55,8 @@ void WFC::setup(std::string jsonFilename) {
     QJsonObject jsonObject = jsonDoc.object();
 
     QJsonObject jsonTilesetObject = jsonObject["tileset"].toObject();
+    voxelSize = jsonTilesetObject["voxelSize"].toDouble();
+
     QJsonArray tilesArray = jsonTilesetObject["tiles"].toArray();
     QJsonArray neighborsArray = jsonTilesetObject["neighbors"].toArray();
 
@@ -145,7 +149,8 @@ void WFC::setup(std::string jsonFilename) {
         {
             tileNames.push_back(tileName + " " + std::to_string(c));
             tileWeights.push_back(tileWeight);
-            tileRotations.push_back(glm::eulerAngleZ(c * PI / 2.0f));
+            // ROTATES IN Y IT HAS TO
+            tileRotations.push_back(glm::eulerAngleY(c * PI / 2.0f));
         }
     }
 
@@ -514,20 +519,29 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
 }
 
 TileGrid WFC::outputObservations() const {
-    TileGrid tileGrid = TileGrid(dim.x, dim.y, dim.z);
+    TileGrid tileGrid = TileGrid(context, dim.x, dim.y, dim.z);
 
     for (int x = 0; x < dim.x; x++) {
         for (int y = 0; y < dim.y; y++) {
             for (int z = 0; z < dim.z; z++) {
                 int tileIndex = observed[x][y][z];
-                Tile tile = Tile();
-                tile.setName(tileNames[tileIndex]);
+                Tile tile = Tile(context);
 
-                // TODO: fix these bad boys based on voxel size n stuff
-                glm::mat4 tileRot = tileRotations[tileIndex];
-                glm::mat4 tileScale = glm::mat4();
-                glm::mat4 tileTrans = glm::mat4();
-                glm::mat4 fullTransform = tileTrans * tileRot * tileScale;
+                //tile.setName("cube");
+
+                std::string tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(" "));
+
+                tile.setName(tileName);
+                glm::mat4 rotMat = tileRotations[tileIndex];
+                //rotMat = glm::mat4();
+                float offset = voxelSize / 2.f;
+                glm::mat4 transMat = glm::translate(glm::mat4(),
+                                                    glm::vec3(offset + voxelSize * x, offset + voxelSize * y, offset + voxelSize * z));
+                glm::mat4 scaleMat = glm::mat4();
+                glm::mat4 trans2Mat = glm::translate(glm::mat4(),
+                                                     glm::vec3(0, -offset, 0));
+
+                glm::mat4 fullTransform = transMat * rotMat * scaleMat * trans2Mat;
 
                 tile.setTransform(fullTransform);
                 tileGrid.setTileAt(tile, x, y, z);

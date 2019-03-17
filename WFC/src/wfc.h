@@ -7,14 +7,14 @@
 class WFC
 {
 public:
-    WFC(int x, int y, int z);
+    WFC(GLWidget277 *context, std::string tileset, int x, int y, int z);
     ~WFC();
 
-    TileGrid run(std::string jsonFilename);
+    TileGrid run();
     // TODO: add limit to number of iterations?
 
 private:
-    void setup(std::string jsonFilename);
+    void setup();
 
     void clear();
 
@@ -32,10 +32,14 @@ private:
 
     TileGrid outputObservations() const;
 
+    std::string jsonFilename;
+
     // desired dimensions of grid to fill with WFC
     glm::vec3 dim;
 
     bool periodic;
+
+    double voxelSize;
 
     // number of total tile variant options
     int actionCount;
@@ -48,5 +52,7 @@ private:
     std::vector<std::vector<std::vector<bool>>> changes;
     std::vector<std::vector<std::vector<int>>> observed;
     std::vector<std::vector<std::vector<bool>>> propagator;
+
+    GLWidget277 *context;
 
 };

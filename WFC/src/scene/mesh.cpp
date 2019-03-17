@@ -17,29 +17,6 @@ void Mesh::createCube(const char *textureFile, const char *bgTextureFile)
     mp_bgTexture = std::unique_ptr<Texture>(new Texture(mp_context));
     mp_bgTexture->create(bgTextureFile);
 
-    // TODO: Create VBO data for positions, normals, UVs, and indices
-/*
-    std::vector<glm::vec4> pos {glm::vec4(-2, -2, 0, 1),
-                                glm::vec4(2, -2, 0, 1),
-                                glm::vec4(2, 2, 0, 1),
-                                glm::vec4(-2, 2, 0, 1)};
-
-    std::vector<glm::vec4> nor {glm::vec4(0, 0, 1, 0),
-                                glm::vec4(0, 0, 1, 0),
-                                glm::vec4(0, 0, 1, 0),
-                                glm::vec4(0, 0, 1, 0)};
-
-    std::vector<glm::vec2> uvs {glm::vec2(0, 0),
-                                glm::vec2(1, 0),
-                                glm::vec2(1, 1),
-                                glm::vec2(0, 1)};
-
-    std::vector<GLuint> idx {0, 1, 2, 0, 2, 3};
-
-    count = 6; // TODO: Set "count" to the number of indices in your index VBO
-
-*/
-
     // will need 24 positions to match with 24 normals
     std::vector<glm::vec4> pos {glm::vec4(1, -1, 1, 1), glm::vec4(1, 1, 1, 1), // front quad
                                 glm::vec4(-1, 1, 1, 1), glm::vec4(-1, -1, 1, 1),

@@ -4,5 +4,18 @@
         <file>objs/wahoo.bmp</file>
         <file>objs/tower_top.png</file>
         <file>objs/tower_top.obj</file>
+        <file>objs/knots/down.obj</file>
+        <file>objs/knots/down.png</file>
+        <file>objs/knots/ground.png</file>
+        <file>objs/knots/ground.obj</file>
+        <file>objs/knots/line.png</file>
+        <file>objs/knots/line.obj</file>
+        <file>objs/knots/turn.obj</file>
+        <file>objs/knots/turn.png</file>
+        <file>objs/knots/up.obj</file>
+        <file>objs/knots/up.png</file>
+        <file>objs/knots/vertical.obj</file>
+        <file>objs/knots/vertical.png</file>
+        <file>objs/knots/cube.obj</file>
     </qresource>
 </RCC>
