@@ -59,9 +59,9 @@ void MyGL::initializeGL()
 
     createMeshes();
 
-    // TODO: make these into input
+    // TODO: make these into input controls
     std::string tileset = "knots";
-    WFC wfc = WFC(this, tileset, 5, 1, 5);
+    WFC wfc = WFC(this, tileset, 5, 2, 5);
     tileGrid = wfc.run();
     tileGrid.createTiles();
 
@@ -74,7 +74,7 @@ void MyGL::initializeGL()
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
-//    vao.bind();
+    //    vao.bind();
     glBindVertexArray(vao);
 }
 
@@ -95,7 +95,6 @@ void MyGL::resizeGL(int w, int h)
 
 //This function is called by Qt any time your GL window is supposed to update
 //For example, when the function updateGL is called, paintGL is called implicitly.
-//DO NOT CONSTRUCT YOUR SCENE GRAPH IN THIS FUNCTION!
 void MyGL::paintGL()
 {
     // Clear the screen so that we only see newly drawn images
@@ -123,11 +122,6 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
     }
-    // http://doc.qt.io/qt-5/qt.html#Key-enum
-    // This could all be much more efficient if a switch
-    // statement were used, but I really dislike their
-    // syntax so I chose to be lazy and use a long
-    // chain of if statements instead
 
     switch (e->key()) {
     case Qt::Key_Escape:
@@ -140,10 +134,10 @@ void MyGL::keyPressEvent(QKeyEvent *e)
         m_glCamera.RotateAboutUp(amount);
         break;
     case Qt::Key_Up:
-        m_glCamera.RotateAboutRight(-amount);
+        m_glCamera.RotateAboutRight(amount);
         break;
     case Qt::Key_Down:
-        m_glCamera.RotateAboutRight(amount);
+        m_glCamera.RotateAboutRight(-amount);
         break;
     case Qt::Key_1:
         m_glCamera.fovy += amount;
@@ -152,10 +146,10 @@ void MyGL::keyPressEvent(QKeyEvent *e)
         m_glCamera.fovy -= amount;
         break;
     case Qt::Key_W:
-        m_glCamera.TranslateAlongForward(amount);
+        m_glCamera.TranslateAlongLook(amount);
         break;
     case Qt::Key_S:
-        m_glCamera.TranslateAlongForward(-amount);
+        m_glCamera.TranslateAlongLook(-amount);
         break;
     case Qt::Key_D:
         m_glCamera.TranslateAlongRight(amount);

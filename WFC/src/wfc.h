@@ -39,6 +39,7 @@ private:
 
     bool periodic;
 
+    // size of input voxel obj
     double voxelSize;
 
     // number of total tile variant options

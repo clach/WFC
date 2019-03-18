@@ -14,7 +14,7 @@
 
 
 WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
-    context(context), dim(glm::vec3(x, y, z)), periodic(false), voxelSize(1), actionCount(0),
+    dim(glm::vec3(x, y, z)), periodic(true), context(context), voxelSize(1), actionCount(0),
     tileset(tileset)
 {
 }
@@ -43,7 +43,7 @@ TileGrid WFC::run()
 }
 
 void WFC::setup() {
-    // parse json file //////////////////////////////////////////////////////////////////////
+    // parse json file
     QString jsonString;
     QFile jsonFile;
     std::string jsonFilename = ":/json/" + tileset + ".json";
@@ -105,7 +105,7 @@ void WFC::setup() {
             b = [](int c) { return 1 - c; };
             break;
         }
-        default: {// case 'X': {
+        default: { // case 'X': {
             cardinality = 1;
             a = [](int c) { return c; };
             b = [](int c) { return c; };
@@ -114,13 +114,14 @@ void WFC::setup() {
         }
 
         actionCount = action.size();
+
         // keep track of first occurence of a tile within action
         firstOccurence[tileName] = actionCount;
 
-        // handle mirrored and rotated tiles /////////////////////////////////////////////////
+        // handle mirrored and rotated tiles
         // (think symmetry of a square)
-        // so there are only cardinality # of meaningful variants for a tile
-        // m keeps track of how the operations produce those cardinality variants
+        // (there are only cardinality # of meaningful variants for a tile
+        // m keeps track of how the operations produce those cardinality variants)
         for (int c = 0; c < cardinality; c++) {
             std::vector<int> m;
 
@@ -150,7 +151,6 @@ void WFC::setup() {
         {
             tileNames.push_back(tileName + " " + std::to_string(c));
             tileWeights.push_back(tileWeight);
-            // ROTATES IN Y IT HAS TO
             tileRotations.push_back(glm::eulerAngleY(c * PI / 2.0f));
         }
     }
@@ -158,7 +158,7 @@ void WFC::setup() {
     // re-update actionCount after all tiles and variants are added
     actionCount = action.size();
 
-    // instantiate wave, changes, observed structures /////////////////////////////////////
+    // instantiate wave, changes, observed structures
     // for each cell in grid, value of wave is vector of trues
     // value of changes is false
     // value of observed is -1
@@ -191,11 +191,10 @@ void WFC::setup() {
         observed.push_back(observedY);
     }
 
-    // build propagator structure ///////////////////////////////////////////////////////////
+    // build propagator structure
 
     // create propagator starting data structure
     // 6 x actionCount x actionCount
-    // TODO: maybe change this later lol
     for (int d = 0; d < 6; d++) { // d is all possible directions
         std::vector<std::vector<bool>> propagatorY;
         for (int t2 = 0; t2 < actionCount; t2++) {
@@ -238,51 +237,40 @@ void WFC::setup() {
         }
 
         // TODO: understand this
-        // L is finding the "left" TILE VARIANT given the tile name and variant number
         int L = action[firstOccurence[leftName]][leftNum];
-        //
         int D = action[L][1];
-        // R is finding the "right" TILE VARIANT given the tile name and variant number
         int R = action[firstOccurence[rightName]][rightNum];
         int U = action[R][1];
 
-        if (neighborType == "horizontal")
-        {
-            // this is -x (0)
+        // propagator directions go -x, +y, +x, -y, +z, -z
+        // TODO: maybe change that to be more intuitive?
+        if (neighborType == "horizontal") { // x and z directions
+            // -x direction
             propagator[0][R][L] = true;
             propagator[0][action[R][6]][action[L][6]] = true;
             propagator[0][action[L][4]][action[R][4]] = true;
             propagator[0][action[L][2]][action[R][2]] = true;
 
-            // this should be..... +z (4)
+            // +z direction
             propagator[4][U][D] = true;
             propagator[4][action[D][6]][action[U][6]] = true;
             propagator[4][action[U][4]][action[D][4]] = true;
             propagator[4][action[D][2]][action[U][2]] = true;
-//            propagator[1][U][D] = true;
-//            propagator[1][action[D][6]][action[U][6]] = true;
-//            propagator[1][action[U][4]][action[D][4]] = true;
-//            propagator[1][action[D][2]][action[U][2]] = true;
         }
-        else if (neighborType == "vertical") {
+        else if (neighborType == "vertical") { // direction
             for (int j = 0; j < 8; j++) {
-                // this should correspond to +y (1)
+                // -y direction
                 propagator[3][action[L][j]][action[R][j]] = true;
-
-                //propagator[1][action[L][j]][action[R][j]] = true;
-                //propagator[4][action[L][j]][action[R][j]] = true;
             }
         }
     }
 
-    // copy over mirrored relationships for x, y, z directions
+    // copy over mirrored relationships for +x, +y, -z directions
     // (ex: if I can put t1 to the left of t2, I can put t2 to the right of t1)
     for (int t2 = 0; t2 < actionCount; t2++) {
         for (int t1 = 0; t1 < actionCount; t1++) {
             propagator[2][t2][t1] = propagator[0][t1][t2];
             propagator[1][t2][t1] = propagator[3][t1][t2];
-
-            //propagator[3][t2][t1] = propagator[1][t1][t2];
             propagator[5][t2][t1] = propagator[4][t1][t2];
         }
     }
@@ -336,14 +324,13 @@ bool WFC::propogate()
                     // we are checking to see if there are changes in cell 2 given
                     // the bool values in cell 1
                     // (cell 1 is adjacent cell in some direction based on d)
-                    // direction order: -x, +y, +x, -y, +z, -z (TODO: change this, or not)
+                    // again, direction order: -x, +y, +x, -y, +z, -z
                     int x1 = x2;
                     int y1 = y2;
                     int z1 = z2;
 
-                    switch (d) {
-
                     // account for periodicity
+                    switch (d) {
                     case 0: {
                         if (x2 == 0) {
                             if (!periodic) {
@@ -429,7 +416,7 @@ bool WFC::propogate()
                     std::vector<bool> bools1 = wave[x1][y1][z1];
                     std::vector<bool> bools2 = wave[x2][y2][z2];
 
-                    // go through each action-action (tile variant)
+                    // go through each action-action pair
                     for (int t2 = 0; t2 < actionCount; t2++) {
 
                         // if tile t2 is still possible in cell ijk
@@ -471,7 +458,6 @@ bool WFC::propogate()
     return change;
 }
 
-// TODO: make sure this passing by reference works
 bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
 {
     // want to find lowest non-zero entropy cell
@@ -512,8 +498,8 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
         }
     }
 
+    // if all cells have zero entropy, WFC is complete
     if (allCellsAtZeroEntropy) {
-        // oh boy all cells have zero entropy! WFC is done!
         for (int x = 0; x < dim.x; x++) {
             for (int y = 0; y < dim.y; y++) {
                 for (int z = 0; z < dim.z; z++) {
@@ -541,25 +527,21 @@ TileGrid WFC::outputObservations() const {
             for (int z = 0; z < dim.z; z++) {
                 int tileIndex = observed[x][y][z];
                 Tile tile = Tile(context, tileset);
-
-                //tile.setName("cube");
-
                 std::string tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(" "));
-
                 tile.setName(tileName);
-                glm::mat4 rotMat = tileRotations[tileIndex];
-                //rotMat = glm::mat4();
+
                 float offset = voxelSize / 2.f;
+
+                glm::mat4 rotMat = tileRotations[tileIndex];
                 glm::mat4 trans1Mat = glm::translate(glm::mat4(),
                                                     glm::vec3(offset + voxelSize * x, offset + voxelSize * y, offset + voxelSize * z));
                 glm::mat4 scaleMat = glm::mat4();
                 // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
                 glm::mat4 trans2Mat = glm::translate(glm::mat4(),
                                                      glm::vec3(0, -offset, 0));
+                glm::mat4 transformMat = trans1Mat * rotMat * scaleMat * trans2Mat;
 
-                glm::mat4 fullTransform = trans1Mat * rotMat * scaleMat * trans2Mat;
-
-                tile.setTransform(fullTransform);
+                tile.setTransform(transformMat);
                 tileGrid.setTileAt(tile, x, y, z);
             }
         }

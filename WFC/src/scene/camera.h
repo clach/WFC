@@ -1,4 +1,3 @@
-// I couldn't figure out how to do the spherical camera, but here's as far as I got:
 #pragma once
 
 #include <la.h>
@@ -10,8 +9,8 @@ class Camera
 public:
     Camera();
     Camera(unsigned int w, unsigned int h);
-    Camera(unsigned int w, unsigned int h, const glm::vec4 &e, const glm::vec4 &f,
-                   const glm::vec4 &u,const glm::vec4 &r);
+    Camera(unsigned int w, unsigned int h, const glm::vec3 &eye, const glm::vec3 &ref,
+           const glm::vec3 &worldUp);
     Camera(const Camera &c);
 
     float fovy;
@@ -22,35 +21,32 @@ public:
     //Computed attributes
     float aspect;
 
-    glm::vec4 ref; // point in world space towards which the camera is pointing
-    glm::vec4 eye; // camera position in world space
-    glm::vec4 forward; // vector pointing foward in camera space, aka "look"
-    glm::vec4 up; // vector pointing up in camera space
-    glm::vec4 right; // vector pointing right in camera space
-
-    glm::vec4 world_up;
-
-    // vertical and horizontal component of the plane of the viewing frustum that passes
-    // through the camera's reference point. Used in Camera::Raycast.
-    glm::vec3 V, H;
-
+    glm::vec3 eye,      //The position of the camera in world space
+              ref,      //The point in world space towards which the camera is pointing
+              look,     //The normalized vector from eye to ref. Is also known as the camera's "forward" vector.
+              up,       //The normalized vector pointing upwards IN CAMERA SPACE. This vector is perpendicular to LOOK and RIGHT.
+              right,    //The normalized vector pointing rightwards IN CAMERA SPACE. It is perpendicular to UP and LOOK.
+              world_up, //The normalized vector pointing upwards IN WORLD SPACE. This is primarily used for computing the camera's initial UP vector.
+              V,        //Represents the vertical component of the plane of the viewing frustum that passes through the camera's reference point. Used in Camera::Raycast.
+              H;        //Represents the horizontal component of the plane of the viewing frustum that passes through the camera's reference point. Used in Camera::Raycast.
 
     glm::mat4 getViewProj();
+    glm::mat4 getView();
+    glm::mat4 getProj();
 
     void RecomputeAttributes();
-    void RecomputeAttributes2();
-
 
     void RotateAboutUp(float deg);
     void RotateAboutRight(float deg);
 
-    void TranslateAlongForward(float amt);
+    void RotateTheta(float deg);
+    void RotatePhi(float deg);
+
+    void TranslateAlongLook(float amt);
     void TranslateAlongRight(float amt);
     void TranslateAlongUp(float amt);
 
-    // attrbutes for polar spherical camera
-    glm::vec3 phi; // angle by which we rotate about y-axis
-    glm::vec3 theta; // angle by which we rotate about x-axis
-    glm::vec3 z; // radius of sphere (distance from reference point)
+    void Zoom(float amt);
 
+    void Reset();
 };
