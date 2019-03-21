@@ -11,11 +11,10 @@
 #include "mainwindow.h"
 #include <scene/mesh.h>
 #include <tilegrid.h>
-
+#include <wfc.h>
 
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
-
 
 class MyGL
     : public GLWidget277
@@ -38,7 +37,10 @@ private:
 
     Mesh someMesh;
 
+    WFC wfc;
     TileGrid tileGrid;
+    glm::vec3 dim;
+    std::string tileset;
 
 public:
     explicit MyGL(QWidget *parent = 0);
@@ -48,10 +50,15 @@ public:
     void resizeGL(int w, int h);
     void paintGL();
 
-    // destroys and creates mesh, and all selected components, then redraws scene
-    void updateMeshScene();
-
     void createMeshes();
+
+    void runWFC();
+
+    void setTileset(std::string tileset);
+
+    void setDimX(int x);
+    void setDimY(int y);
+    void setDimZ(int z);
 
 protected:
     void keyPressEvent(QKeyEvent *e);

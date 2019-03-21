@@ -1,6 +1,5 @@
 {  
    "tileset":{  
-      "pixelSize":8,
       "voxelSize":3,
       "tiles":[  
          {  

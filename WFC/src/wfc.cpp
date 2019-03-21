@@ -12,16 +12,20 @@
 // d used for direction
 // i, j, k used for everything else
 
+WFC::WFC(GLWidget277 *context) : context(context),
+    dim(glm::vec3()), periodic(false), voxelSize(1), actionCount(0),
+    tileset("")
+{
+}
 
 WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
-    dim(glm::vec3(x, y, z)), periodic(true), context(context), voxelSize(1), actionCount(0),
+    context(context), dim(glm::vec3(x, y, z)), periodic(false), voxelSize(1), actionCount(0),
     tileset(tileset)
 {
 }
 
 WFC::~WFC()
 {
-    // TODO
 }
 
 TileGrid WFC::run()
@@ -43,6 +47,9 @@ TileGrid WFC::run()
 }
 
 void WFC::setup() {
+    // clear everything
+    clear();
+
     // parse json file
     QString jsonString;
     QFile jsonFile;
@@ -278,7 +285,14 @@ void WFC::setup() {
 }
 
 void WFC::clear() {
-    // TODO
+    actionCount = 0;
+    tileNames.clear();
+    tileWeights.clear();
+    tileRotations.clear();
+    wave.clear();
+    changes.clear();
+    observed.clear();
+    propagator.clear();
 }
 
 bool WFC::observe()
@@ -548,4 +562,12 @@ TileGrid WFC::outputObservations() const {
     }
 
     return tileGrid;
+}
+
+void WFC::setDim(int x, int y, int z) {
+    this->dim = glm::vec3(x, y, z);
+}
+
+void WFC::setTileset(std::string tileset) {
+    this->tileset = tileset;
 }

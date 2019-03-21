@@ -105,7 +105,7 @@
      <string>z</string>
     </property>
    </widget>
-   <widget class="QSpinBox" name="dimXSpinBox">
+   <widget class="QSpinBox" name="dimX">
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -121,7 +121,7 @@
      <number>2</number>
     </property>
    </widget>
-   <widget class="QSpinBox" name="dimYSpinBox">
+   <widget class="QSpinBox" name="dimY">
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -137,7 +137,7 @@
      <number>2</number>
     </property>
    </widget>
-   <widget class="QSpinBox" name="dimZSpinBox">
+   <widget class="QSpinBox" name="dimZ">
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -177,6 +177,16 @@
     </property>
     <property name="text">
      <string>Run WFC</string>
+    </property>
+   </widget>
+   <widget class="QListView" name="tilesetList">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>170</y>
+      <width>171</width>
+      <height>192</height>
+     </rect>
     </property>
    </widget>
   </widget>

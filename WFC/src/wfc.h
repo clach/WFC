@@ -1,16 +1,20 @@
 #pragma once
-#include "TileGrid.h"
 #include <iostream>
 #include <math.h>
 #include "utils.h"
+#include "tilegrid.h"
 
 class WFC
 {
 public:
+    WFC(GLWidget277 *context);
     WFC(GLWidget277 *context, std::string tileset, int x, int y, int z);
     ~WFC();
 
+    void setDim(int x, int y, int z);
+    void setTileset(std::string tileset);
     TileGrid run();
+
     // TODO: add limit to number of iterations?
 
 private:
@@ -32,18 +36,14 @@ private:
 
     TileGrid outputObservations() const;
 
-    std::string tileset;
 
-    // desired dimensions of grid to fill with WFC
-    glm::vec3 dim;
+    GLWidget277 *context;
+    glm::vec3 dim; // desired dimensions of grid to fill with WFC
+    std::string tileset; // name of WFC tileset
 
     bool periodic;
-
-    // size of input voxel obj
-    double voxelSize;
-
-    // number of total tile variant options
-    int actionCount;
+    double voxelSize; // size of input voxel obj
+    int actionCount; // number of total tile variant options
 
     std::vector<std::string> tileNames; // tile names
     std::vector<double> tileWeights; // tile weights (frequencies in input)
@@ -53,7 +53,5 @@ private:
     std::vector<std::vector<std::vector<bool>>> changes;
     std::vector<std::vector<std::vector<int>>> observed;
     std::vector<std::vector<std::vector<bool>>> propagator;
-
-    GLWidget277 *context;
 
 };

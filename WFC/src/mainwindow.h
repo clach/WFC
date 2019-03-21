@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QKeyEvent>
 #include <QObject>
+#include <QListWidgetItem>
 
 namespace Ui {
 class MainWindow;
@@ -20,18 +21,25 @@ public:
 
 private slots:
     void on_actionQuit_triggered();
-
     void on_actionCamera_Controls_triggered();
 
-public slots:
-    // user can press button and choose OBJ to import as mesh
-    void slot_importOBJ();
+public slots:    
+    // user can use spin boxes to edit grid dimensions
+    void slot_changeDimX(int);
+    void slot_changeDimY(int);
+    void slot_changeDimZ(int);
 
-    // user can press button and choose JSON to import as skeleton
-    void slot_importJSON();
+    // user can press button to run WFC
+    void slot_runWFC();
+
+    // user can select tileset from list
+    void slot_changeTileset(QListWidgetItem*);
+
 
 private:
     Ui::MainWindow *ui;
+
+    void populateTilesetList();
 
 
 signals:

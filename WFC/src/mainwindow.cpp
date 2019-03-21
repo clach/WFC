@@ -7,56 +7,34 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-
+#include <QStringListModel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ui->mygl->setFocus();
-}
 
-void MainWindow::slot_importOBJ() {
+    // set up UI connections
 
-    // bring up dialogue for user to open file, .obj's only
-    QString filename = QFileDialog::getOpenFileName(0, QString("Load OBJ"), QString(":/"), tr("*.obj"));
-    QFile file(filename);
+    // connect grid dimension spin boxes
+    connect(ui->dimX, SIGNAL(valueChanged(int)), this, SLOT(slot_changeDimX(int)));
+    connect(ui->dimY, SIGNAL(valueChanged(int)), this, SLOT(slot_changeDimY(int)));
+    connect(ui->dimZ, SIGNAL(valueChanged(int)), this, SLOT(slot_changeDimZ(int)));
 
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    // set default dim values in mygl based on spinboxes
+    slot_changeDimX(ui->dimX->value());
+    slot_changeDimY(ui->dimY->value());
+    slot_changeDimZ(ui->dimZ->value());
 
-        // start reading file
-        QTextStream in(&file);
+    // connect tileset list view
+    connect(ui->tilesetList, SIGNAL(itemClicked(QListWidgetItem*, int)), this, SLOT(slot_changeTileset(QListWidgetItem*)));
 
-        while(!in.atEnd()) {
-            QString line= in.readLine(); // read file one line at a time
+    // populate tileset list view
+    populateTilesetList();
 
-            char name[2];
-            float x, y, z;
-        }
-
-        // finished reading file, now have all the vertices, faces, and half edges
-
-
-    }
-}
-
-void MainWindow::slot_importJSON() {
-
-    // bring up dialogue for user to open file, .jsons's only
-    QString filename = QFileDialog::getOpenFileName(0, QString("Load JSON"), QString(":/"), tr("*.json"));
-    QFile file(filename);
-
-    // parse the JSON file
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QString fileContents = file.readAll();
-        file.close();
-
-        QJsonDocument json = QJsonDocument::fromJson(fileContents.toUtf8());
-        QJsonObject jsonObject = json.object();
-
-        // get root joint
-        QJsonObject root = jsonObject["root"].toObject();
-    }
+    // connect run WFC button
+    connect(ui->runWFCButton, SIGNAL(clicked(bool)), this, SLOT(slot_runWFC()));
 
 }
 
@@ -75,3 +53,43 @@ void MainWindow::on_actionCamera_Controls_triggered()
     CameraControlsHelp* c = new CameraControlsHelp();
     c->show();
 }
+
+void MainWindow::slot_changeDimX(int x) {
+    ui->mygl->setDimX(x);
+}
+
+void MainWindow::slot_changeDimY(int y) {
+    ui->mygl->setDimY(y);
+}
+
+void MainWindow::slot_changeDimZ(int z) {
+    ui->mygl->setDimZ(z);
+}
+
+// TODO: fix this
+void MainWindow::slot_changeTileset(QListWidgetItem* tileset) {
+    int i = 1;
+    //ui->mygl->setTileset((std::string) tileset);
+}
+
+void MainWindow::slot_runWFC() {
+    ui->mygl->runWFC();
+}
+
+void MainWindow::populateTilesetList() {
+    // populate list view with jsons in json folder
+
+    // TODO: fix hard coding
+    //QDir dir1 = QDir::currentPath();
+    QDir dir = QDir("/Users/carolinelachanski/Documents/WFC/WFC/json");
+    QStringList jsons = dir.entryList(QStringList() << "*.json", QDir::Files);
+
+    QStringListModel* model = new QStringListModel(this);
+    QStringList list;
+    foreach (QString filename, jsons) {
+        list << filename;
+    }
+    model->setStringList(list);
+    ui->tilesetList->setModel(model);
+}
+

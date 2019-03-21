@@ -4,15 +4,12 @@
 #include <iostream>
 #include <QApplication>
 #include <QKeyEvent>
-#include "wfc.h"
-
 
 MyGL::MyGL(QWidget *parent)
     : GLWidget277(parent),
       m_geomCylinder(this), m_geomSphere(this),
-      m_quad(this), someMesh(this),
-      m_progLambert(this), m_progFlat(this), prog_skeleton(this),
-      m_glCamera(), tileGrid()
+      m_quad(this), m_progLambert(this), m_progFlat(this), prog_skeleton(this),
+      m_glCamera(), someMesh(this), wfc(this), tileGrid(), dim(glm::vec3(5, 2, 5)), tileset("knots")
 {}
 
 MyGL::~MyGL()
@@ -59,11 +56,7 @@ void MyGL::initializeGL()
 
     createMeshes();
 
-    // TODO: make these into input controls
-    std::string tileset = "knots";
-    WFC wfc = WFC(this, tileset, 5, 2, 5);
-    tileGrid = wfc.run();
-    tileGrid.createTiles();
+    runWFC();
 
     // Create and set up the diffuse shader
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
@@ -172,14 +165,35 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     update();  // Calls paintGL, among other things
 }
 
-// completely updates the scene related to the mesh
-// repopulats list widgets in mainwindow
-void MyGL::updateMeshScene() {
-    update();
-}
-
 void MyGL::createMeshes() {
     //someMesh.createFromOBJ(":/objs/tower_top.obj", ":/objs/tower_top.png");
     someMesh.createFromOBJ(":/objs/wahoo.obj", ":/objs/wahoo.bmp");
     someMesh.loadTexture();
 }
+
+void MyGL::runWFC() {
+    tileGrid.destroyTiles();
+    wfc.setDim(dim.x, dim.y, dim.z);
+    wfc.setTileset(tileset);
+    tileGrid = wfc.run();
+    tileGrid.createTiles();
+    update();
+}
+
+void MyGL::setDimX(int x) {
+    this->dim.x = x;
+}
+
+void MyGL::setDimY(int y) {
+    this->dim.y = y;
+}
+
+void MyGL::setDimZ(int z) {
+    this->dim.z = z;
+}
+
+void MyGL::setTileset(std::string tileset) {
+    this->tileset = tileset;
+}
+
+

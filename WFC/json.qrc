@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>json/knots.json</file>
-        <file>json/ex.json</file>
+        <file>json/knotsOnlyTurns.json</file>
+        <file>json/dontSelectMe.json</file>
     </qresource>
 </RCC>
