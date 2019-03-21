@@ -28,10 +28,14 @@ MainWindow::MainWindow(QWidget *parent) :
     slot_changeDimZ(ui->dimZ->value());
 
     // connect tileset list view
-    connect(ui->tilesetList, SIGNAL(itemClicked(QListWidgetItem*, int)), this, SLOT(slot_changeTileset(QListWidgetItem*)));
+    connect(ui->tilesetList, SIGNAL(currentRowChanged(int)), this, SLOT(slot_changeTileset()));
 
     // populate tileset list view
     populateTilesetList();
+
+    // select second item // TODO fix later
+    ui->tilesetList->setCurrentRow(1);
+    slot_changeTileset();
 
     // connect run WFC button
     connect(ui->runWFCButton, SIGNAL(clicked(bool)), this, SLOT(slot_runWFC()));
@@ -66,10 +70,9 @@ void MainWindow::slot_changeDimZ(int z) {
     ui->mygl->setDimZ(z);
 }
 
-// TODO: fix this
-void MainWindow::slot_changeTileset(QListWidgetItem* tileset) {
-    int i = 1;
-    //ui->mygl->setTileset((std::string) tileset);
+void MainWindow::slot_changeTileset() {
+    std::string tileset = ui->tilesetList->currentItem()->text().toStdString();
+    ui->mygl->setTileset(tileset);
 }
 
 void MainWindow::slot_runWFC() {
@@ -78,18 +81,18 @@ void MainWindow::slot_runWFC() {
 
 void MainWindow::populateTilesetList() {
     // populate list view with jsons in json folder
-
-    // TODO: fix hard coding
-    //QDir dir1 = QDir::currentPath();
-    QDir dir = QDir("/Users/carolinelachanski/Documents/WFC/WFC/json");
+    // TODO: why did I do this
+    QDir currPath = QDir::currentPath();
+    currPath.cdUp();
+    currPath.cdUp();
+    currPath.cdUp();
+    currPath.cdUp();
+    QDir dir = QDir(currPath.absolutePath() + "/WFC/json");
     QStringList jsons = dir.entryList(QStringList() << "*.json", QDir::Files);
 
-    QStringListModel* model = new QStringListModel(this);
-    QStringList list;
     foreach (QString filename, jsons) {
-        list << filename;
+        filename.chop(5); // remove ".json" from end
+        ui->tilesetList->addItem(filename);
     }
-    model->setStringList(list);
-    ui->tilesetList->setModel(model);
 }
 

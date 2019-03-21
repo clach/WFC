@@ -179,7 +179,7 @@
      <string>Run WFC</string>
     </property>
    </widget>
-   <widget class="QListView" name="tilesetList">
+   <widget class="QListWidget" name="tilesetList">
     <property name="geometry">
      <rect>
       <x>640</x>

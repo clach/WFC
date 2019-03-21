@@ -33,7 +33,7 @@ public slots:
     void slot_runWFC();
 
     // user can select tileset from list
-    void slot_changeTileset(QListWidgetItem*);
+    void slot_changeTileset();
 
 
 private:
