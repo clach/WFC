@@ -20,6 +20,8 @@ public:
 private:
     void setup();
 
+    void parseTileset();
+
     void clear();
 
     // return true if each cell has one remaining pattern
@@ -36,14 +38,23 @@ private:
 
     TileGrid outputObservations() const;
 
+    bool tilesetChanged;
+
+    bool inSubset(std::string tileName);
+
+    int emptyIndex;
 
     GLWidget277 *context;
     glm::vec3 dim; // desired dimensions of grid to fill with WFC
     std::string tileset; // name of WFC tileset
 
     bool periodic;
+    bool sky;
+    bool ground;
     double voxelSize; // size of input voxel obj
     int actionCount; // number of total tile variant options
+
+    std::vector<std::string> subsetTileNames;
 
     std::vector<std::string> tileNames; // tile names
     std::vector<double> tileWeights; // tile weights (frequencies in input)

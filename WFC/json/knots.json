@@ -1,6 +1,8 @@
 {  
    "tileset":{  
       "voxelSize":3,
+      "periodic": false,
+      "sky": true,
       "tiles":[  
          {  
             "name":"down",
@@ -27,6 +29,10 @@
             "symmetry":"X"
          }
       ],
+      "subsets": {
+         "onlyTurns": ["turn", "empty"],
+         "noEmpty": ["down", "line", "turn", "up", "vertical"]
+      },
       "neighbors":[  
          [  
             "horizontal",

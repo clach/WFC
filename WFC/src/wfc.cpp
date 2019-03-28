@@ -13,14 +13,14 @@
 // i, j, k used for everything else
 
 WFC::WFC(GLWidget277 *context) : context(context),
-    dim(glm::vec3()), periodic(false), voxelSize(1), actionCount(0),
-    tileset("")
+    dim(glm::vec3()), periodic(false), sky(true), ground(false), voxelSize(1), actionCount(0),
+    tileset(""), tilesetChanged(true), emptyIndex(-1)
 {
 }
 
 WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
-    context(context), dim(glm::vec3(x, y, z)), periodic(false), voxelSize(1), actionCount(0),
-    tileset(tileset)
+    context(context), dim(glm::vec3(x, y, z)), periodic(false), sky(true), ground(false),
+    voxelSize(1), actionCount(0), tileset(tileset), tilesetChanged(true), emptyIndex(-1)
 {
 }
 
@@ -46,10 +46,11 @@ TileGrid WFC::run()
     return outputObservations();
 }
 
-void WFC::setup() {
-    // clear everything
-    clear();
+bool WFC::inSubset(std::string tileName) {
+    return std::find(subsetTileNames.begin(), subsetTileNames.end(), tileName) != subsetTileNames.end();
+}
 
+void WFC::parseTileset() {
     // parse json file
     QString jsonString;
     QFile jsonFile;
@@ -64,9 +65,19 @@ void WFC::setup() {
 
     QJsonObject jsonTilesetObject = jsonObject["tileset"].toObject();
     voxelSize = jsonTilesetObject["voxelSize"].toDouble();
+    periodic = jsonTilesetObject["periodic"].toBool();
+    sky = jsonTilesetObject["sky"].toBool();
+    ground = jsonTilesetObject["ground"].toBool();
 
     QJsonArray tilesArray = jsonTilesetObject["tiles"].toArray();
     QJsonArray neighborsArray = jsonTilesetObject["neighbors"].toArray();
+
+    // TODO: implement subsets
+    QJsonObject jsonSubsetsObject = jsonTilesetObject["subsets"].toObject();
+    QJsonArray subsetTileNamesArray = jsonSubsetsObject["onlyTurns"].toArray();
+    for (int i = 0; i < subsetTileNamesArray.size(); i++) {
+        subsetTileNames.push_back(subsetTileNamesArray[i].toString().toStdString());
+    }
 
     std::vector<std::vector<int>> action;
     std::map<std::string, int> firstOccurence = std::map<std::string, int>();
@@ -74,6 +85,10 @@ void WFC::setup() {
     for (int i = 0; i < tilesArray.size(); i++) {
         QJsonObject jsonTile = tilesArray[i].toObject();
         std::string tileName = jsonTile["name"].toString().toStdString();
+
+        if (!inSubset(tileName)) {
+            continue;
+        }
         char tileSym = jsonTile["symmetry"].toString("X").toStdString().at(0);
         double tileWeight = jsonTile["weight"].toDouble(1.0);
 
@@ -125,6 +140,10 @@ void WFC::setup() {
         // keep track of first occurence of a tile within action
         firstOccurence[tileName] = actionCount;
 
+        if (tileName == "empty") {
+            emptyIndex = actionCount;
+        }
+
         // handle mirrored and rotated tiles
         // (think symmetry of a square)
         // (there are only cardinality # of meaningful variants for a tile
@@ -165,41 +184,7 @@ void WFC::setup() {
     // re-update actionCount after all tiles and variants are added
     actionCount = action.size();
 
-    // instantiate wave, changes, observed structures
-    // for each cell in grid, value of wave is vector of trues
-    // value of changes is false
-    // value of observed is -1
-    for (int x = 0; x < dim.x; x++) {
-        std::vector<std::vector<std::vector<bool>>> waveY;
-        std::vector<std::vector<bool>> changesY;
-        std::vector<std::vector<int>> observedY;
-
-        for (int y = 0; y < dim.y; y++) {
-            std::vector<std::vector<bool>> waveZ;
-            std::vector<bool> changesZ;
-            std::vector<int> observedZ;
-
-            for (int z = 0; z < dim.z; z++) {
-                std::vector<bool> bools;
-                for (int t = 0; t < actionCount; t++) {
-                    bools.push_back(true);
-                }
-                waveZ.push_back(bools);
-                changesZ.push_back(false);
-                observedZ.push_back(-1);
-            }
-
-            waveY.push_back(waveZ);
-            changesY.push_back(changesZ);
-            observedY.push_back(observedZ);
-        }
-        wave.push_back(waveY);
-        changes.push_back(changesY);
-        observed.push_back(observedY);
-    }
-
     // build propagator structure
-
     // create propagator starting data structure
     // 6 x actionCount x actionCount
     for (int d = 0; d < 6; d++) { // d is all possible directions
@@ -243,6 +228,11 @@ void WFC::setup() {
             rightNum = 0;
         }
 
+        // check if current neighbor relationship involves tiles that belong to subset
+        if (!inSubset(leftName) || !inSubset(rightName)) {
+            continue;
+        }
+
         // TODO: understand this
         int L = action[firstOccurence[leftName]][leftNum];
         int D = action[L][1];
@@ -281,18 +271,85 @@ void WFC::setup() {
             propagator[5][t2][t1] = propagator[4][t1][t2];
         }
     }
+}
+
+void WFC::setup() {
+    // clear everything
+    clear();
+
+    if (tilesetChanged) {
+        parseTileset();
+    }
+
+    if (sky && !ground) {
+        dim += 2;
+    }
+
+    // instantiate wave, changes, observed structures
+    // for each cell in grid, value of wave is vector of trues
+    // value of changes is false
+    // value of observed is -1
+    for (int x = 0; x < dim.x; x++) {
+        std::vector<std::vector<std::vector<bool>>> waveY;
+        std::vector<std::vector<bool>> changesY;
+        std::vector<std::vector<int>> observedY;
+
+        for (int y = 0; y < dim.y; y++) {
+            std::vector<std::vector<bool>> waveZ;
+            std::vector<bool> changesZ;
+            std::vector<int> observedZ;
+
+            for (int z = 0; z < dim.z; z++) {
+                std::vector<bool> bools;
+                for (int t = 0; t < actionCount; t++) {
+                    bools.push_back(true);
+                }
+                waveZ.push_back(bools);
+                changesZ.push_back(false);
+                observedZ.push_back(-1);
+            }
+
+            waveY.push_back(waveZ);
+            changesY.push_back(changesZ);
+            observedY.push_back(observedZ);
+        }
+        wave.push_back(waveY);
+        changes.push_back(changesY);
+        observed.push_back(observedY);
+    }
+
+    // add empty tiles on boundaries
+    if (sky) {
+        for (int x = 0; x < dim.x; x++) {
+            for (int y = 0; y < dim.y; y++) {
+                for (int z = 0; z < dim.z; z++) {
+                    // if on a boundary
+                    if (x == 0 || x == dim.x - 1 || y == 0 || y == dim.y - 1 || z == 0 || z == dim.z - 1) {
+                        for (int t = 0; t < actionCount; t++) {
+                            wave[x][y][z][t] = t == emptyIndex;
+                        }
+                        changes[x][y][z] = true;
+                    }
+                }
+            }
+        }
+    }
+
+    propogate();
 
 }
 
 void WFC::clear() {
-    actionCount = 0;
-    tileNames.clear();
-    tileWeights.clear();
-    tileRotations.clear();
+    if (tilesetChanged) {
+        actionCount = 0;
+        tileNames.clear();
+        tileWeights.clear();
+        tileRotations.clear();
+        propagator.clear();
+    }
     wave.clear();
     changes.clear();
     observed.clear();
-    propagator.clear();
 }
 
 bool WFC::observe()
@@ -548,7 +605,7 @@ TileGrid WFC::outputObservations() const {
 
                 glm::mat4 rotMat = tileRotations[tileIndex];
                 glm::mat4 trans1Mat = glm::translate(glm::mat4(),
-                                                    glm::vec3(offset + voxelSize * x, offset + voxelSize * y, offset + voxelSize * z));
+                                                     glm::vec3(offset + voxelSize * x, offset + voxelSize * y, offset + voxelSize * z));
                 glm::mat4 scaleMat = glm::mat4();
                 // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
                 glm::mat4 trans2Mat = glm::translate(glm::mat4(),
@@ -569,5 +626,6 @@ void WFC::setDim(int x, int y, int z) {
 }
 
 void WFC::setTileset(std::string tileset) {
+    tilesetChanged = this->tileset != tileset;
     this->tileset = tileset;
 }
