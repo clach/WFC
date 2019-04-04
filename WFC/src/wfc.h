@@ -51,7 +51,7 @@ private:
     bool periodic;
     bool sky;
     bool ground;
-    double voxelSize; // size of input voxel obj
+    float voxelSize; // size of input voxel obj
     int actionCount; // number of total tile variant options
 
     std::vector<std::string> subsetTileNames;

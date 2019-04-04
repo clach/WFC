@@ -5,11 +5,12 @@ Quad::Quad(GLWidget277 *context) : Drawable(context)
 
 void Quad::create()
 {
+    // creates a quad in upper right quadrant (0 to 1)
     GLuint idx[6]{0, 1, 2, 0, 2, 3};
-    glm::vec4 vert_pos[4] {glm::vec4(-10.f, 0.f, -10.f, 1.f),
-                           glm::vec4(10.f, 0.f, -10.f, 1.f),
-                           glm::vec4(10.f, 0.f, 10.f, 1.f),
-                           glm::vec4(-10.f, 0.f, 10.f, 1.f)};
+    glm::vec4 vert_pos[4] {glm::vec4(0.f, 0.f, 0.f, 1.f),
+                           glm::vec4(1.f, 0.f, 0.f, 1.f),
+                           glm::vec4(1.f, 0.f, 1.f, 1.f),
+                           glm::vec4(0.f, 0.f, 1.f, 1.f)};
 
 
     glm::vec4 vert_nor[4] {glm::vec4(0.f, 1.f, 0.f, 0.f),

@@ -5,13 +5,16 @@ class TileGrid
 {
 public:
     TileGrid();
-    TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim, int zDim);
+    TileGrid(GLWidget277 *context, std::string tileset, int voxelSize, int xDim, int yDim, int zDim);
     ~TileGrid();
-    Tile& getTileAt(int x, int y, int z);
+    Tile getTileAt(int x, int y, int z) const;
     void setTileAt(Tile tile, int x, int y, int z);
     void createTiles();
     void drawTiles(ShaderProgram& sp);
     void destroyTiles();
+
+    float getVoxelSize() const;
+    glm::vec3 getDim() const;
 
 private:
     glm::vec3 dim;
@@ -21,6 +24,7 @@ private:
     // don't need to make members for each separate class?
     GLWidget277 *context;
     std::string tileset;
+    float voxelSize;
 
 
 };

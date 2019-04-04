@@ -1,11 +1,11 @@
 #include "tilegrid.h"
 
-TileGrid::TileGrid() : TileGrid(nullptr, "", 0, 0, 0)
+TileGrid::TileGrid() : TileGrid(nullptr, "", 1, 0, 0, 0)
 {
 }
 
-TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim, int zDim) :
-    dim(glm::vec3(xDim, yDim, zDim)), context(context), tileset(tileset)
+TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int voxelSize, int xDim, int yDim, int zDim) :
+    dim(glm::vec3(xDim, yDim, zDim)), context(context), tileset(tileset), voxelSize(voxelSize)
 {
     for (int x = 0; x < dim.x; x++) {
         std::vector<std::vector<Tile>> tilesY;
@@ -24,7 +24,7 @@ TileGrid::~TileGrid() {
     // TODO
 }
 
-Tile& TileGrid::getTileAt(int x, int y, int z) {
+Tile TileGrid::getTileAt(int x, int y, int z) const {
     if (x < 0 || x >= dim.x || y < 0 || y >= dim.y || z < 0 || z >= dim.z) {
         // TODO: throw more meaningful error
         throw "out of bounds!";
@@ -68,5 +68,13 @@ void TileGrid::destroyTiles() {
             }
         }
     }
+}
+
+glm::vec3 TileGrid::getDim() const {
+    return dim;
+}
+
+float TileGrid::getVoxelSize() const {
+    return voxelSize;
 }
 

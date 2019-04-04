@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // set up UI connections
 
+    // connect build mode radio button
+    connect(ui->buildModeButton, SIGNAL(toggled(bool)), this, SLOT(slot_selectBuildMode(bool)));
+
     // connect grid dimension spin boxes
     connect(ui->dimX, SIGNAL(valueChanged(int)), this, SLOT(slot_changeDimX(int)));
     connect(ui->dimY, SIGNAL(valueChanged(int)), this, SLOT(slot_changeDimY(int)));
@@ -36,6 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // select second item // TODO fix later
     ui->tilesetList->setCurrentRow(1);
     slot_changeTileset();
+
+    // connect clear button
+    connect(ui->clearButton, SIGNAL(clicked(bool)), this, SLOT(slot_clearWFC()));
 
     // connect run WFC button
     connect(ui->runWFCButton, SIGNAL(clicked(bool)), this, SLOT(slot_runWFC()));
@@ -58,6 +64,11 @@ void MainWindow::on_actionCamera_Controls_triggered()
     c->show();
 }
 
+void MainWindow::slot_selectBuildMode(bool buildMode) {
+    ui->mygl->setBuildMode(buildMode);
+    ui->runWFCButton->setEnabled(!buildMode);
+}
+
 void MainWindow::slot_changeDimX(int x) {
     ui->mygl->setDimX(x);
 }
@@ -77,6 +88,10 @@ void MainWindow::slot_changeTileset() {
 
 void MainWindow::slot_runWFC() {
     ui->mygl->runWFC();
+}
+
+void MainWindow::slot_clearWFC() {
+    ui->mygl->clearWFC();
 }
 
 void MainWindow::populateTilesetList() {

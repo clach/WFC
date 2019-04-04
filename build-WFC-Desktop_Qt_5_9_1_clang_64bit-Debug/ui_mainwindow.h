@@ -20,6 +20,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QRadioButton>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QWidget>
 #include "mygl.h"
@@ -45,6 +46,8 @@ public:
     QLabel *tilesetLabel;
     QPushButton *runWFCButton;
     QListWidget *tilesetList;
+    QPushButton *clearButton;
+    QRadioButton *buildModeButton;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuHelp;
@@ -72,40 +75,47 @@ public:
         label_12->setGeometry(QRect(1020, 10, 60, 16));
         dimLabel = new QLabel(centralWidget);
         dimLabel->setObjectName(QStringLiteral("dimLabel"));
-        dimLabel->setGeometry(QRect(640, 20, 81, 16));
+        dimLabel->setGeometry(QRect(640, 80, 81, 16));
         dimXLabel = new QLabel(centralWidget);
         dimXLabel->setObjectName(QStringLiteral("dimXLabel"));
-        dimXLabel->setGeometry(QRect(640, 40, 16, 16));
+        dimXLabel->setGeometry(QRect(640, 100, 16, 16));
         dimYLabel = new QLabel(centralWidget);
         dimYLabel->setObjectName(QStringLiteral("dimYLabel"));
-        dimYLabel->setGeometry(QRect(640, 70, 16, 16));
+        dimYLabel->setGeometry(QRect(640, 130, 16, 16));
         dimZLabel = new QLabel(centralWidget);
         dimZLabel->setObjectName(QStringLiteral("dimZLabel"));
-        dimZLabel->setGeometry(QRect(640, 100, 16, 16));
+        dimZLabel->setGeometry(QRect(640, 160, 16, 16));
         dimX = new QSpinBox(centralWidget);
         dimX->setObjectName(QStringLiteral("dimX"));
-        dimX->setGeometry(QRect(660, 40, 48, 24));
+        dimX->setGeometry(QRect(660, 100, 48, 24));
         dimX->setMaximum(30);
         dimX->setValue(2);
         dimY = new QSpinBox(centralWidget);
         dimY->setObjectName(QStringLiteral("dimY"));
-        dimY->setGeometry(QRect(660, 70, 48, 24));
+        dimY->setGeometry(QRect(660, 130, 48, 24));
         dimY->setMaximum(30);
         dimY->setValue(2);
         dimZ = new QSpinBox(centralWidget);
         dimZ->setObjectName(QStringLiteral("dimZ"));
-        dimZ->setGeometry(QRect(660, 100, 48, 24));
+        dimZ->setGeometry(QRect(660, 160, 48, 24));
         dimZ->setMaximum(30);
         dimZ->setValue(2);
         tilesetLabel = new QLabel(centralWidget);
         tilesetLabel->setObjectName(QStringLiteral("tilesetLabel"));
-        tilesetLabel->setGeometry(QRect(640, 150, 60, 16));
+        tilesetLabel->setGeometry(QRect(640, 210, 60, 16));
         runWFCButton = new QPushButton(centralWidget);
         runWFCButton->setObjectName(QStringLiteral("runWFCButton"));
         runWFCButton->setGeometry(QRect(670, 520, 113, 32));
         tilesetList = new QListWidget(centralWidget);
         tilesetList->setObjectName(QStringLiteral("tilesetList"));
-        tilesetList->setGeometry(QRect(640, 170, 171, 192));
+        tilesetList->setGeometry(QRect(640, 230, 171, 192));
+        clearButton = new QPushButton(centralWidget);
+        clearButton->setObjectName(QStringLiteral("clearButton"));
+        clearButton->setEnabled(false);
+        clearButton->setGeometry(QRect(670, 480, 113, 32));
+        buildModeButton = new QRadioButton(centralWidget);
+        buildModeButton->setObjectName(QStringLiteral("buildModeButton"));
+        buildModeButton->setGeometry(QRect(640, 30, 131, 20));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -142,6 +152,8 @@ public:
         dimZLabel->setText(QApplication::translate("MainWindow", "z", Q_NULLPTR));
         tilesetLabel->setText(QApplication::translate("MainWindow", "Tileset", Q_NULLPTR));
         runWFCButton->setText(QApplication::translate("MainWindow", "Run WFC", Q_NULLPTR));
+        clearButton->setText(QApplication::translate("MainWindow", "Clear", Q_NULLPTR));
+        buildModeButton->setText(QApplication::translate("MainWindow", "Build mode", Q_NULLPTR));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
         menuHelp->setTitle(QApplication::translate("MainWindow", "Help", Q_NULLPTR));
     } // retranslateUi

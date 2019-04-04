@@ -6,9 +6,10 @@
 #include <QKeyEvent>
 
 MyGL::MyGL(QWidget *parent)
-    : GLWidget277(parent),
-      m_geomCylinder(this), m_geomSphere(this),
-      m_quad(this), m_progLambert(this), m_progFlat(this), prog_skeleton(this),
+    : GLWidget277(parent), buildMode(false),
+      groundQuad(this), selectionQuad(this),
+      groundQuadColor(glm::vec4(0.0, 1.0, 0.0, 1.0)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
+      m_progLambert(this), m_progFlat(this),
       m_glCamera(), someMesh(this), wfc(this), tileGrid(), dim(glm::vec3(5, 2, 5)), tileset("knots")
 {}
 
@@ -16,9 +17,8 @@ MyGL::~MyGL()
 {
     makeCurrent();
     glDeleteVertexArrays(1, &vao);
-    m_geomCylinder.destroy();
-    m_geomSphere.destroy();
-    m_quad.destroy();
+    groundQuad.destroy();
+    selectionQuad.destroy();
     someMesh.destroy();
     tileGrid.destroyTiles();
 }
@@ -42,25 +42,24 @@ void MyGL::initializeGL()
     // Set the color with which the screen is filled at the start of each render call.
     glClearColor(0.53, 0.81, 0.92, 1);
 
+    // enable transparency
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+
     printGLErrorLog();
 
     // Create a Vertex Attribute Object
     glGenVertexArrays(1, &vao);
 
-    //Create the instances of Cylinder and Sphere.
-    m_geomCylinder.create();
-
-    m_geomSphere.create();
-
-    m_quad.create();
-
+    // create geometry
+    groundQuad.create();
+    selectionQuad.create();
     createMeshes();
 
     runWFC();
 
-    // Create and set up the diffuse shader
+    // create shaders
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
-    // Create and set up the flat lighting shader
     m_progFlat.create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
     m_progLambert.setGeometryColor(glm::vec4(1.0, 0, 0, 1.0));
@@ -77,8 +76,6 @@ void MyGL::resizeGL(int w, int h)
     //our scene's camera view.
     m_glCamera = Camera(w, h);
     glm::mat4 viewproj = m_glCamera.getViewProj();
-
-    // Upload the view-projection matrix to our shaders (i.e. onto the graphics card)
 
     m_progLambert.setViewProjMatrix(viewproj);
     m_progFlat.setViewProjMatrix(viewproj);
@@ -97,8 +94,27 @@ void MyGL::paintGL()
     m_progLambert.setViewProjMatrix(m_glCamera.getViewProj());
     m_progLambert.setModelMatrix(glm::mat4());
 
-    m_progFlat.setModelMatrix(glm::translate(glm::mat4(), glm::vec3(0.0, -1.0, 0.0)));
-    m_progFlat.draw(m_quad);
+    float voxelSize = tileGrid.getVoxelSize();
+
+    // draw ground quad
+    glm::mat4 quadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, 1, voxelSize * dim.z));
+    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, 0.0, 0.0));
+    glm::mat4 groundQuadTransform = quadTrans * quadScale;
+    m_progFlat.setModelMatrix(groundQuadTransform);
+    m_progFlat.setGeometryColor(groundQuadColor);
+    m_progFlat.draw(groundQuad);
+
+    // TODO
+    // get raycast
+    // draw selction quad
+    glm::vec3 posToDraw;
+
+    if (buildMode) {
+        if (checkToAddTile(groundQuadTransform, &posToDraw)) {
+            //posToDraw = glm::vec3(0, 0, 0);
+            drawSelectionQuad(posToDraw);
+        }
+    }
 
     //m_progLambert.setModelMatrix(glm::scale(glm::mat4(), glm::vec3(0.05)));
     //m_progLambert.draw(someMesh);
@@ -180,20 +196,94 @@ void MyGL::runWFC() {
     update();
 }
 
+void MyGL::clearWFC() {
+    // TODO: this leads to opengl invalid values
+    tileGrid.destroyTiles();
+    update();
+}
+
+void MyGL::setBuildMode(bool buildMode) {
+    this->buildMode = buildMode;
+
+    if (buildMode) {
+        selectionQuad.create();
+        tileGrid.destroyTiles();
+
+    } else {
+        selectionQuad.destroy();
+    }
+
+    update();
+}
+
 void MyGL::setDimX(int x) {
     this->dim.x = x;
+    update();
 }
 
 void MyGL::setDimY(int y) {
     this->dim.y = y;
+    update();
 }
 
 void MyGL::setDimZ(int z) {
     this->dim.z = z;
+    update();
 }
 
 void MyGL::setTileset(std::string tileset) {
     this->tileset = tileset;
+}
+
+void MyGL::drawSelectionQuad(glm::vec3 pos) {
+    float voxelSize = tileGrid.getVoxelSize();
+    glm::mat4 quadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize));
+    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(pos.x * voxelSize, 0.01, pos.z * voxelSize));
+    glm::mat4 quadTransform = quadTrans * quadScale;
+    m_progFlat.setModelMatrix(quadTransform);
+    m_progFlat.setGeometryColor(selectionQuadColor);
+    m_progFlat.draw(selectionQuad);
+}
+
+bool MyGL::checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) const {
+
+    // ray march from camera
+    glm::vec3 rayOrigin = m_glCamera.getEye();
+    glm::vec3 rayDirection = m_glCamera.getLook();
+
+    // start ray marching
+    //float tFinal = 20.0; // final ray march distance
+    //for (float t = 0; t <= tFinal; t += 0.01) {
+       // glm::vec3 rayCurrent = rayOrigin + (t * rayDirection);
+
+        // check intersection with ground quad
+        // TODO: add more checks later
+        glm::mat4 invTransMat = glm::inverse(groundQuadTransMat);
+
+        glm::vec3 newOrigin = glm::vec3(invTransMat * glm::vec4(rayOrigin, 1.f));
+        glm::vec3 newDirection = glm::vec3(invTransMat * glm::vec4(rayDirection, 0.f));
+
+        // get intersection ground quad as plane
+        glm::vec3 groundQuadNormal = glm::vec3(0, 1, 0);
+        glm::vec3 groundQuadCenter = glm::vec3(0.5, 0.5, 0.5);
+        float t = glm::dot(groundQuadNormal, groundQuadCenter - rayOrigin) /
+                  glm::dot(groundQuadNormal, rayDirection);
+
+        if (t < 0) {
+            return false;
+        }
+
+        // now check if point of intersection falls in bounds of ground quad
+        glm::vec3 pointOfIntersection = rayOrigin + t * rayDirection;
+
+        if (pointOfIntersection.x >= 0 && pointOfIntersection.x <= 1 &&
+            pointOfIntersection.z >= 0 && pointOfIntersection.z <= 1) {
+            *posToDraw = pointOfIntersection;
+            return true;
+        }
+    //}
+
+    return false;
 }
 
 

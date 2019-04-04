@@ -48,5 +48,8 @@ public:
 
     void Zoom(float amt);
 
+    glm::vec3 getEye() const;
+    glm::vec3 getLook() const;
+
     void Reset();
 };

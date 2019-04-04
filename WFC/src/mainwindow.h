@@ -24,10 +24,16 @@ private slots:
     void on_actionCamera_Controls_triggered();
 
 public slots:    
+    // user can use radio button to toggle build mode
+    void slot_selectBuildMode(bool);
+
     // user can use spin boxes to edit grid dimensions
     void slot_changeDimX(int);
     void slot_changeDimY(int);
     void slot_changeDimZ(int);
+
+    // user can press button to clear current WFC output
+    void slot_clearWFC();
 
     // user can press button to run WFC
     void slot_runWFC();

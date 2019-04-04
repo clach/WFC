@@ -7,8 +7,11 @@ in vec4 fs_Col;
 
 out vec4 out_Col;
 
+uniform vec4 u_Color; // The color with which to render this instance of geometry.
+
+
 void main()
 {
     // Copy the color; there is no shading.
-    out_Col = fs_Col;
+    out_Col = u_Color;
 }

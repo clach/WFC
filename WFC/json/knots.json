@@ -31,6 +31,7 @@
       ],
       "subsets": {
          "onlyTurns": ["turn", "empty"],
+         "onlyTurns3D": ["turn", "up", "down", "empty"],
          "noEmpty": ["down", "line", "turn", "up", "vertical"]
       },
       "neighbors":[  

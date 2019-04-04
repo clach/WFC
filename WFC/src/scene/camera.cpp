@@ -147,3 +147,11 @@ void Camera::TranslateAlongUp(float amt)
     eye += translation;
     ref += translation;
 }
+
+glm::vec3 Camera::getEye() const {
+    return eye;
+}
+
+glm::vec3 Camera::getLook() const {
+    return look;
+}
