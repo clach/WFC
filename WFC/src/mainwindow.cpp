@@ -36,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // populate tileset list view
     populateTilesetList();
 
+    // connect tile list view
+    connect(ui->tileList, SIGNAL(currentRowChanged(int)), this, SLOT(slot_changeTile()));
+
     // select second item // TODO fix later
     ui->tilesetList->setCurrentRow(1);
     slot_changeTileset();
@@ -83,7 +86,13 @@ void MainWindow::slot_changeDimZ(int z) {
 
 void MainWindow::slot_changeTileset() {
     std::string tileset = ui->tilesetList->currentItem()->text().toStdString();
+    populateTileList(tileset);
     ui->mygl->setTileset(tileset);
+}
+
+void MainWindow::slot_changeTile() {
+    std::string tile = ui->tileList->currentItem()->text().toStdString();
+    ui->mygl->setSelectedTile(tile);
 }
 
 void MainWindow::slot_runWFC() {
@@ -109,5 +118,30 @@ void MainWindow::populateTilesetList() {
         filename.chop(5); // remove ".json" from end
         ui->tilesetList->addItem(filename);
     }
+}
+
+void MainWindow::populateTileList(std::string tileset) {
+    ui->tileList->clear();
+    // TODO: this code is copied from WFC class, maybe make separate util class or something
+    // parse json file
+    QString jsonString;
+    QFile jsonFile;
+    std::string jsonFilename = ":/json/" + tileset + ".json";
+    jsonFile.setFileName(QString::fromStdString(jsonFilename));
+    jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    jsonString = jsonFile.readAll();
+    jsonFile.close();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonString.toUtf8());
+    QJsonObject jsonObject = jsonDoc.object();
+    QJsonObject jsonTilesetObject = jsonObject["tileset"].toObject();
+    QJsonArray tilesArray = jsonTilesetObject["tiles"].toArray();
+
+    for (int i = 0; i < tilesArray.size(); i++) {
+        QJsonObject jsonTile = tilesArray[i].toObject();
+        QString tileName = jsonTile["name"].toString();
+        ui->tileList->addItem(tileName);
+    }
+
 }
 

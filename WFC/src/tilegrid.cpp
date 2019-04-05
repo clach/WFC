@@ -78,3 +78,13 @@ float TileGrid::getVoxelSize() const {
     return voxelSize;
 }
 
+void TileGrid::clear() {
+    for (int x = 0; x < dim.x; x++) {
+        for (int y = 0; y < dim.y; y++) {
+            for (int z = 0; z < dim.z; z++) {
+                Tile emptyTile = Tile(context, tileset);
+                tiles[x][y][z] = emptyTile;
+            }
+        }
+    }
+}

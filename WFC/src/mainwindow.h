@@ -41,11 +41,15 @@ public slots:
     // user can select tileset from list
     void slot_changeTileset();
 
+    // user can select tile from list
+    void slot_changeTile();
+
 
 private:
     Ui::MainWindow *ui;
 
     void populateTilesetList();
+    void populateTileList(std::string tileset);
 
 
 signals:

@@ -10,7 +10,8 @@ MyGL::MyGL(QWidget *parent)
       groundQuad(this), selectionQuad(this),
       groundQuadColor(glm::vec4(0.0, 1.0, 0.0, 1.0)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
       m_progLambert(this), m_progFlat(this),
-      m_glCamera(), someMesh(this), wfc(this), tileGrid(), dim(glm::vec3(5, 2, 5)), tileset("knots")
+      m_glCamera(), someMesh(this), wfc(this), tileGrid(), dim(glm::vec3(5, 2, 5)), tileset("knots"),
+      selectedTile("empty")
 {}
 
 MyGL::~MyGL()
@@ -111,7 +112,7 @@ void MyGL::paintGL()
 
     if (buildMode) {
         if (checkToAddTile(groundQuadTransform, &posToDraw)) {
-            //posToDraw = glm::vec3(0, 0, 0);
+            posToDraw = glm::vec3(0, 0, 0);
             drawSelectionQuad(posToDraw);
         }
     }
@@ -191,6 +192,7 @@ void MyGL::runWFC() {
     tileGrid.destroyTiles();
     wfc.setDim(dim.x, dim.y, dim.z);
     wfc.setTileset(tileset);
+    tileGrid.clear();
     tileGrid = wfc.run();
     tileGrid.createTiles();
     update();
@@ -198,22 +200,16 @@ void MyGL::runWFC() {
 
 void MyGL::clearWFC() {
     // TODO: this leads to opengl invalid values
+    tileGrid.clear();
     tileGrid.destroyTiles();
     update();
 }
 
 void MyGL::setBuildMode(bool buildMode) {
     this->buildMode = buildMode;
-
     if (buildMode) {
-        selectionQuad.create();
-        tileGrid.destroyTiles();
-
-    } else {
-        selectionQuad.destroy();
+        clearWFC();
     }
-
-    update();
 }
 
 void MyGL::setDimX(int x) {
@@ -235,6 +231,11 @@ void MyGL::setTileset(std::string tileset) {
     this->tileset = tileset;
 }
 
+void MyGL::setSelectedTile(std::string tile) {
+    this->selectedTile = tile;
+}
+
+
 void MyGL::drawSelectionQuad(glm::vec3 pos) {
     float voxelSize = tileGrid.getVoxelSize();
     glm::mat4 quadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize));
@@ -245,6 +246,7 @@ void MyGL::drawSelectionQuad(glm::vec3 pos) {
     m_progFlat.draw(selectionQuad);
 }
 
+// TODO fix all this nonsense
 bool MyGL::checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) const {
 
     // ray march from camera
@@ -283,7 +285,47 @@ bool MyGL::checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) co
         }
     //}
 
-    return false;
+    return true;
+}
+
+void MyGL::mouseReleaseEvent(QMouseEvent *e) {
+    if (buildMode) {
+        if (e->button() == Qt::LeftButton) {
+            // TODO
+            // get pos of click
+            // get indicies into tile grid
+            glm::vec3 tileGridPos = glm::vec3(1, 1, 1);
+            int x = (int)tileGridPos.x;
+            int y = (int)tileGridPos.y;
+            int z = (int)tileGridPos.z;
+
+            // get tile to set
+            Tile tile = Tile(this, tileset);
+            tile.setName(selectedTile);
+
+            float voxelSize = tileGrid.getVoxelSize();
+            float offset = voxelSize / 2.f;
+
+            // TODO: code copied from WFC, maybe make fxn that does this
+            // also control rotation somehow??
+            glm::mat4 rotMat = glm::mat4();
+            glm::mat4 trans1Mat = glm::translate(glm::mat4(),
+                                                 glm::vec3(voxelSize * x, voxelSize * y, voxelSize * z)
+                                                 + glm::vec3(offset));
+            glm::mat4 scaleMat = glm::mat4();
+            // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
+            glm::mat4 trans2Mat = glm::translate(glm::mat4(),
+                                                 glm::vec3(0, -offset, 0));
+            glm::mat4 transformMat = trans1Mat * rotMat * scaleMat * trans2Mat;
+
+            tile.setTransform(transformMat);
+
+            tileGrid.setTileAt(tile, x, y, z);
+            tileGrid.createTiles();
+            update();
+
+        }
+    }
 }
 
 

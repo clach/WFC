@@ -12,6 +12,7 @@ public:
     void createTiles();
     void drawTiles(ShaderProgram& sp);
     void destroyTiles();
+    void clear(); // fills TileGrid with empty tiles
 
     float getVoxelSize() const;
     glm::vec3 getDim() const;

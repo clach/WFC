@@ -44,6 +44,7 @@ private:
     TileGrid tileGrid;
     glm::vec3 dim;
     std::string tileset;
+    std::string selectedTile;
 
     bool checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) const;
 
@@ -66,6 +67,8 @@ public:
 
     void setTileset(std::string tileset);
 
+    void setSelectedTile(std::string tile);
+
     void setBuildMode(bool buildMode);
 
     void setDimX(int x);
@@ -74,6 +77,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *e);
+    void mouseReleaseEvent(QMouseEvent *e);
 
 signals:
 

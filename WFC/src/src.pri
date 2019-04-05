@@ -7,7 +7,6 @@ SOURCES += \
     $$PWD/glwidget277.cpp \
     $$PWD/mygl.cpp \
     $$PWD/shaderprogram.cpp \
-    $$PWD/utils.cpp \
     $$PWD/scene/cylinder.cpp \
     $$PWD/scene/sphere.cpp \
     $$PWD/la.cpp \

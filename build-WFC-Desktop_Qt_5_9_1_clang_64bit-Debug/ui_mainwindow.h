@@ -48,6 +48,8 @@ public:
     QListWidget *tilesetList;
     QPushButton *clearButton;
     QRadioButton *buildModeButton;
+    QLabel *tileLabel;
+    QListWidget *tileList;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuHelp;
@@ -56,7 +58,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(820, 590);
+        MainWindow->resize(820, 676);
         actionQuit = new QAction(MainWindow);
         actionQuit->setObjectName(QStringLiteral("actionQuit"));
         actionCamera_Controls = new QAction(MainWindow);
@@ -65,7 +67,7 @@ public:
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         mygl = new MyGL(centralWidget);
         mygl->setObjectName(QStringLiteral("mygl"));
-        mygl->setGeometry(QRect(11, 11, 618, 541));
+        mygl->setGeometry(QRect(11, 11, 618, 631));
         mygl->setFocusPolicy(Qt::ClickFocus);
         label_3 = new QLabel(centralWidget);
         label_3->setObjectName(QStringLiteral("label_3"));
@@ -105,17 +107,23 @@ public:
         tilesetLabel->setGeometry(QRect(640, 210, 60, 16));
         runWFCButton = new QPushButton(centralWidget);
         runWFCButton->setObjectName(QStringLiteral("runWFCButton"));
-        runWFCButton->setGeometry(QRect(670, 520, 113, 32));
+        runWFCButton->setGeometry(QRect(670, 600, 113, 32));
         tilesetList = new QListWidget(centralWidget);
         tilesetList->setObjectName(QStringLiteral("tilesetList"));
-        tilesetList->setGeometry(QRect(640, 230, 171, 192));
+        tilesetList->setGeometry(QRect(640, 230, 171, 121));
         clearButton = new QPushButton(centralWidget);
         clearButton->setObjectName(QStringLiteral("clearButton"));
         clearButton->setEnabled(false);
-        clearButton->setGeometry(QRect(670, 480, 113, 32));
+        clearButton->setGeometry(QRect(670, 560, 113, 32));
         buildModeButton = new QRadioButton(centralWidget);
         buildModeButton->setObjectName(QStringLiteral("buildModeButton"));
         buildModeButton->setGeometry(QRect(640, 30, 131, 20));
+        tileLabel = new QLabel(centralWidget);
+        tileLabel->setObjectName(QStringLiteral("tileLabel"));
+        tileLabel->setGeometry(QRect(640, 380, 60, 16));
+        tileList = new QListWidget(centralWidget);
+        tileList->setObjectName(QStringLiteral("tileList"));
+        tileList->setGeometry(QRect(640, 400, 171, 121));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -154,6 +162,7 @@ public:
         runWFCButton->setText(QApplication::translate("MainWindow", "Run WFC", Q_NULLPTR));
         clearButton->setText(QApplication::translate("MainWindow", "Clear", Q_NULLPTR));
         buildModeButton->setText(QApplication::translate("MainWindow", "Build mode", Q_NULLPTR));
+        tileLabel->setText(QApplication::translate("MainWindow", "Tiles", Q_NULLPTR));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
         menuHelp->setTitle(QApplication::translate("MainWindow", "Help", Q_NULLPTR));
     } // retranslateUi

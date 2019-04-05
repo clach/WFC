@@ -55,7 +55,6 @@ SOURCES       = ../WFC/src/main.cpp \
 		../WFC/src/glwidget277.cpp \
 		../WFC/src/mygl.cpp \
 		../WFC/src/shaderprogram.cpp \
-		../WFC/src/utils.cpp \
 		../WFC/src/scene/cylinder.cpp \
 		../WFC/src/scene/sphere.cpp \
 		../WFC/src/la.cpp \
@@ -80,7 +79,6 @@ OBJECTS       = main.o \
 		glwidget277.o \
 		mygl.o \
 		shaderprogram.o \
-		utils.o \
 		cylinder.o \
 		sphere.o \
 		la.o \
@@ -308,7 +306,6 @@ DIST          = ../../../../Qt5.9.1/5.9.1/clang_64/mkspecs/features/spec_pre.prf
 		../WFC/src/glwidget277.cpp \
 		../WFC/src/mygl.cpp \
 		../WFC/src/shaderprogram.cpp \
-		../WFC/src/utils.cpp \
 		../WFC/src/scene/cylinder.cpp \
 		../WFC/src/scene/sphere.cpp \
 		../WFC/src/la.cpp \
@@ -756,7 +753,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents ../WFC/glsl.qrc ../WFC/objs.qrc ../WFC/json.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../../Qt5.9.1/5.9.1/clang_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../WFC/src/la.h ../WFC/src/mainwindow.h ../WFC/src/glwidget277.h ../WFC/src/mygl.h ../WFC/src/shaderprogram.h ../WFC/src/utils.h ../WFC/src/scene/cylinder.h ../WFC/src/scene/sphere.h ../WFC/src/drawable.h ../WFC/src/scene/camera.h ../WFC/src/cameracontrolshelp.h ../WFC/src/scene/quad.h ../WFC/src/tinyobj/tiny_obj_loader.h ../WFC/src/scene/mesh.h ../WFC/src/texture.h ../WFC/src/tile.h ../WFC/src/tilegrid.h ../WFC/src/wfc.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../WFC/src/main.cpp ../WFC/src/mainwindow.cpp ../WFC/src/glwidget277.cpp ../WFC/src/mygl.cpp ../WFC/src/shaderprogram.cpp ../WFC/src/utils.cpp ../WFC/src/scene/cylinder.cpp ../WFC/src/scene/sphere.cpp ../WFC/src/la.cpp ../WFC/src/drawable.cpp ../WFC/src/scene/camera.cpp ../WFC/src/cameracontrolshelp.cpp ../WFC/src/scene/quad.cpp ../WFC/src/tinyobj/tiny_obj_loader.cc ../WFC/src/scene/mesh.cpp ../WFC/src/texture.cpp ../WFC/src/tile.cpp ../WFC/src/tilegrid.cpp ../WFC/src/wfc.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../WFC/src/main.cpp ../WFC/src/mainwindow.cpp ../WFC/src/glwidget277.cpp ../WFC/src/mygl.cpp ../WFC/src/shaderprogram.cpp ../WFC/src/scene/cylinder.cpp ../WFC/src/scene/sphere.cpp ../WFC/src/la.cpp ../WFC/src/drawable.cpp ../WFC/src/scene/camera.cpp ../WFC/src/cameracontrolshelp.cpp ../WFC/src/scene/quad.cpp ../WFC/src/tinyobj/tiny_obj_loader.cc ../WFC/src/scene/mesh.cpp ../WFC/src/texture.cpp ../WFC/src/tile.cpp ../WFC/src/tilegrid.cpp ../WFC/src/wfc.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../WFC/forms/mainwindow.ui ../WFC/forms/cameracontrolshelp.ui $(DISTDIR)/
 
 
@@ -1584,9 +1581,6 @@ shaderprogram.o: ../WFC/src/shaderprogram.cpp ../WFC/src/shaderprogram.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QStringBuilder \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qstringbuilder.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o shaderprogram.o ../WFC/src/shaderprogram.cpp
-
-utils.o: ../WFC/src/utils.cpp ../WFC/src/utils.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o utils.o ../WFC/src/utils.cpp
 
 cylinder.o: ../WFC/src/scene/cylinder.cpp ../WFC/src/scene/cylinder.h \
 		../WFC/src/drawable.h \
