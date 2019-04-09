@@ -813,7 +813,6 @@ qrc_objs.cpp: ../WFC/objs.qrc \
 qrc_json.cpp: ../WFC/json.qrc \
 		../../../../Qt5.9.1/5.9.1/clang_64/bin/rcc \
 		../WFC/json/knots.json \
-		../WFC/json/knotsOnlyTurns.json \
 		../WFC/json/dontSelectMe.json
 	/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/bin/rcc -name json ../WFC/json.qrc -o qrc_json.cpp
 
@@ -2680,12 +2679,13 @@ tilegrid.o: ../WFC/src/tilegrid.cpp ../WFC/src/tilegrid.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
-		../WFC/src/shaderprogram.h
+		../WFC/src/shaderprogram.h \
+		../WFC/src/wfc.h \
+		../WFC/src/utils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tilegrid.o ../WFC/src/tilegrid.cpp
 
 wfc.o: ../WFC/src/wfc.cpp ../WFC/src/wfc.h \
 		../WFC/src/utils.h \
-		../WFC/src/tilegrid.h \
 		../WFC/src/tile.h \
 		../WFC/src/scene/mesh.h \
 		../WFC/src/drawable.h \

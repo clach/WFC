@@ -10,7 +10,7 @@ MyGL::MyGL(QWidget *parent)
       groundQuad(this), selectionQuad(this),
       groundQuadColor(glm::vec4(0.0, 1.0, 0.0, 1.0)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
       m_progLambert(this), m_progFlat(this),
-      m_glCamera(), someMesh(this), wfc(this), tileGrid(), dim(glm::vec3(5, 2, 5)), tileset("knots"),
+      m_glCamera(), someMesh(this), tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset("knots"),
       selectedTile("empty")
 {}
 
@@ -127,7 +127,6 @@ void MyGL::paintGL()
 
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
-
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
@@ -189,26 +188,38 @@ void MyGL::createMeshes() {
 }
 
 void MyGL::runWFC() {
-    tileGrid.destroyTiles();
-    wfc.setDim(dim.x, dim.y, dim.z);
-    wfc.setTileset(tileset);
-    tileGrid.clear();
-    tileGrid = wfc.run();
+    if (buildMode) {
+    } else {
+        tileGrid.destroyTiles();
+        tileGrid.clear();
+    }
+    tileGrid.setDim(dim, buildMode, buildIndices);
+    tileGrid.setTileset(tileset);
+    tileGrid.runWFC();
     tileGrid.createTiles();
     update();
 }
 
-void MyGL::clearWFC() {
-    // TODO: this leads to opengl invalid values
-    tileGrid.clear();
+void MyGL::clearTileGrid() {
     tileGrid.destroyTiles();
+    tileGrid.clear();
+    buildIndices.clear();
     update();
 }
+
+void MyGL::clearNonUserTiles() {
+    // TODO
+    for (int i = 0; i < buildIndices.size(); i++) {
+    }
+}
+
 
 void MyGL::setBuildMode(bool buildMode) {
     this->buildMode = buildMode;
     if (buildMode) {
-        clearWFC();
+        clearTileGrid();
+    } else {
+        buildIndices.clear();
     }
 }
 
@@ -228,13 +239,16 @@ void MyGL::setDimZ(int z) {
 }
 
 void MyGL::setTileset(std::string tileset) {
+    if (this->tileset != tileset) {
+        tileGrid.destroyTiles();
+        tileGrid.clear();
+    }
     this->tileset = tileset;
 }
 
 void MyGL::setSelectedTile(std::string tile) {
     this->selectedTile = tile;
 }
-
 
 void MyGL::drawSelectionQuad(glm::vec3 pos) {
     float voxelSize = tileGrid.getVoxelSize();
@@ -256,74 +270,86 @@ bool MyGL::checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) co
     // start ray marching
     //float tFinal = 20.0; // final ray march distance
     //for (float t = 0; t <= tFinal; t += 0.01) {
-       // glm::vec3 rayCurrent = rayOrigin + (t * rayDirection);
+    // glm::vec3 rayCurrent = rayOrigin + (t * rayDirection);
 
-        // check intersection with ground quad
-        // TODO: add more checks later
-        glm::mat4 invTransMat = glm::inverse(groundQuadTransMat);
+    // check intersection with ground quad
+    // TODO: add more checks later
+    glm::mat4 invTransMat = glm::inverse(groundQuadTransMat);
 
-        glm::vec3 newOrigin = glm::vec3(invTransMat * glm::vec4(rayOrigin, 1.f));
-        glm::vec3 newDirection = glm::vec3(invTransMat * glm::vec4(rayDirection, 0.f));
+    glm::vec3 newOrigin = glm::vec3(invTransMat * glm::vec4(rayOrigin, 1.f));
+    glm::vec3 newDirection = glm::vec3(invTransMat * glm::vec4(rayDirection, 0.f));
 
-        // get intersection ground quad as plane
-        glm::vec3 groundQuadNormal = glm::vec3(0, 1, 0);
-        glm::vec3 groundQuadCenter = glm::vec3(0.5, 0.5, 0.5);
-        float t = glm::dot(groundQuadNormal, groundQuadCenter - rayOrigin) /
-                  glm::dot(groundQuadNormal, rayDirection);
+    // get intersection ground quad as plane
+    glm::vec3 groundQuadNormal = glm::vec3(0, 1, 0);
+    glm::vec3 groundQuadCenter = glm::vec3(0.5, 0.5, 0.5);
+    float t = glm::dot(groundQuadNormal, groundQuadCenter - rayOrigin) /
+            glm::dot(groundQuadNormal, rayDirection);
 
-        if (t < 0) {
-            return false;
-        }
+    if (t < 0) {
+        return false;
+    }
 
-        // now check if point of intersection falls in bounds of ground quad
-        glm::vec3 pointOfIntersection = rayOrigin + t * rayDirection;
+    // now check if point of intersection falls in bounds of ground quad
+    glm::vec3 pointOfIntersection = rayOrigin + t * rayDirection;
 
-        if (pointOfIntersection.x >= 0 && pointOfIntersection.x <= 1 &&
+    if (pointOfIntersection.x >= 0 && pointOfIntersection.x <= 1 &&
             pointOfIntersection.z >= 0 && pointOfIntersection.z <= 1) {
-            *posToDraw = pointOfIntersection;
-            return true;
-        }
-    //}
+        *posToDraw = pointOfIntersection;
+        return true;
+    }
 
     return true;
 }
 
+// TODO: first click doesnt do anything
 void MyGL::mouseReleaseEvent(QMouseEvent *e) {
     if (buildMode) {
+        // user left clicks to place tile
         if (e->button() == Qt::LeftButton) {
             // TODO
             // get pos of click
             // get indicies into tile grid
-            glm::vec3 tileGridPos = glm::vec3(1, 1, 1);
-            int x = (int)tileGridPos.x;
-            int y = (int)tileGridPos.y;
-            int z = (int)tileGridPos.z;
+            glm::vec3 tileGridPos = glm::vec3(0, 0, 0);
+            buildIndices.push_back(tileGridPos);
 
             // get tile to set
             Tile tile = Tile(this, tileset);
             tile.setName(selectedTile);
 
-            float voxelSize = tileGrid.getVoxelSize();
-            float offset = voxelSize / 2.f;
-
-            // TODO: code copied from WFC, maybe make fxn that does this
-            // also control rotation somehow??
+            // TODO: also control rotation somehow??
             glm::mat4 rotMat = glm::mat4();
-            glm::mat4 trans1Mat = glm::translate(glm::mat4(),
-                                                 glm::vec3(voxelSize * x, voxelSize * y, voxelSize * z)
-                                                 + glm::vec3(offset));
-            glm::mat4 scaleMat = glm::mat4();
-            // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
-            glm::mat4 trans2Mat = glm::translate(glm::mat4(),
-                                                 glm::vec3(0, -offset, 0));
-            glm::mat4 transformMat = trans1Mat * rotMat * scaleMat * trans2Mat;
+            tile.setTransform(tileGrid.getTileTransform(tileGridPos, rotMat));
 
-            tile.setTransform(transformMat);
-
-            tileGrid.setTileAt(tile, x, y, z);
+            tileGrid.setTileAt(tile, (int)tileGridPos.x, (int)tileGridPos.y, (int)tileGridPos.z);
             tileGrid.createTiles();
             update();
 
+        // user right clicks to remove tile
+        } else if (e->button() == Qt::RightButton) { // user right clicks
+            // TODO
+            // get pos of click
+            // get indices into tile grid
+            glm::vec3 tileGridPos = glm::vec3(0, 0, 0);
+
+            if (std::find(buildIndices.begin(), buildIndices.end(), tileGridPos) != buildIndices.end()) {
+
+                // remove tile grid position from build indices
+                std::vector<glm::vec3>::iterator iter = std::find(buildIndices.begin(), buildIndices.end(), tileGridPos);
+                int index = std::distance(buildIndices.begin(), iter);
+                buildIndices.erase(buildIndices.begin() + index);
+
+                // set empty tile in place
+                Tile tile = Tile(this, tileset);
+                tile.setName("empty");
+
+                // TODO: control rotation somehow
+                glm::mat4 rotMat = glm::mat4();
+                tile.setTransform(tileGrid.getTileTransform(tileGridPos, rotMat));
+
+                tileGrid.setTileAt(tile, (int)tileGridPos.x, (int)tileGridPos.y, (int)tileGridPos.z);
+                tileGrid.createTiles();
+                update();
+            }
         }
     }
 }

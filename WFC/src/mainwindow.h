@@ -33,7 +33,10 @@ public slots:
     void slot_changeDimZ(int);
 
     // user can press button to clear current WFC output
-    void slot_clearWFC();
+    void slot_clearTileGrid();
+
+    // user can press button to clear non-user placed tiles
+    void slot_clearNonUserTiles();
 
     // user can press button to run WFC
     void slot_runWFC();

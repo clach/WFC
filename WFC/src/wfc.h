@@ -2,7 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include "utils.h"
-#include "tilegrid.h"
+#include "tile.h"
 
 class WFC
 {
@@ -13,12 +13,17 @@ public:
 
     void setDim(int x, int y, int z);
     void setTileset(std::string tileset);
-    TileGrid run();
+    void setBuildIndices(std::vector<glm::vec3> buildIndices);
+    void run(std::vector<std::vector<std::vector<Tile>>>* tiles);
+
+    float getVoxelSize() const;
+
+    glm::mat4 getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const;
 
     // TODO: add limit to number of iterations?
 
 private:
-    void setup();
+    void setup(std::vector<std::vector<std::vector<Tile>>>* tiles);
 
     void parseTileset();
 
@@ -36,13 +41,14 @@ private:
     // throws exception if contradiction (cell has no remaining patterns)
     bool findLowestEntropy(glm::vec3& cell, std::vector<int>& indices);
 
-    TileGrid outputObservations() const;
+    void outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const;
 
     bool tilesetChanged;
 
     bool inSubset(std::string tileName);
 
     int emptyIndex;
+
 
     GLWidget277 *context;
     glm::vec3 dim; // desired dimensions of grid to fill with WFC
@@ -55,6 +61,10 @@ private:
     int actionCount; // number of total tile variant options
 
     std::vector<std::string> subsetTileNames;
+
+    std::vector<glm::vec3> buildIndices;
+
+    std::map<std::string, int> firstOccurence;
 
     std::vector<std::string> tileNames; // tile names
     std::vector<double> tileWeights; // tile weights (frequencies in input)

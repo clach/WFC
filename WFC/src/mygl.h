@@ -40,11 +40,12 @@ private:
 
     bool buildMode;
 
-    WFC wfc;
     TileGrid tileGrid;
     glm::vec3 dim;
     std::string tileset;
     std::string selectedTile;
+
+    std::vector<glm::vec3> buildIndices;
 
     bool checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) const;
 
@@ -63,7 +64,9 @@ public:
 
     void runWFC();
 
-    void clearWFC();
+    void clearTileGrid();
+
+    void clearNonUserTiles();
 
     void setTileset(std::string tileset);
 

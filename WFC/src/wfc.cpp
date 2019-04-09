@@ -28,11 +28,9 @@ WFC::~WFC()
 {
 }
 
-TileGrid WFC::run()
+void WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
 {
-    // TODO: set rand seed each time?
-
-    setup();
+    setup(tiles);
 
     while (true) {
         if (observe()) { // returns true when WFC is complete
@@ -43,7 +41,7 @@ TileGrid WFC::run()
     }
 
     // WFC is complete, output results
-    return outputObservations();
+    outputObservations(tiles);
 }
 
 bool WFC::inSubset(std::string tileName) {
@@ -64,7 +62,7 @@ void WFC::parseTileset() {
     QJsonObject jsonObject = jsonDoc.object();
 
     QJsonObject jsonTilesetObject = jsonObject["tileset"].toObject();
-    voxelSize = (float)jsonTilesetObject["voxelSize"].toDouble();
+    voxelSize = jsonTilesetObject["voxelSize"].toDouble();
     periodic = jsonTilesetObject["periodic"].toBool();
     sky = jsonTilesetObject["sky"].toBool();
     ground = jsonTilesetObject["ground"].toBool();
@@ -80,7 +78,7 @@ void WFC::parseTileset() {
     }
 
     std::vector<std::vector<int>> action;
-    std::map<std::string, int> firstOccurence = std::map<std::string, int>();
+    firstOccurence = std::map<std::string, int>();
 
     for (int i = 0; i < tilesArray.size(); i++) {
         QJsonObject jsonTile = tilesArray[i].toObject();
@@ -273,13 +271,15 @@ void WFC::parseTileset() {
     }
 }
 
-void WFC::setup() {
+void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
     // clear everything
     clear();
 
     if (tilesetChanged) {
         parseTileset();
     }
+
+    //sky= false;
 
     if (sky && !ground) {
         dim += 2;
@@ -333,8 +333,39 @@ void WFC::setup() {
                 }
             }
         }
+
+        propogate();
     }
 
+    // fill with tiles passed from user
+    int indexOffset = 0;
+
+    if (sky) {
+        indexOffset = 1;
+    }
+
+    for (int i = 0; i < buildIndices.size(); i++) {
+        int x = buildIndices[i].x;
+        int y = buildIndices[i].y;
+        int z = buildIndices[i].z;
+
+        Tile tile = (*tiles)[x][y][z];
+        std::string name = tile.getName();
+
+        int tileIndex = firstOccurence[name];
+        // TODO: account for rotation of input tile!!
+        std::vector<bool> bools = wave[x + indexOffset][y + indexOffset][z + indexOffset];
+
+        // set bool array of selected cell to false, except for chosen tile
+        for (int t = 0; t < actionCount; t++) {
+            bools[t] = t == tileIndex;
+        }
+
+        wave[x + indexOffset][y + indexOffset][z + indexOffset] = bools;
+        changes[x + indexOffset][x + indexOffset][z + indexOffset] = true;
+    }
+
+    // TODO: algorithm assumes all user input is valid
     propogate();
 
 }
@@ -342,6 +373,7 @@ void WFC::setup() {
 void WFC::clear() {
     if (tilesetChanged) {
         actionCount = 0;
+        firstOccurence.clear();
         tileNames.clear();
         tileWeights.clear();
         tileRotations.clear();
@@ -374,10 +406,9 @@ bool WFC::observe()
             wave[cell.x][cell.y][cell.z] = bools;
             changes[cell.x][cell.y][cell.z] = true;
         }
-    }
-    catch (char* c) {
-        std::cout << c << std::endl;
-        exit(1);
+    } catch (...) {
+        std::cout << "No valid pattern found!" << std::endl;
+        return true;
     }
 
     return false;
@@ -590,67 +621,44 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
     return false;
 }
 
-TileGrid WFC::outputObservations() const {
-    TileGrid tileGrid;
+void WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const {
+    // TODO: fix this nonsense
+    int xBound = dim.x;
+    int yBound = dim.y;
+    int zBound = dim.z;
+    int observedIndexOffset = 0;
+
     if (sky) {
-        tileGrid = TileGrid(context, tileset, voxelSize, dim.x - 2, dim.y - 2, dim.z - 2);
+        xBound = dim.x - 2;
+        yBound = dim.y - 2;
+        zBound = dim.z - 2;
+        observedIndexOffset = 1;
+    }
 
-        for (int x = 0; x < dim.x - 2; x++) {
-            for (int y = 0; y < dim.y - 2; y++) {
-                for (int z = 0; z < dim.z - 2; z++) {
-                    int tileIndex = observed[x + 1][y + 1][z + 1];
-                    Tile tile = Tile(context, tileset);
-                    std::string tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(" "));
-                    tile.setName(tileName);
+    for (int x = 0; x < xBound; x++) {
+        for (int y = 0; y < yBound; y++) {
+            for (int z = 0; z < zBound; z++) {
+                int tileIndex = observed[x + observedIndexOffset][y + observedIndexOffset][z + observedIndexOffset];
+                Tile tile = Tile(context, tileset);
 
-                    float offset = voxelSize / 2.f;
-
-                    glm::mat4 rotMat = tileRotations[tileIndex];
-                    glm::mat4 trans1Mat = glm::translate(glm::mat4(),
-                                                         glm::vec3(voxelSize * x, voxelSize * y, voxelSize * z)
-                                                         + glm::vec3(offset));
-                    glm::mat4 scaleMat = glm::mat4();
-                    // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
-                    glm::mat4 trans2Mat = glm::translate(glm::mat4(),
-                                                         glm::vec3(0, -offset, 0));
-                    glm::mat4 transformMat = trans1Mat * rotMat * scaleMat * trans2Mat;
-
-                    tile.setTransform(transformMat);
-                    tileGrid.setTileAt(tile, x, y, z);
+                std::string tileName = "empty";
+                if (tileIndex != -1) {
+                    tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(" "));
                 }
-            }
-        }
-    } else {
-        tileGrid = TileGrid(context, tileset, voxelSize, dim.x , dim.y, dim.z);
+                tile.setName(tileName);
 
-        for (int x = 0; x < dim.x; x++) {
-            for (int y = 0; y < dim.y; y++) {
-                for (int z = 0; z < dim.z; z++) {
-                    int tileIndex = observed[x][y][z];
-                    Tile tile = Tile(context, tileset);
-                    std::string tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(" "));
-                    tile.setName(tileName);
+                float offset = voxelSize / 2.f;
 
-                    float offset = voxelSize / 2.f;
-
-                    glm::mat4 rotMat = tileRotations[tileIndex];
-                    glm::mat4 trans1Mat = glm::translate(glm::mat4(),
-                                                         glm::vec3(voxelSize * x, voxelSize * y, voxelSize * z)
-                                                         + glm::vec3(offset));
-                    glm::mat4 scaleMat = glm::mat4();
-                    // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
-                    glm::mat4 trans2Mat = glm::translate(glm::mat4(),
-                                                         glm::vec3(0, -offset, 0));
-                    glm::mat4 transformMat = trans1Mat * rotMat * scaleMat * trans2Mat;
-
-                    tile.setTransform(transformMat);
-                    tileGrid.setTileAt(tile, x, y, z);
+                glm::mat4 rotMat = glm::mat4();
+                if (tileIndex != -1) {
+                    rotMat = tileRotations[tileIndex];
                 }
+                tile.setTransform(getTileTransform(glm::vec3(x, y, z), rotMat));
+
+                (*tiles)[x][y][z] = tile;
             }
         }
     }
-
-    return tileGrid;
 }
 
 void WFC::setDim(int x, int y, int z) {
@@ -661,3 +669,31 @@ void WFC::setTileset(std::string tileset) {
     tilesetChanged = this->tileset != tileset;
     this->tileset = tileset;
 }
+
+void WFC::setBuildIndices(std::vector<glm::vec3> buildIndices) {
+    this->buildIndices = buildIndices;
+}
+
+float WFC::getVoxelSize() const {
+    return this->voxelSize;
+}
+
+glm::mat4 WFC::getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const {
+    float offset = voxelSize / 2.f;
+
+    glm::mat4 trans1Mat = glm::translate(glm::mat4(),
+                                         glm::vec3(voxelSize * pos.x,
+                                                   voxelSize * pos.y,
+                                                   voxelSize * pos.z)
+                                         + glm::vec3(offset));
+    glm::mat4 scaleMat = glm::mat4();
+
+    // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
+    glm::mat4 trans2Mat = glm::translate(glm::mat4(), glm::vec3(0, -offset, 0));
+
+    glm::mat4 transformMat = trans1Mat * rotMat * scaleMat * trans2Mat;
+
+    return transformMat;
+}
+
+

@@ -14,6 +14,7 @@ public:
     Tile& operator=(Tile& tile); // copy assignment operator
 
     void setName(std::string name);
+    std::string getName() const;
     void createTileMesh();
     void drawTileMesh(ShaderProgram& sp);
     void destroyTileMesh();
@@ -23,6 +24,7 @@ private:
     GLWidget277 *context;
 
     std::string tileset;
+    std::string name;
     std::string objName;
     std::string textureName;
 

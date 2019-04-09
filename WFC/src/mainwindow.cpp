@@ -41,10 +41,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // select second item // TODO fix later
     ui->tilesetList->setCurrentRow(1);
-    slot_changeTileset();
 
     // connect clear button
     connect(ui->clearButton, SIGNAL(clicked(bool)), this, SLOT(slot_clearWFC()));
+
+    // connect clear non-user placed tiles button
+    connect(ui->clearNonUserTilesButton, SIGNAL(clicked(bool)), this, SLOT(slot_clearNonUserTiles()));
 
     // connect run WFC button
     connect(ui->runWFCButton, SIGNAL(clicked(bool)), this, SLOT(slot_runWFC()));
@@ -69,7 +71,8 @@ void MainWindow::on_actionCamera_Controls_triggered()
 
 void MainWindow::slot_selectBuildMode(bool buildMode) {
     ui->mygl->setBuildMode(buildMode);
-    ui->runWFCButton->setEnabled(!buildMode);
+    ui->clearNonUserTilesButton->setEnabled(buildMode);
+    //ui->runWFCButton->setEnabled(!buildMode);
 }
 
 void MainWindow::slot_changeDimX(int x) {
@@ -85,23 +88,33 @@ void MainWindow::slot_changeDimZ(int z) {
 }
 
 void MainWindow::slot_changeTileset() {
-    std::string tileset = ui->tilesetList->currentItem()->text().toStdString();
-    populateTileList(tileset);
-    ui->mygl->setTileset(tileset);
+    if (ui->tilesetList->currentItem() != nullptr) {
+        std::string tileset = ui->tilesetList->currentItem()->text().toStdString();
+        ui->mygl->setTileset(tileset);
+        populateTileList(tileset);
+    }
 }
 
 void MainWindow::slot_changeTile() {
-    std::string tile = ui->tileList->currentItem()->text().toStdString();
-    ui->mygl->setSelectedTile(tile);
+    if (ui->tileList->currentItem() != nullptr) {
+        std::string tile = ui->tileList->currentItem()->text().toStdString();
+        ui->mygl->setSelectedTile(tile);
+    }
+
 }
 
 void MainWindow::slot_runWFC() {
     ui->mygl->runWFC();
 }
 
-void MainWindow::slot_clearWFC() {
-    ui->mygl->clearWFC();
+void MainWindow::slot_clearTileGrid() {
+    ui->mygl->clearTileGrid();
 }
+
+void MainWindow::slot_clearNonUserTiles() {
+    ui->mygl->clearNonUserTiles();
+}
+
 
 void MainWindow::populateTilesetList() {
     // populate list view with jsons in json folder
@@ -121,6 +134,7 @@ void MainWindow::populateTilesetList() {
 }
 
 void MainWindow::populateTileList(std::string tileset) {
+    ui->tileList->clearSelection();
     ui->tileList->clear();
     // TODO: this code is copied from WFC class, maybe make separate util class or something
     // parse json file
@@ -143,5 +157,9 @@ void MainWindow::populateTileList(std::string tileset) {
         ui->tileList->addItem(tileName);
     }
 
+    // automatically select the first item
+    if (ui->tileList->count() > 0) {
+        ui->tileList->setCurrentRow(0);
+    }
 }
 
