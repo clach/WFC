@@ -1,6 +1,7 @@
 #pragma once
 
 #include <la.h>
+#include "ray.h"
 
 //A perspective projection camera
 //Receives its eye position and reference point from the scene XML file
@@ -50,6 +51,8 @@ public:
 
     glm::vec3 getEye() const;
     glm::vec3 getLook() const;
+
+    Ray raycast(glm::vec2 point) const;
 
     void Reset();
 };

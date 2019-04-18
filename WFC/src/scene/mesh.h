@@ -12,7 +12,7 @@ public:
 
     void createFromOBJ(const char *filename, const char* textureFile);
     void createFromOBJ(const char *filename, const char* textureFile, const char* bgTextureFile);
-    void createCube(const char* textureFile, const char* bgTextureFile);
+    void createCube();
 
     void bindTexture() const;
     void loadTexture() const;

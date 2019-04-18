@@ -19,7 +19,10 @@ SOURCES += \
     $$PWD/texture.cpp \
     $$PWD/tile.cpp \
     $$PWD/tilegrid.cpp \
-    $$PWD/wfc.cpp
+    $$PWD/wfc.cpp \
+    $$PWD/scene/ray.cpp \
+    $$PWD/scene/boundarylines.cpp \
+    $$PWD/scene/cube.cpp
 
 
 HEADERS += \
@@ -40,5 +43,8 @@ HEADERS += \
     $$PWD/texture.h \
     $$PWD/tile.h \
     $$PWD/tilegrid.h \
-    $$PWD/wfc.h
+    $$PWD/wfc.h \
+    $$PWD/scene/ray.h \
+    $$PWD/scene/boundarylines.h \
+    $$PWD/scene/cube.h
 

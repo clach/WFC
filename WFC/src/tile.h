@@ -1,12 +1,15 @@
 #pragma once
 #include "scene/mesh.h"
 #include "shaderprogram.h"
+#include "tilegrid.h"
+
+class TileGrid;
 
 class Tile
 {
 public:
-    Tile(GLWidget277 *context, std::string tileset);
-    Tile(GLWidget277 *context, std::string tileset, std::string name);
+    Tile(GLWidget277 *context, TileGrid* tileGrid, std::string tileset);
+    Tile(GLWidget277 *context, TileGrid* tileGrid, std::string tileset, std::string name);
     Tile(const Tile &tile2); // copy constructor
 
     virtual ~Tile();
@@ -19,9 +22,12 @@ public:
     void drawTileMesh(ShaderProgram& sp);
     void destroyTileMesh();
     void setTransform(const glm::mat4 transform);
+    void setVisualizeEmptyTiles(bool visualize);
 
 private:
     GLWidget277 *context;
+
+    TileGrid* tileGrid;
 
     std::string tileset;
     std::string name;
@@ -29,6 +35,7 @@ private:
     std::string textureName;
 
     Mesh mesh;
+    bool visualizeEmptyTiles;
 
     glm::mat4 modelMat;
 

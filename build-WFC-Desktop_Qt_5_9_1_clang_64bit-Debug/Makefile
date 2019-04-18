@@ -67,7 +67,10 @@ SOURCES       = ../WFC/src/main.cpp \
 		../WFC/src/texture.cpp \
 		../WFC/src/tile.cpp \
 		../WFC/src/tilegrid.cpp \
-		../WFC/src/wfc.cpp qrc_glsl.cpp \
+		../WFC/src/wfc.cpp \
+		../WFC/src/scene/ray.cpp \
+		../WFC/src/scene/boundarylines.cpp \
+		../WFC/src/scene/cube.cpp qrc_glsl.cpp \
 		qrc_objs.cpp \
 		qrc_json.cpp \
 		moc_mainwindow.cpp \
@@ -92,6 +95,9 @@ OBJECTS       = main.o \
 		tile.o \
 		tilegrid.o \
 		wfc.o \
+		ray.o \
+		boundarylines.o \
+		cube.o \
 		qrc_glsl.o \
 		qrc_objs.o \
 		qrc_json.o \
@@ -301,7 +307,10 @@ DIST          = ../../../../Qt5.9.1/5.9.1/clang_64/mkspecs/features/spec_pre.prf
 		../WFC/src/texture.h \
 		../WFC/src/tile.h \
 		../WFC/src/tilegrid.h \
-		../WFC/src/wfc.h ../WFC/src/main.cpp \
+		../WFC/src/wfc.h \
+		../WFC/src/scene/ray.h \
+		../WFC/src/scene/boundarylines.h \
+		../WFC/src/scene/cube.h ../WFC/src/main.cpp \
 		../WFC/src/mainwindow.cpp \
 		../WFC/src/glwidget277.cpp \
 		../WFC/src/mygl.cpp \
@@ -318,7 +327,10 @@ DIST          = ../../../../Qt5.9.1/5.9.1/clang_64/mkspecs/features/spec_pre.prf
 		../WFC/src/texture.cpp \
 		../WFC/src/tile.cpp \
 		../WFC/src/tilegrid.cpp \
-		../WFC/src/wfc.cpp
+		../WFC/src/wfc.cpp \
+		../WFC/src/scene/ray.cpp \
+		../WFC/src/scene/boundarylines.cpp \
+		../WFC/src/scene/cube.cpp
 QMAKE_TARGET  = 277
 DESTDIR       = 
 TARGET        = 277.app/Contents/MacOS/277
@@ -752,8 +764,8 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../WFC/glsl.qrc ../WFC/objs.qrc ../WFC/json.qrc $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../../Qt5.9.1/5.9.1/clang_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../WFC/src/la.h ../WFC/src/mainwindow.h ../WFC/src/glwidget277.h ../WFC/src/mygl.h ../WFC/src/shaderprogram.h ../WFC/src/utils.h ../WFC/src/scene/cylinder.h ../WFC/src/scene/sphere.h ../WFC/src/drawable.h ../WFC/src/scene/camera.h ../WFC/src/cameracontrolshelp.h ../WFC/src/scene/quad.h ../WFC/src/tinyobj/tiny_obj_loader.h ../WFC/src/scene/mesh.h ../WFC/src/texture.h ../WFC/src/tile.h ../WFC/src/tilegrid.h ../WFC/src/wfc.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../WFC/src/main.cpp ../WFC/src/mainwindow.cpp ../WFC/src/glwidget277.cpp ../WFC/src/mygl.cpp ../WFC/src/shaderprogram.cpp ../WFC/src/scene/cylinder.cpp ../WFC/src/scene/sphere.cpp ../WFC/src/la.cpp ../WFC/src/drawable.cpp ../WFC/src/scene/camera.cpp ../WFC/src/cameracontrolshelp.cpp ../WFC/src/scene/quad.cpp ../WFC/src/tinyobj/tiny_obj_loader.cc ../WFC/src/scene/mesh.cpp ../WFC/src/texture.cpp ../WFC/src/tile.cpp ../WFC/src/tilegrid.cpp ../WFC/src/wfc.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../WFC/src/la.h ../WFC/src/mainwindow.h ../WFC/src/glwidget277.h ../WFC/src/mygl.h ../WFC/src/shaderprogram.h ../WFC/src/utils.h ../WFC/src/scene/cylinder.h ../WFC/src/scene/sphere.h ../WFC/src/drawable.h ../WFC/src/scene/camera.h ../WFC/src/cameracontrolshelp.h ../WFC/src/scene/quad.h ../WFC/src/tinyobj/tiny_obj_loader.h ../WFC/src/scene/mesh.h ../WFC/src/texture.h ../WFC/src/tile.h ../WFC/src/tilegrid.h ../WFC/src/wfc.h ../WFC/src/scene/ray.h ../WFC/src/scene/boundarylines.h ../WFC/src/scene/cube.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../WFC/src/main.cpp ../WFC/src/mainwindow.cpp ../WFC/src/glwidget277.cpp ../WFC/src/mygl.cpp ../WFC/src/shaderprogram.cpp ../WFC/src/scene/cylinder.cpp ../WFC/src/scene/sphere.cpp ../WFC/src/la.cpp ../WFC/src/drawable.cpp ../WFC/src/scene/camera.cpp ../WFC/src/cameracontrolshelp.cpp ../WFC/src/scene/quad.cpp ../WFC/src/tinyobj/tiny_obj_loader.cc ../WFC/src/scene/mesh.cpp ../WFC/src/texture.cpp ../WFC/src/tile.cpp ../WFC/src/tilegrid.cpp ../WFC/src/wfc.cpp ../WFC/src/scene/ray.cpp ../WFC/src/scene/boundarylines.cpp ../WFC/src/scene/cube.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../WFC/forms/mainwindow.ui ../WFC/forms/cameracontrolshelp.ui $(DISTDIR)/
 
 
@@ -962,7 +974,9 @@ moc_mygl.cpp: ../WFC/src/glwidget277.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglshaderprogram.h \
 		../WFC/src/scene/sphere.h \
 		../WFC/src/scene/quad.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/scene/camera.h \
+		../WFC/src/scene/ray.h \
 		../WFC/src/mainwindow.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QMainWindow \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qmainwindow.h \
@@ -1114,7 +1128,9 @@ ui_mainwindow.h: ../WFC/forms/mainwindow.ui \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglshaderprogram.h \
 		../WFC/src/scene/sphere.h \
 		../WFC/src/scene/quad.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/scene/camera.h \
+		../WFC/src/scene/ray.h \
 		../WFC/src/mainwindow.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QMainWindow \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qmainwindow.h \
@@ -1292,7 +1308,9 @@ mainwindow.o: ../WFC/src/mainwindow.cpp ../WFC/src/mainwindow.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglshaderprogram.h \
 		../WFC/src/scene/sphere.h \
 		../WFC/src/scene/quad.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/scene/camera.h \
+		../WFC/src/scene/ray.h \
 		../WFC/src/scene/mesh.h \
 		../WFC/src/texture.h \
 		../WFC/src/tilegrid.h \
@@ -1449,7 +1467,9 @@ mygl.o: ../WFC/src/mygl.cpp ../WFC/src/mygl.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglshaderprogram.h \
 		../WFC/src/scene/sphere.h \
 		../WFC/src/scene/quad.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/scene/camera.h \
+		../WFC/src/scene/ray.h \
 		../WFC/src/mainwindow.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QMainWindow \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qmainwindow.h \
@@ -2111,7 +2131,8 @@ camera.o: ../WFC/src/scene/camera.cpp ../WFC/src/scene/camera.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QMatrix4x4 \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qmatrix4x4.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
-		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
+		../WFC/src/scene/ray.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o camera.o ../WFC/src/scene/camera.cpp
 
 cameracontrolshelp.o: ../WFC/src/cameracontrolshelp.cpp ../WFC/src/cameracontrolshelp.h \
@@ -2803,6 +2824,327 @@ wfc.o: ../WFC/src/wfc.cpp ../WFC/src/wfc.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QJsonObject \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qjsonobject.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o wfc.o ../WFC/src/wfc.cpp
+
+ray.o: ../WFC/src/scene/ray.cpp ../WFC/src/scene/ray.h \
+		../WFC/src/la.h \
+		../WFC/include/glm/glm.hpp \
+		../WFC/include/glm/detail/_fixes.hpp \
+		../WFC/include/glm/fwd.hpp \
+		../WFC/include/glm/detail/type_int.hpp \
+		../WFC/include/glm/detail/setup.hpp \
+		../WFC/include/glm/detail/type_float.hpp \
+		../WFC/include/glm/detail/type_vec.hpp \
+		../WFC/include/glm/detail/precision.hpp \
+		../WFC/include/glm/detail/type_mat.hpp \
+		../WFC/include/glm/vec2.hpp \
+		../WFC/include/glm/detail/type_vec2.hpp \
+		../WFC/include/glm/detail/_swizzle.hpp \
+		../WFC/include/glm/detail/_swizzle_func.hpp \
+		../WFC/include/glm/detail/type_vec2.inl \
+		../WFC/include/glm/vec3.hpp \
+		../WFC/include/glm/detail/type_vec3.hpp \
+		../WFC/include/glm/detail/type_vec3.inl \
+		../WFC/include/glm/vec4.hpp \
+		../WFC/include/glm/detail/type_vec4.hpp \
+		../WFC/include/glm/detail/type_vec4.inl \
+		../WFC/include/glm/mat2x2.hpp \
+		../WFC/include/glm/detail/type_mat2x2.hpp \
+		../WFC/include/glm/detail/type_mat2x2.inl \
+		../WFC/include/glm/mat2x3.hpp \
+		../WFC/include/glm/detail/type_mat2x3.hpp \
+		../WFC/include/glm/detail/type_mat2x3.inl \
+		../WFC/include/glm/mat2x4.hpp \
+		../WFC/include/glm/detail/type_mat2x4.hpp \
+		../WFC/include/glm/detail/type_mat2x4.inl \
+		../WFC/include/glm/mat3x2.hpp \
+		../WFC/include/glm/detail/type_mat3x2.hpp \
+		../WFC/include/glm/detail/type_mat3x2.inl \
+		../WFC/include/glm/mat3x3.hpp \
+		../WFC/include/glm/detail/type_mat3x3.hpp \
+		../WFC/include/glm/detail/type_mat3x3.inl \
+		../WFC/include/glm/mat3x4.hpp \
+		../WFC/include/glm/detail/type_mat3x4.hpp \
+		../WFC/include/glm/detail/type_mat3x4.inl \
+		../WFC/include/glm/mat4x2.hpp \
+		../WFC/include/glm/detail/type_mat4x2.hpp \
+		../WFC/include/glm/detail/type_mat4x2.inl \
+		../WFC/include/glm/mat4x3.hpp \
+		../WFC/include/glm/detail/type_mat4x3.hpp \
+		../WFC/include/glm/detail/type_mat4x3.inl \
+		../WFC/include/glm/mat4x4.hpp \
+		../WFC/include/glm/detail/type_mat4x4.hpp \
+		../WFC/include/glm/detail/type_mat4x4.inl \
+		../WFC/include/glm/trigonometric.hpp \
+		../WFC/include/glm/detail/func_trigonometric.hpp \
+		../WFC/include/glm/detail/func_trigonometric.inl \
+		../WFC/include/glm/detail/_vectorize.hpp \
+		../WFC/include/glm/detail/type_vec1.hpp \
+		../WFC/include/glm/detail/type_vec1.inl \
+		../WFC/include/glm/exponential.hpp \
+		../WFC/include/glm/detail/func_exponential.hpp \
+		../WFC/include/glm/detail/func_exponential.inl \
+		../WFC/include/glm/detail/func_vector_relational.hpp \
+		../WFC/include/glm/detail/func_vector_relational.inl \
+		../WFC/include/glm/common.hpp \
+		../WFC/include/glm/detail/func_common.hpp \
+		../WFC/include/glm/detail/func_common.inl \
+		../WFC/include/glm/packing.hpp \
+		../WFC/include/glm/detail/func_packing.hpp \
+		../WFC/include/glm/detail/func_packing.inl \
+		../WFC/include/glm/detail/type_half.hpp \
+		../WFC/include/glm/detail/type_half.inl \
+		../WFC/include/glm/geometric.hpp \
+		../WFC/include/glm/detail/func_geometric.hpp \
+		../WFC/include/glm/detail/func_geometric.inl \
+		../WFC/include/glm/matrix.hpp \
+		../WFC/include/glm/detail/func_matrix.hpp \
+		../WFC/include/glm/detail/func_matrix.inl \
+		../WFC/include/glm/vector_relational.hpp \
+		../WFC/include/glm/integer.hpp \
+		../WFC/include/glm/detail/func_integer.hpp \
+		../WFC/include/glm/detail/func_integer.inl \
+		../WFC/include/glm/gtc/matrix_transform.hpp \
+		../WFC/include/glm/gtc/constants.hpp \
+		../WFC/include/glm/gtc/constants.inl \
+		../WFC/include/glm/gtc/matrix_transform.inl \
+		../WFC/include/glm/gtx/string_cast.hpp \
+		../WFC/include/glm/gtx/integer.hpp \
+		../WFC/include/glm/gtx/integer.inl \
+		../WFC/include/glm/gtx/quaternion.hpp \
+		../WFC/include/glm/gtc/quaternion.hpp \
+		../WFC/include/glm/gtx/quaternion.inl \
+		../WFC/include/glm/gtx/norm.hpp \
+		../WFC/include/glm/gtx/norm.inl \
+		../WFC/include/glm/gtx/string_cast.inl \
+		../WFC/include/glm/gtc/type_ptr.hpp \
+		../WFC/include/glm/gtc/type_ptr.inl \
+		../WFC/include/glm/gtx/euler_angles.hpp \
+		../WFC/include/glm/gtx/euler_angles.inl \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QMatrix4x4 \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qmatrix4x4.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ray.o ../WFC/src/scene/ray.cpp
+
+boundarylines.o: ../WFC/src/scene/boundarylines.cpp ../WFC/src/scene/boundarylines.h \
+		../WFC/src/drawable.h \
+		../WFC/src/glwidget277.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QOpenGLWidget \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qopenglwidget.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QOpenGLFunctions_3_2_Core \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglfunctions_3_2_core.h \
+		../WFC/src/la.h \
+		../WFC/include/glm/glm.hpp \
+		../WFC/include/glm/detail/_fixes.hpp \
+		../WFC/include/glm/fwd.hpp \
+		../WFC/include/glm/detail/type_int.hpp \
+		../WFC/include/glm/detail/setup.hpp \
+		../WFC/include/glm/detail/type_float.hpp \
+		../WFC/include/glm/detail/type_vec.hpp \
+		../WFC/include/glm/detail/precision.hpp \
+		../WFC/include/glm/detail/type_mat.hpp \
+		../WFC/include/glm/vec2.hpp \
+		../WFC/include/glm/detail/type_vec2.hpp \
+		../WFC/include/glm/detail/_swizzle.hpp \
+		../WFC/include/glm/detail/_swizzle_func.hpp \
+		../WFC/include/glm/detail/type_vec2.inl \
+		../WFC/include/glm/vec3.hpp \
+		../WFC/include/glm/detail/type_vec3.hpp \
+		../WFC/include/glm/detail/type_vec3.inl \
+		../WFC/include/glm/vec4.hpp \
+		../WFC/include/glm/detail/type_vec4.hpp \
+		../WFC/include/glm/detail/type_vec4.inl \
+		../WFC/include/glm/mat2x2.hpp \
+		../WFC/include/glm/detail/type_mat2x2.hpp \
+		../WFC/include/glm/detail/type_mat2x2.inl \
+		../WFC/include/glm/mat2x3.hpp \
+		../WFC/include/glm/detail/type_mat2x3.hpp \
+		../WFC/include/glm/detail/type_mat2x3.inl \
+		../WFC/include/glm/mat2x4.hpp \
+		../WFC/include/glm/detail/type_mat2x4.hpp \
+		../WFC/include/glm/detail/type_mat2x4.inl \
+		../WFC/include/glm/mat3x2.hpp \
+		../WFC/include/glm/detail/type_mat3x2.hpp \
+		../WFC/include/glm/detail/type_mat3x2.inl \
+		../WFC/include/glm/mat3x3.hpp \
+		../WFC/include/glm/detail/type_mat3x3.hpp \
+		../WFC/include/glm/detail/type_mat3x3.inl \
+		../WFC/include/glm/mat3x4.hpp \
+		../WFC/include/glm/detail/type_mat3x4.hpp \
+		../WFC/include/glm/detail/type_mat3x4.inl \
+		../WFC/include/glm/mat4x2.hpp \
+		../WFC/include/glm/detail/type_mat4x2.hpp \
+		../WFC/include/glm/detail/type_mat4x2.inl \
+		../WFC/include/glm/mat4x3.hpp \
+		../WFC/include/glm/detail/type_mat4x3.hpp \
+		../WFC/include/glm/detail/type_mat4x3.inl \
+		../WFC/include/glm/mat4x4.hpp \
+		../WFC/include/glm/detail/type_mat4x4.hpp \
+		../WFC/include/glm/detail/type_mat4x4.inl \
+		../WFC/include/glm/trigonometric.hpp \
+		../WFC/include/glm/detail/func_trigonometric.hpp \
+		../WFC/include/glm/detail/func_trigonometric.inl \
+		../WFC/include/glm/detail/_vectorize.hpp \
+		../WFC/include/glm/detail/type_vec1.hpp \
+		../WFC/include/glm/detail/type_vec1.inl \
+		../WFC/include/glm/exponential.hpp \
+		../WFC/include/glm/detail/func_exponential.hpp \
+		../WFC/include/glm/detail/func_exponential.inl \
+		../WFC/include/glm/detail/func_vector_relational.hpp \
+		../WFC/include/glm/detail/func_vector_relational.inl \
+		../WFC/include/glm/common.hpp \
+		../WFC/include/glm/detail/func_common.hpp \
+		../WFC/include/glm/detail/func_common.inl \
+		../WFC/include/glm/packing.hpp \
+		../WFC/include/glm/detail/func_packing.hpp \
+		../WFC/include/glm/detail/func_packing.inl \
+		../WFC/include/glm/detail/type_half.hpp \
+		../WFC/include/glm/detail/type_half.inl \
+		../WFC/include/glm/geometric.hpp \
+		../WFC/include/glm/detail/func_geometric.hpp \
+		../WFC/include/glm/detail/func_geometric.inl \
+		../WFC/include/glm/matrix.hpp \
+		../WFC/include/glm/detail/func_matrix.hpp \
+		../WFC/include/glm/detail/func_matrix.inl \
+		../WFC/include/glm/vector_relational.hpp \
+		../WFC/include/glm/integer.hpp \
+		../WFC/include/glm/detail/func_integer.hpp \
+		../WFC/include/glm/detail/func_integer.inl \
+		../WFC/include/glm/gtc/matrix_transform.hpp \
+		../WFC/include/glm/gtc/constants.hpp \
+		../WFC/include/glm/gtc/constants.inl \
+		../WFC/include/glm/gtc/matrix_transform.inl \
+		../WFC/include/glm/gtx/string_cast.hpp \
+		../WFC/include/glm/gtx/integer.hpp \
+		../WFC/include/glm/gtx/integer.inl \
+		../WFC/include/glm/gtx/quaternion.hpp \
+		../WFC/include/glm/gtc/quaternion.hpp \
+		../WFC/include/glm/gtx/quaternion.inl \
+		../WFC/include/glm/gtx/norm.hpp \
+		../WFC/include/glm/gtx/norm.inl \
+		../WFC/include/glm/gtx/string_cast.inl \
+		../WFC/include/glm/gtc/type_ptr.hpp \
+		../WFC/include/glm/gtc/type_ptr.inl \
+		../WFC/include/glm/gtx/euler_angles.hpp \
+		../WFC/include/glm/gtx/euler_angles.inl \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QMatrix4x4 \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qmatrix4x4.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o boundarylines.o ../WFC/src/scene/boundarylines.cpp
+
+cube.o: ../WFC/src/scene/cube.cpp ../WFC/src/scene/cube.h \
+		../WFC/src/drawable.h \
+		../WFC/src/glwidget277.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QOpenGLWidget \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qopenglwidget.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QOpenGLFunctions_3_2_Core \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglfunctions_3_2_core.h \
+		../WFC/src/la.h \
+		../WFC/include/glm/glm.hpp \
+		../WFC/include/glm/detail/_fixes.hpp \
+		../WFC/include/glm/fwd.hpp \
+		../WFC/include/glm/detail/type_int.hpp \
+		../WFC/include/glm/detail/setup.hpp \
+		../WFC/include/glm/detail/type_float.hpp \
+		../WFC/include/glm/detail/type_vec.hpp \
+		../WFC/include/glm/detail/precision.hpp \
+		../WFC/include/glm/detail/type_mat.hpp \
+		../WFC/include/glm/vec2.hpp \
+		../WFC/include/glm/detail/type_vec2.hpp \
+		../WFC/include/glm/detail/_swizzle.hpp \
+		../WFC/include/glm/detail/_swizzle_func.hpp \
+		../WFC/include/glm/detail/type_vec2.inl \
+		../WFC/include/glm/vec3.hpp \
+		../WFC/include/glm/detail/type_vec3.hpp \
+		../WFC/include/glm/detail/type_vec3.inl \
+		../WFC/include/glm/vec4.hpp \
+		../WFC/include/glm/detail/type_vec4.hpp \
+		../WFC/include/glm/detail/type_vec4.inl \
+		../WFC/include/glm/mat2x2.hpp \
+		../WFC/include/glm/detail/type_mat2x2.hpp \
+		../WFC/include/glm/detail/type_mat2x2.inl \
+		../WFC/include/glm/mat2x3.hpp \
+		../WFC/include/glm/detail/type_mat2x3.hpp \
+		../WFC/include/glm/detail/type_mat2x3.inl \
+		../WFC/include/glm/mat2x4.hpp \
+		../WFC/include/glm/detail/type_mat2x4.hpp \
+		../WFC/include/glm/detail/type_mat2x4.inl \
+		../WFC/include/glm/mat3x2.hpp \
+		../WFC/include/glm/detail/type_mat3x2.hpp \
+		../WFC/include/glm/detail/type_mat3x2.inl \
+		../WFC/include/glm/mat3x3.hpp \
+		../WFC/include/glm/detail/type_mat3x3.hpp \
+		../WFC/include/glm/detail/type_mat3x3.inl \
+		../WFC/include/glm/mat3x4.hpp \
+		../WFC/include/glm/detail/type_mat3x4.hpp \
+		../WFC/include/glm/detail/type_mat3x4.inl \
+		../WFC/include/glm/mat4x2.hpp \
+		../WFC/include/glm/detail/type_mat4x2.hpp \
+		../WFC/include/glm/detail/type_mat4x2.inl \
+		../WFC/include/glm/mat4x3.hpp \
+		../WFC/include/glm/detail/type_mat4x3.hpp \
+		../WFC/include/glm/detail/type_mat4x3.inl \
+		../WFC/include/glm/mat4x4.hpp \
+		../WFC/include/glm/detail/type_mat4x4.hpp \
+		../WFC/include/glm/detail/type_mat4x4.inl \
+		../WFC/include/glm/trigonometric.hpp \
+		../WFC/include/glm/detail/func_trigonometric.hpp \
+		../WFC/include/glm/detail/func_trigonometric.inl \
+		../WFC/include/glm/detail/_vectorize.hpp \
+		../WFC/include/glm/detail/type_vec1.hpp \
+		../WFC/include/glm/detail/type_vec1.inl \
+		../WFC/include/glm/exponential.hpp \
+		../WFC/include/glm/detail/func_exponential.hpp \
+		../WFC/include/glm/detail/func_exponential.inl \
+		../WFC/include/glm/detail/func_vector_relational.hpp \
+		../WFC/include/glm/detail/func_vector_relational.inl \
+		../WFC/include/glm/common.hpp \
+		../WFC/include/glm/detail/func_common.hpp \
+		../WFC/include/glm/detail/func_common.inl \
+		../WFC/include/glm/packing.hpp \
+		../WFC/include/glm/detail/func_packing.hpp \
+		../WFC/include/glm/detail/func_packing.inl \
+		../WFC/include/glm/detail/type_half.hpp \
+		../WFC/include/glm/detail/type_half.inl \
+		../WFC/include/glm/geometric.hpp \
+		../WFC/include/glm/detail/func_geometric.hpp \
+		../WFC/include/glm/detail/func_geometric.inl \
+		../WFC/include/glm/matrix.hpp \
+		../WFC/include/glm/detail/func_matrix.hpp \
+		../WFC/include/glm/detail/func_matrix.inl \
+		../WFC/include/glm/vector_relational.hpp \
+		../WFC/include/glm/integer.hpp \
+		../WFC/include/glm/detail/func_integer.hpp \
+		../WFC/include/glm/detail/func_integer.inl \
+		../WFC/include/glm/gtc/matrix_transform.hpp \
+		../WFC/include/glm/gtc/constants.hpp \
+		../WFC/include/glm/gtc/constants.inl \
+		../WFC/include/glm/gtc/matrix_transform.inl \
+		../WFC/include/glm/gtx/string_cast.hpp \
+		../WFC/include/glm/gtx/integer.hpp \
+		../WFC/include/glm/gtx/integer.inl \
+		../WFC/include/glm/gtx/quaternion.hpp \
+		../WFC/include/glm/gtc/quaternion.hpp \
+		../WFC/include/glm/gtx/quaternion.inl \
+		../WFC/include/glm/gtx/norm.hpp \
+		../WFC/include/glm/gtx/norm.inl \
+		../WFC/include/glm/gtx/string_cast.inl \
+		../WFC/include/glm/gtc/type_ptr.hpp \
+		../WFC/include/glm/gtc/type_ptr.inl \
+		../WFC/include/glm/gtx/euler_angles.hpp \
+		../WFC/include/glm/gtx/euler_angles.inl \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QMatrix4x4 \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qmatrix4x4.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QOpenGLContext \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglcontext.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QOpenGLBuffer \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglbuffer.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QOpenGLShaderProgram \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qopenglshaderprogram.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cube.o ../WFC/src/scene/cube.cpp
 
 qrc_glsl.o: qrc_glsl.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_glsl.o qrc_glsl.cpp

@@ -8,15 +8,8 @@ Mesh::Mesh(GLWidget277 *context)
       mp_texture(nullptr), mp_bgTexture(nullptr)
 {}
 
-void Mesh::createCube(const char *textureFile, const char *bgTextureFile)
+void Mesh::createCube()
 {
-    // Code that sets up texture data on the GPU
-    mp_texture = std::unique_ptr<Texture>(new Texture(mp_context));
-    mp_texture->create(textureFile);
-
-    mp_bgTexture = std::unique_ptr<Texture>(new Texture(mp_context));
-    mp_bgTexture->create(bgTextureFile);
-
     // will need 24 positions to match with 24 normals
     std::vector<glm::vec4> pos {glm::vec4(1, -1, 1, 1), glm::vec4(1, 1, 1, 1), // front quad
                                 glm::vec4(-1, 1, 1, 1), glm::vec4(-1, -1, 1, 1),
@@ -65,6 +58,11 @@ void Mesh::createCube(const char *textureFile, const char *bgTextureFile)
                                 glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(1, 1), glm::vec2(0, 1), // top quad
                                 glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(1, 1), glm::vec2(0, 1)};  // bottom quad
 
+    std::vector<glm::vec4> col;
+    for (int i = 0; i < 24; i++) {
+        col.push_back(glm::vec4(1, 1, 1, 0.5));
+    }
+
     // cube has 6 sides, will have 12 triangles, 12 * 3 indices
     std::vector<GLuint> idx {0, 1, 2,
                              0, 2, 3,
@@ -96,6 +94,10 @@ void Mesh::createCube(const char *textureFile, const char *bgTextureFile)
     generateUV();
     mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufUV);
     mp_context->glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), uvs.data(), GL_STATIC_DRAW);
+
+    //generateCol();
+    //mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufCol);
+    //mp_context->glBufferData(GL_ARRAY_BUFFER, col.size() * sizeof(glm::vec4), col.data(), GL_STATIC_DRAW);
 }
 
 void Mesh::create()

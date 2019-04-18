@@ -4,6 +4,9 @@
 #include "utils.h"
 #include "tile.h"
 
+class Tile;
+class TileGrid;
+
 class WFC
 {
 public:
@@ -13,14 +16,20 @@ public:
 
     void setDim(int x, int y, int z);
     void setTileset(std::string tileset);
+    void setPeriodic(bool periodic);
+    void setSky(bool sky);
     void setBuildIndices(std::vector<glm::vec3> buildIndices);
-    void run(std::vector<std::vector<std::vector<Tile>>>* tiles);
+    std::vector<glm::vec3> getBuildIndices() const;
+    bool run(std::vector<std::vector<std::vector<Tile>>>* tiles);
 
     float getVoxelSize() const;
 
     glm::mat4 getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const;
 
     // TODO: add limit to number of iterations?
+
+    // TODO
+    TileGrid* tileGrid;
 
 private:
     void setup(std::vector<std::vector<std::vector<Tile>>>* tiles);
@@ -41,14 +50,13 @@ private:
     // throws exception if contradiction (cell has no remaining patterns)
     bool findLowestEntropy(glm::vec3& cell, std::vector<int>& indices);
 
-    void outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const;
+    bool outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const;
 
     bool tilesetChanged;
 
     bool inSubset(std::string tileName);
 
     int emptyIndex;
-
 
     GLWidget277 *context;
     glm::vec3 dim; // desired dimensions of grid to fill with WFC

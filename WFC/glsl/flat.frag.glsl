@@ -13,5 +13,5 @@ uniform vec4 u_Color; // The color with which to render this instance of geometr
 void main()
 {
     // Copy the color; there is no shading.
-    out_Col = u_Color;
+    out_Col = fs_Col;
 }

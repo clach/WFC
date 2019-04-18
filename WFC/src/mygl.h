@@ -7,8 +7,9 @@
 #include <scene/cylinder.h>
 #include <scene/sphere.h>
 #include <scene/quad.h>
-#include "scene/camera.h"
-#include "mainwindow.h"
+#include <scene/boundarylines.h>
+#include <scene/camera.h>
+#include <mainwindow.h>
 #include <scene/mesh.h>
 #include <tilegrid.h>
 #include <wfc.h>
@@ -16,8 +17,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 
-class MyGL
-    : public GLWidget277
+class MyGL : public GLWidget277
 {
     Q_OBJECT
 
@@ -32,11 +32,14 @@ private:
 
     Quad groundQuad;
     glm::vec4 groundQuadColor;
+    glm::mat4 groundQuadTransform;
 
     Quad selectionQuad;
     glm::vec4 selectionQuadColor;
 
     Mesh someMesh;
+
+    BoundaryLines lines;
 
     bool buildMode;
 
@@ -48,7 +51,8 @@ private:
     std::vector<glm::vec3> buildIndices;
 
     bool checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) const;
-
+    glm::vec3 convertWorldSpacePosToTileIndex(glm::vec3 pos) const;
+    bool getIntersectionWithGroundQuad(glm::vec3* posToDraw) const;
     void drawSelectionQuad(glm::vec3 pos);
 
 
@@ -73,16 +77,19 @@ public:
     void setSelectedTile(std::string tile);
 
     void setBuildMode(bool buildMode);
+    void setVisualizeEmptyTiles(bool visualize);
 
     void setDimX(int x);
     void setDimY(int y);
     void setDimZ(int z);
 
+    void setPeriodic(bool periodic);
+    void setSky(bool sky);
+
 protected:
     void keyPressEvent(QKeyEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
-
-signals:
+    void mouseMoveEvent(QMouseEvent *e);
 
 };
 

@@ -9,27 +9,30 @@ TileGrid::TileGrid(GLWidget277 *context) : TileGrid(context, "", 0, 0, 0)
 }
 
 TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim, int zDim) :
-    dim(glm::vec3(xDim, yDim, zDim)), wfc(context), context(context), tileset(tileset)
+    dim(glm::vec3(xDim, yDim, zDim)), context(context), tileset(tileset)
 {
     for (int x = 0; x < dim.x; x++) {
         std::vector<std::vector<Tile>> tilesY;
         for (int y = 0; y < dim.y; y++) {
             std::vector<Tile> tilesZ;
             for (int z = 0; z < dim.z; z++) {
-                tilesZ.push_back(Tile(context, tileset));
+                tilesZ.push_back(Tile(context, this, tileset));
             }
             tilesY.push_back(tilesZ);
         }
         tiles.push_back(tilesY);
     }
+    wfc = new WFC(context);
+    wfc->tileGrid = this;
 }
 
 TileGrid::~TileGrid() {
     // TODO
+    delete wfc;
 }
 
-void TileGrid::runWFC() {
-    wfc.run(&tiles);
+bool TileGrid::runWFC() {
+    return wfc->run(&tiles);
 }
 
 
@@ -95,7 +98,7 @@ void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3> buil
         for (int y = 0; y < dim.y; y++) {
             std::vector<Tile> tilesZ;
             for (int z = 0; z < dim.z; z++) {
-                tilesZ.push_back(Tile(context, tileset));
+                tilesZ.push_back(Tile(context, this, tileset));
             }
             tilesY.push_back(tilesZ);
         }
@@ -120,31 +123,55 @@ void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3> buil
         }
     }
 
-    this->wfc.setBuildIndices(buildIndices);
-    this->wfc.setDim(dim.x, dim.y, dim.z);
+    wfc->setBuildIndices(buildIndices);
+    wfc->setDim(dim.x, dim.y, dim.z);
 }
 
 void TileGrid::setTileset(std::string tileset) {
     this->tileset = tileset;
-    this->wfc.setTileset(tileset);
+    wfc->setTileset(tileset);
+}
+
+void TileGrid::setPeriodic(bool periodic) {
+    wfc->setPeriodic(periodic);
+}
+
+void TileGrid::setSky(bool sky) {
+    wfc->setSky(sky);
 }
 
 float TileGrid::getVoxelSize() const {
-    return wfc.getVoxelSize();
+    return wfc->getVoxelSize();
 }
 
 glm::mat4 TileGrid::getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const {
-    return wfc.getTileTransform(pos, rotMat);
+    return wfc->getTileTransform(pos, rotMat);
 }
-
 
 void TileGrid::clear() {
     for (int x = 0; x < dim.x; x++) {
         for (int y = 0; y < dim.y; y++) {
             for (int z = 0; z < dim.z; z++) {
-                Tile emptyTile = Tile(context, tileset);
+                Tile emptyTile = Tile(context, this, tileset);
                 tiles[x][y][z] = emptyTile;
             }
         }
     }
 }
+
+void TileGrid::visualizeEmptyTiles(bool visualize) {
+    this->visualize = visualize;
+    // only done in build mode
+    for (glm::vec3 buildIndex : wfc->getBuildIndices()) {
+        Tile tile = tiles[buildIndex.x][buildIndex.y][buildIndex.z];
+        if (tile.getName() == "empty") {
+            tile.setVisualizeEmptyTiles(visualize);
+        }
+    }
+}
+
+bool TileGrid::visualizeEmptyTiles() const {
+    return visualize;
+}
+
+

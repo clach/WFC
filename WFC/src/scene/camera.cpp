@@ -155,3 +155,14 @@ glm::vec3 Camera::getEye() const {
 glm::vec3 Camera::getLook() const {
     return look;
 }
+
+Ray Camera::raycast(glm::vec2 point) const {
+    float ndcX = (2.f * point.x / width - 1.f);
+    float ndcY = (1.f - 2.f * point.y / height);
+
+    glm::vec3 P = ref + ndcX * H + ndcY * V;
+    Ray ray = Ray(eye, glm::normalize(P - eye));
+
+    return ray;
+}
+

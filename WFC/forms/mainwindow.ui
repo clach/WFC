@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>932</width>
-    <height>676</height>
+    <width>1087</width>
+    <height>727</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>11</x>
       <y>11</y>
       <width>711</width>
-      <height>631</height>
+      <height>681</height>
      </rect>
     </property>
     <property name="focusPolicy">
@@ -30,8 +30,8 @@
    <widget class="QLabel" name="dimLabel">
     <property name="geometry">
      <rect>
-      <x>760</x>
-      <y>80</y>
+      <x>750</x>
+      <y>120</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -43,8 +43,8 @@
    <widget class="QLabel" name="dimXLabel">
     <property name="geometry">
      <rect>
-      <x>760</x>
-      <y>100</y>
+      <x>750</x>
+      <y>140</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -56,8 +56,8 @@
    <widget class="QLabel" name="dimYLabel">
     <property name="geometry">
      <rect>
-      <x>760</x>
-      <y>130</y>
+      <x>750</x>
+      <y>170</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -69,8 +69,8 @@
    <widget class="QLabel" name="dimZLabel">
     <property name="geometry">
      <rect>
-      <x>760</x>
-      <y>160</y>
+      <x>750</x>
+      <y>200</y>
       <width>16</width>
       <height>16</height>
      </rect>
@@ -82,8 +82,8 @@
    <widget class="QSpinBox" name="dimX">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>100</y>
+      <x>770</x>
+      <y>140</y>
       <width>48</width>
       <height>24</height>
      </rect>
@@ -98,8 +98,8 @@
    <widget class="QSpinBox" name="dimY">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>130</y>
+      <x>770</x>
+      <y>170</y>
       <width>48</width>
       <height>24</height>
      </rect>
@@ -114,8 +114,8 @@
    <widget class="QSpinBox" name="dimZ">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>160</y>
+      <x>770</x>
+      <y>200</y>
       <width>48</width>
       <height>24</height>
      </rect>
@@ -131,7 +131,7 @@
     <property name="geometry">
      <rect>
       <x>740</x>
-      <y>210</y>
+      <y>260</y>
       <width>60</width>
       <height>16</height>
      </rect>
@@ -144,7 +144,7 @@
     <property name="geometry">
      <rect>
       <x>760</x>
-      <y>610</y>
+      <y>660</y>
       <width>141</width>
       <height>32</height>
      </rect>
@@ -157,7 +157,7 @@
     <property name="geometry">
      <rect>
       <x>740</x>
-      <y>230</y>
+      <y>280</y>
       <width>171</width>
       <height>121</height>
      </rect>
@@ -165,12 +165,12 @@
    </widget>
    <widget class="QPushButton" name="clearButton">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
       <x>760</x>
-      <y>530</y>
+      <y>580</y>
       <width>141</width>
       <height>32</height>
      </rect>
@@ -196,7 +196,7 @@
     <property name="geometry">
      <rect>
       <x>740</x>
-      <y>370</y>
+      <y>420</y>
       <width>60</width>
       <height>16</height>
      </rect>
@@ -209,17 +209,20 @@
     <property name="geometry">
      <rect>
       <x>740</x>
-      <y>390</y>
+      <y>440</y>
       <width>171</width>
       <height>121</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="clearNonUserTilesButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>758</x>
-      <y>570</y>
+      <y>620</y>
       <width>141</width>
       <height>32</height>
      </rect>
@@ -228,13 +231,90 @@
      <string>Clear non-user tiles</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="periodicCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>140</y>
+      <width>87</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Periodic</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="skyCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>170</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clean</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="dimLabel_2">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>120</y>
+      <width>131</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Boundary Conditions</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="skyCheckBox_2">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>200</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ground</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="visualizeEmptiesCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>50</y>
+      <width>311</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Visualize user-placed empty tiles in build mode</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>932</width>
+     <width>1087</width>
      <height>22</height>
     </rect>
    </property>

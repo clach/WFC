@@ -12,23 +12,18 @@
 // d used for direction
 // i, j, k used for everything else
 
-WFC::WFC(GLWidget277 *context) : context(context),
-    dim(glm::vec3()), periodic(false), sky(true), ground(false), voxelSize(1), actionCount(0),
-    tileset(""), tilesetChanged(true), emptyIndex(-1)
-{
-}
+WFC::WFC(GLWidget277 *context) : WFC(context, " ", 0, 0, 0)
+{}
 
 WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
-    context(context), dim(glm::vec3(x, y, z)), periodic(false), sky(true), ground(false),
+    context(context), dim(glm::vec3(x, y, z)), periodic(false), sky(false), ground(false),
     voxelSize(1), actionCount(0), tileset(tileset), tilesetChanged(true), emptyIndex(-1)
-{
-}
+{}
 
 WFC::~WFC()
-{
-}
+{}
 
-void WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
+bool WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
 {
     setup(tiles);
 
@@ -41,7 +36,7 @@ void WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
     }
 
     // WFC is complete, output results
-    outputObservations(tiles);
+    return outputObservations(tiles);
 }
 
 bool WFC::inSubset(std::string tileName) {
@@ -63,8 +58,8 @@ void WFC::parseTileset() {
 
     QJsonObject jsonTilesetObject = jsonObject["tileset"].toObject();
     voxelSize = jsonTilesetObject["voxelSize"].toDouble();
-    periodic = jsonTilesetObject["periodic"].toBool();
-    sky = jsonTilesetObject["sky"].toBool();
+    //periodic = jsonTilesetObject["periodic"].toBool();
+    //sky = jsonTilesetObject["sky"].toBool();
     ground = jsonTilesetObject["ground"].toBool();
 
     QJsonArray tilesArray = jsonTilesetObject["tiles"].toArray();
@@ -362,7 +357,7 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
         }
 
         wave[x + indexOffset][y + indexOffset][z + indexOffset] = bools;
-        changes[x + indexOffset][x + indexOffset][z + indexOffset] = true;
+        changes[x + indexOffset][y + indexOffset][z + indexOffset] = true;
     }
 
     // TODO: algorithm assumes all user input is valid
@@ -621,7 +616,9 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
     return false;
 }
 
-void WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const {
+bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const {
+    bool valid = true;
+
     // TODO: fix this nonsense
     int xBound = dim.x;
     int yBound = dim.y;
@@ -639,7 +636,11 @@ void WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles)
         for (int y = 0; y < yBound; y++) {
             for (int z = 0; z < zBound; z++) {
                 int tileIndex = observed[x + observedIndexOffset][y + observedIndexOffset][z + observedIndexOffset];
-                Tile tile = Tile(context, tileset);
+                Tile tile = Tile(context, tileGrid, tileset);
+
+                if (valid && tileIndex == -1) {
+                    valid = false;
+                }
 
                 std::string tileName = "empty";
                 if (tileIndex != -1) {
@@ -659,10 +660,20 @@ void WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles)
             }
         }
     }
+
+    return valid;
 }
 
 void WFC::setDim(int x, int y, int z) {
     this->dim = glm::vec3(x, y, z);
+}
+
+void WFC::setPeriodic(bool periodic) {
+    this->periodic = periodic;
+}
+
+void WFC::setSky(bool sky) {
+    this->sky = sky;
 }
 
 void WFC::setTileset(std::string tileset) {
@@ -672,6 +683,10 @@ void WFC::setTileset(std::string tileset) {
 
 void WFC::setBuildIndices(std::vector<glm::vec3> buildIndices) {
     this->buildIndices = buildIndices;
+}
+
+std::vector<glm::vec3> WFC::getBuildIndices() const {
+    return buildIndices;
 }
 
 float WFC::getVoxelSize() const {
