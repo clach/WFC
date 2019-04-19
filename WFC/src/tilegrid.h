@@ -36,7 +36,8 @@ public:
     void setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* buildIndices);
     glm::vec3 getDim() const;
 
-    glm::mat4 getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const;
+    glm::mat4 calculateTileTransform(glm::vec3 pos, int cardinality) const;
+    int getMaxCardinality(std::string tileName) const;
 
 private:
     GLWidget277 *context;

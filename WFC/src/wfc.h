@@ -24,12 +24,11 @@ public:
 
     float getVoxelSize() const;
 
-    glm::mat4 getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const;
+    glm::mat4 calculateTileTransform(glm::vec3 pos, int cardinality) const;
 
-    // TODO: add limit to number of iterations?
-
-    // TODO
     TileGrid* tileGrid;
+
+    int getMaxCardinality(std::string tileName);
 
 private:
     void setup(std::vector<std::vector<std::vector<Tile>>>* tiles);
@@ -76,7 +75,9 @@ private:
 
     std::vector<std::string> tileNames; // tile names
     std::vector<double> tileWeights; // tile weights (frequencies in input)
-    std::vector<glm::mat4> tileRotations;
+    //std::vector<glm::mat4> tileRotations;
+    //std::vector<int> tileCardinalities;
+    std::map<std::string, int> maxCardinalities;
 
     std::vector<std::vector<std::vector<std::vector<bool>>>> wave;
     std::vector<std::vector<std::vector<bool>>> changes;

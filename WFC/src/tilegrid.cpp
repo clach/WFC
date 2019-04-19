@@ -150,8 +150,13 @@ float TileGrid::getVoxelSize() const {
     return wfc->getVoxelSize();
 }
 
-glm::mat4 TileGrid::getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const {
-    return wfc->getTileTransform(pos, rotMat);
+int TileGrid::getMaxCardinality(std::string tileName) const {
+    return wfc->getMaxCardinality(tileName);
+}
+
+
+glm::mat4 TileGrid::calculateTileTransform(glm::vec3 pos, int cardinality) const {
+    return wfc->calculateTileTransform(pos, cardinality);
 }
 
 void TileGrid::clear() {

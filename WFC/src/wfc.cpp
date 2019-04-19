@@ -128,6 +128,10 @@ void WFC::parseTileset() {
         }
         }
 
+        maxCardinalities[tileName] = cardinality;
+
+        //maxCardinalities.insert(std::pair<std::string, int>(tileName, cardinality));
+
         actionCount = action.size();
 
         // keep track of first occurence of a tile within action
@@ -170,26 +174,20 @@ void WFC::parseTileset() {
         {
             tileNames.push_back(tileName + " " + std::to_string(c));
             tileWeights.push_back(tileWeight);
-            tileRotations.push_back(glm::eulerAngleY(c * PI / 2.0f));
+            //tileRotations.push_back(glm::eulerAngleY(c * PI / 2.0f));
+            //tileCardinalities.push_back(c);
         }
     }
 
     // re-update actionCount after all tiles and variants are added
     actionCount = action.size();
 
-    // build propagator structure
-    // create propagator starting data structure
-    // 6 x actionCount x actionCount
-    for (int d = 0; d < 6; d++) { // d is all possible directions
-        std::vector<std::vector<bool>> propagatorY;
-        for (int t2 = 0; t2 < actionCount; t2++) {
-            std::vector<bool> propagatorZ;
-            for (int t1 = 0; t1 < actionCount; t1++) {
-                // set all neighbor relationships to false at start
-                propagatorZ.push_back(false);
-            }
-            propagatorY.push_back(propagatorZ);
-        }
+    // create propagator starting data structure (size 6 x actionCount x actionCount)
+    // set all neighbor relationships to false at start
+    std::vector<bool> propagatorZ(actionCount, false);
+    std::vector<std::vector<bool>> propagatorY(actionCount, propagatorZ);
+    // d is all possible directions
+    for (int d = 0; d < 6; d++) {
         propagator.push_back(propagatorY);
     }
 
@@ -337,18 +335,16 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
         indexOffset = 1;
     }
 
+    // update structures to account for user-placed tiles at buildIndices
     for (int i = 0; i < buildIndices.size(); i++) {
         int x = buildIndices[i].x;
         int y = buildIndices[i].y;
         int z = buildIndices[i].z;
 
         Tile tile = (*tiles)[x][y][z];
-        std::string name = tile.getName();
+        int tileIndex = firstOccurence[tile.getName()] + tile.getCardinality();
 
-        int tileIndex = firstOccurence[name];
-        // TODO: account for rotation of input tile!!
         std::vector<bool> bools = wave[x + indexOffset][y + indexOffset][z + indexOffset];
-
         // set bool array of selected cell to false, except for chosen tile
         for (int t = 0; t < actionCount; t++) {
             bools[t] = t == tileIndex;
@@ -369,8 +365,8 @@ void WFC::clear() {
         firstOccurence.clear();
         tileNames.clear();
         tileWeights.clear();
-        tileRotations.clear();
         propagator.clear();
+        maxCardinalities.clear();
     }
     wave.clear();
     changes.clear();
@@ -641,18 +637,23 @@ bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles)
                 }
 
                 std::string tileName = "empty";
+                int cardinality = 0;
                 if (tileIndex != -1) {
                     tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(" "));
+                    cardinality = stoi(tileNames[tileIndex].substr(tileNames[tileIndex].find(" ") + 1));
                 }
                 tile.setName(tileName);
+                tile.setCardinality(cardinality);
 
                 float offset = voxelSize / 2.f;
 
-                glm::mat4 rotMat = glm::mat4();
+                //glm::mat4 rotMat = glm::mat4();
+                //int cardinality = 0;
                 if (tileIndex != -1) {
-                    rotMat = tileRotations[tileIndex];
+                    //rotMat = tileRotations[tileIndex];
+                    //cardinality = tileCardinalities[tileIndex];
                 }
-                tile.setTransform(getTileTransform(glm::vec3(x, y, z), rotMat));
+                tile.setTransform(calculateTileTransform(glm::vec3(x, y, z), cardinality));
 
                 (*tiles)[x][y][z] = tile;
             }
@@ -691,7 +692,7 @@ float WFC::getVoxelSize() const {
     return this->voxelSize;
 }
 
-glm::mat4 WFC::getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const {
+glm::mat4 WFC::calculateTileTransform(glm::vec3 pos, int cardinality) const {
     float offset = voxelSize / 2.f;
 
     glm::mat4 trans1Mat = glm::translate(glm::mat4(),
@@ -701,6 +702,8 @@ glm::mat4 WFC::getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const {
                                          + glm::vec3(offset));
     glm::mat4 scaleMat = glm::mat4();
 
+    glm::mat4 rotMat = glm::eulerAngleY(cardinality * PI / 2.0f);
+
     // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
     glm::mat4 trans2Mat = glm::translate(glm::mat4(), glm::vec3(0, -offset, 0));
 
@@ -708,5 +711,10 @@ glm::mat4 WFC::getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const {
 
     return transformMat;
 }
+
+int WFC::getMaxCardinality(std::string tileName) {
+    return maxCardinalities[tileName];
+}
+
 
 

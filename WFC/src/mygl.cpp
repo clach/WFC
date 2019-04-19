@@ -8,7 +8,7 @@
 MyGL::MyGL(QWidget *parent)
     : GLWidget277(parent), buildMode(false),
       groundQuad(this), selectionQuad(this),
-      groundQuadColor(glm::vec4(0.0, 1.0, 0.0, 1.0)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
+      groundQuadColor(glm::vec4(0.13, 0.55, 0.13, 1.0)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
       m_progLambert(this), m_progFlat(this),
       m_glCamera(), someMesh(this), lines(this),
       tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset("knots"),
@@ -64,18 +64,18 @@ void MyGL::initializeGL()
     lines.create();
     createMeshes();
 
-    // run initial WFC
+    // run initial wave function collapse
     runWFC();
 
     // create shaders
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
     m_progFlat.create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
-    m_progLambert.setGeometryColor(glm::vec4(1.0, 0, 0, 1));
+    m_progLambert.setGeometryColor(glm::vec4(1, 0, 0, 1));
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
-    //    vao.bind();
+    // vao.bind();
     glBindVertexArray(vao);
 }
 
@@ -105,21 +105,19 @@ void MyGL::paintGL()
 
     float voxelSize = tileGrid.getVoxelSize();
 
-    // draw ground quad
-    glm::mat4 quadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, 1, voxelSize * dim.z));
-    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, voxelSize * groundQuadHeight, 0.0));
-    groundQuadTransform = quadTrans * quadScale;
-    m_progFlat.setModelMatrix(groundQuadTransform);
-    m_progFlat.draw(groundQuad);
-
     // draw boundary lines
     glm::mat4 linesScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, voxelSize * dim.y, voxelSize * dim.z));
     m_progFlat.setModelMatrix(linesScale);
     m_progFlat.draw(lines);
 
-    //m_progFlat.setModelMatrix(glm::translate(glm::mat4(), glm::vec3(0.0, 1.0, 0.0)));
-    //m_progFlat.draw(selectionQuad);
+    // draw ground quad
+    glm::mat4 groundQuadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, 1, voxelSize * dim.z));
+    glm::mat4 groundQuadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, voxelSize * groundQuadHeight, 0.0));
+    groundQuadTransform = groundQuadTrans * groundQuadScale;
+    m_progFlat.setModelMatrix(groundQuadTransform);
+    m_progFlat.draw(groundQuad);
 
+    // draw selection quad if desired
     if (drawSelectionQuad) {
         glm::mat4 selectionQuadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize));
         glm::mat4 selectionQuadTrans = glm::translate(glm::mat4(), glm::vec3(selectionQuadPos.x * voxelSize,
@@ -244,9 +242,8 @@ void MyGL::clearNonUserTiles() {
 
 void MyGL::setBuildMode(bool buildMode) {
     this->buildMode = buildMode;
-    if (buildMode) {
-        clearTileGrid();
-    } else {
+    clearTileGrid();
+    if (!buildMode) {
         buildIndices.clear();
     }
 }
@@ -298,17 +295,6 @@ void MyGL::setTileset(std::string tileset) {
 void MyGL::setSelectedTile(std::string tile) {
     this->selectedTile = tile;
 }
-
-/*
-void MyGL::drawSelectionQuad(glm::vec3 pos) {
-    float voxelSize = tileGrid.getVoxelSize();
-    glm::mat4 quadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize));
-    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(pos.x * voxelSize, groundQuadHeight * voxelSize + 0.01, pos.z * voxelSize));
-    glm::mat4 quadTransform = quadTrans * quadScale;
-    m_progFlat.setModelMatrix(quadTransform);
-    // TODO: getting GL INVALID VALUES for this
-    m_progFlat.draw(selectionQuad);
-}*/
 
 glm::vec3 MyGL::convertWorldSpacePosToTileIndex(glm::vec3 pos) const {
     glm::vec3 tileIndex;
@@ -366,19 +352,22 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
                     Tile tile = tileGrid.getTileAt(indices.x, indices.y, indices.z);
                     // if user is trying to place same tile that is already there
                     if (tile.getName() == selectedTile) {
-                        // TODO:
-                        // update rotation ///////////////
-                        glm::mat4 rotMat = glm::mat4();
-                        tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
+                        // update rotation of tile
+                        int cardinality = tile.getCardinality();
+                        cardinality++;
+                        int maxCardinality = tileGrid.getMaxCardinality(tile.getName());
+                        if (maxCardinality != 0) {
+                            cardinality = cardinality % maxCardinality;
+                        }
+                        tile.setCardinality(cardinality);
+                        tile.setTransform(tileGrid.calculateTileTransform(indices, cardinality));
 
                         tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
                     } else {
                         // get tile to set
                         Tile tile = Tile(this, &tileGrid, tileset);
                         tile.setName(selectedTile);
-
-                        glm::mat4 rotMat = glm::mat4(); // set default rotation
-                        tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
+                        tile.setTransform(tileGrid.calculateTileTransform(indices, 0));
 
                         tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
                     }
@@ -388,9 +377,7 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
                     // get tile to set
                     Tile tile = Tile(this, &tileGrid, tileset);
                     tile.setName(selectedTile);
-
-                    glm::mat4 rotMat = glm::mat4(); // set default rotation
-                    tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
+                    tile.setTransform(tileGrid.calculateTileTransform(indices, 0));
 
                     tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
                 }
@@ -411,9 +398,7 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
                     // set empty tile in place
                     Tile tile = Tile(this, &tileGrid, tileset);
                     tile.setName("empty");
-
-                    glm::mat4 rotMat = glm::mat4();
-                    tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
+                    tile.setTransform(tileGrid.calculateTileTransform(indices, 0));
 
                     tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
                     tileGrid.createTiles();
@@ -431,6 +416,4 @@ void MyGL::mouseMoveEvent(QMouseEvent *e) {
         update();
     }
 }
-
-
 

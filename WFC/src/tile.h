@@ -18,6 +18,10 @@ public:
 
     void setName(std::string name);
     std::string getName() const;
+
+    void setCardinality(int c);
+    int getCardinality() const;
+
     void createTileMesh();
     void drawTileMesh(ShaderProgram& sp);
     void destroyTileMesh();
@@ -31,6 +35,7 @@ private:
 
     std::string tileset;
     std::string name;
+    int cardinality;
     std::string objName;
     std::string textureName;
 
