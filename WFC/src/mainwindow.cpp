@@ -17,8 +17,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // set up UI connections
 
-    // connect build mode radio button
-    connect(ui->buildModeButton, SIGNAL(toggled(bool)), this, SLOT(slot_setBuildMode(bool)));
+    // connect build mode check box
+    connect(ui->buildModeCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setBuildMode(bool)));
+    slot_setBuildMode(ui->buildModeCheckBox->isChecked());
 
     // connect visualize empties check box
     connect(ui->visualizeEmptiesCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setVisualizeEmptyTiles(bool)));
@@ -33,13 +34,17 @@ MainWindow::MainWindow(QWidget *parent) :
     slot_setDimY(ui->dimY->value());
     slot_setDimZ(ui->dimZ->value());
 
-    // connect periodic option check box
-    connect(ui->periodicCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setPeriodic(bool)));
-    slot_setPeriodic(ui->periodicCheckBox->isChecked());
+    // connect periodic check box
+    connect(ui->periodicRadioButton, SIGNAL(toggled(bool)), this, SLOT(slot_setPeriodic(bool)));
+    slot_setPeriodic(ui->periodicRadioButton->isChecked());
 
-    // connect sky/clean boundary option check box
-    connect(ui->skyCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setSky(bool)));
-    slot_setSky(ui->skyCheckBox->isChecked());
+    // connect sky/clean boundary check box
+    connect(ui->cleanRadioButton, SIGNAL(toggled(bool)), this, SLOT(slot_setClean(bool)));
+    slot_setClean(ui->cleanRadioButton->isChecked());
+
+    // connect no boundary conditions check box
+    connect(ui->noneRadioButton, SIGNAL(toggled(bool)), this, SLOT(slot_setNone(bool)));
+    slot_setClean(ui->cleanRadioButton->isChecked());
 
     // connect tileset list view
     connect(ui->tilesetList, SIGNAL(currentRowChanged(int)), this, SLOT(slot_setTileset()));
@@ -65,6 +70,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // connect run WFC button
     connect(ui->runWFCButton, SIGNAL(clicked(bool)), this, SLOT(slot_runWFC()));
+
+    connect(ui->mygl, SIGNAL(wfcConvergenceError(bool)), this, SLOT(slot_setErrorLabel(bool)));
 
 }
 
@@ -107,14 +114,20 @@ void MainWindow::slot_setDimZ(int z) {
 
 void MainWindow::slot_setPeriodic(bool periodic) {
     ui->mygl->setPeriodic(periodic);
-    ui->skyCheckBox->setCheckable(!periodic);
-    ui->skyCheckBox->setEnabled(!periodic);
+    ui->mygl->setSky(!periodic);
+    //ui->cleanRadioButton->setChecked(!periodic);
 }
 
-void MainWindow::slot_setSky(bool sky) {
-    ui->mygl->setSky(sky);
-    ui->periodicCheckBox->setCheckable(!sky);
-    ui->periodicCheckBox->setEnabled(!sky);
+void MainWindow::slot_setClean(bool clean) {
+    ui->mygl->setSky(clean);
+    ui->mygl->setPeriodic(!clean);
+    //ui->periodicRadioButton->setChecked(!clean);
+}
+
+void MainWindow::slot_setNone(bool none) {
+    ui->mygl->setSky(!none);
+    ui->mygl->setPeriodic(!none);
+    //ui->periodicRadioButton->setChecked(!clean);
 }
 
 void MainWindow::slot_setTileset() {
@@ -152,7 +165,6 @@ void MainWindow::slot_clearTileGrid() {
 void MainWindow::slot_clearNonUserTiles() {
     ui->mygl->clearNonUserTiles();
 }
-
 
 void MainWindow::populateTilesetList() {
     // populate list view with jsons in json folder
@@ -217,4 +229,14 @@ void MainWindow::populateTileList(std::string tileset) {
         ui->tileList->setCurrentRow(0);
     }
 }
+
+
+void MainWindow::slot_setErrorLabel(bool error) {
+    if (error) {
+        ui->errorLabel->setText(QString("No convergence!"));
+    } else {
+        ui->errorLabel->setText(QString(""));
+    }
+}
+
 

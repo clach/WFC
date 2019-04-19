@@ -86,7 +86,7 @@ glm::vec3 TileGrid::getDim() const {
     return dim;
 }
 
-void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3> buildIndices) {
+void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* buildIndices) {
     this->dim = dim;
 
     std::vector<std::vector<std::vector<Tile>>> tilesCopy = tiles;
@@ -111,19 +111,25 @@ void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3> buil
         int minY = std::min((int)dim.y, (int)tilesCopy[0].size());
         int minZ = std::min((int)dim.z, (int)tilesCopy[0][0].size());
 
-        for (int i = 0; i < buildIndices.size(); i++) {
-            int x  = buildIndices[i].x;
-            int y  = buildIndices[i].y;
-            int z  = buildIndices[i].z;
+        std::vector<int> buildIndicesToErase;
+        for (int i = 0; i < buildIndices->size(); i++) {
+            int x  = (*buildIndices)[i].x;
+            int y  = (*buildIndices)[i].y;
+            int z  = (*buildIndices)[i].z;
 
             if (x < minX && y < minY && z < minZ) {
                 tiles[x][y][z] = tilesCopy[x][y][z];
+            } else {
+                buildIndicesToErase.push_back(i);
             }
+        }
 
+        for (int i : buildIndicesToErase) {
+            buildIndices->erase(buildIndices->begin() + i);
         }
     }
 
-    wfc->setBuildIndices(buildIndices);
+    wfc->setBuildIndices(*buildIndices);
     wfc->setDim(dim.x, dim.y, dim.z);
 }
 
@@ -161,17 +167,25 @@ void TileGrid::clear() {
 
 void TileGrid::visualizeEmptyTiles(bool visualize) {
     this->visualize = visualize;
-    // only done in build mode
-    for (glm::vec3 buildIndex : wfc->getBuildIndices()) {
-        Tile tile = tiles[buildIndex.x][buildIndex.y][buildIndex.z];
-        if (tile.getName() == "empty") {
-            tile.setVisualizeEmptyTiles(visualize);
-        }
-    }
 }
 
 bool TileGrid::visualizeEmptyTiles() const {
     return visualize;
 }
+
+void TileGrid::clearNonUserTiles(std::vector<glm::vec3> buildIndices) {
+    for (int x = 0; x < dim.x; x++) {
+        for (int y = 0; y < dim.y; y++) {
+            for (int z = 0; z < dim.z; z++) {
+                glm::vec3 index = glm::vec3(x, y, z);
+                if (std::find(buildIndices.begin(), buildIndices.end(), index) == buildIndices.end()) {
+                    Tile emptyTile = Tile(context, this, tileset);
+                    tiles[x][y][z] = emptyTile;
+                }
+            }
+        }
+    }
+}
+
 
 

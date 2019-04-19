@@ -12,7 +12,7 @@ MyGL::MyGL(QWidget *parent)
       m_progLambert(this), m_progFlat(this),
       m_glCamera(), someMesh(this), lines(this),
       tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset("knots"),
-      selectedTile("empty")
+      selectedTile("empty"), groundQuadHeight(0), drawSelectionQuad(false)
 {
     setMouseTracking(true);
 }
@@ -57,18 +57,21 @@ void MyGL::initializeGL()
     glGenVertexArrays(1, &vao);
 
     // create geometry
+    groundQuad.setColor(groundQuadColor);
     groundQuad.create();
+    selectionQuad.setColor(selectionQuadColor);
     selectionQuad.create();
     lines.create();
     createMeshes();
 
+    // run initial WFC
     runWFC();
 
     // create shaders
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
     m_progFlat.create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
-    m_progLambert.setGeometryColor(glm::vec4(1.0, 0, 0, 1.0));
+    m_progLambert.setGeometryColor(glm::vec4(1.0, 0, 0, 1));
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
@@ -104,17 +107,30 @@ void MyGL::paintGL()
 
     // draw ground quad
     glm::mat4 quadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, 1, voxelSize * dim.z));
-    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, 0.0, 0.0));
+    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, voxelSize * groundQuadHeight, 0.0));
     groundQuadTransform = quadTrans * quadScale;
     m_progFlat.setModelMatrix(groundQuadTransform);
-    m_progFlat.setGeometryColor(groundQuadColor);
     m_progFlat.draw(groundQuad);
 
-    // draw bounary lines
+    // draw boundary lines
     glm::mat4 linesScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, voxelSize * dim.y, voxelSize * dim.z));
     m_progFlat.setModelMatrix(linesScale);
     m_progFlat.draw(lines);
 
+    //m_progFlat.setModelMatrix(glm::translate(glm::mat4(), glm::vec3(0.0, 1.0, 0.0)));
+    //m_progFlat.draw(selectionQuad);
+
+    if (drawSelectionQuad) {
+        glm::mat4 selectionQuadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize));
+        glm::mat4 selectionQuadTrans = glm::translate(glm::mat4(), glm::vec3(selectionQuadPos.x * voxelSize,
+                                                                             voxelSize * groundQuadHeight + 0.01,
+                                                                             selectionQuadPos.z * voxelSize));
+        glm::mat4 selectionQuadTransform = selectionQuadTrans * selectionQuadScale;
+        m_progFlat.setModelMatrix(selectionQuadTransform);
+        m_progFlat.draw(selectionQuad);
+    }
+
+    // draw tiles
     tileGrid.drawTiles(m_progLambert);
 }
 
@@ -169,6 +185,16 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     case Qt::Key_R:
         m_glCamera = Camera(this->width(), this->height());
         break;
+    case Qt::Key_Minus:
+        if (groundQuadHeight > 0) {
+            groundQuadHeight--;
+        }
+        break;
+    case Qt::Key_Equal:
+        if (groundQuadHeight < dim.y - 1) {
+            groundQuadHeight++;
+        }
+        break;
     }
 
     m_glCamera.RecomputeAttributes();
@@ -186,14 +212,20 @@ void MyGL::runWFC() {
         tileGrid.destroyTiles();
         tileGrid.clear();
     }
-    tileGrid.setDim(dim, buildMode, buildIndices);
+    tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.setTileset(tileset);
-    if (!tileGrid.runWFC() && buildMode) {
-        // if the WFC did not converge, clear the build indices
-        // TODO: this is a little hacky, it's not necessarily the user's fault
-        buildIndices.clear();
+    if (!tileGrid.runWFC()) {
+        emit wfcConvergenceError(true);
+        if (buildMode) {
+            // if the WFC did not converge, clear the build indices
+            // TODO: this is a little hacky, it's not necessarily the user's fault
+            buildIndices.clear();
+        }
+    } else {
+        emit wfcConvergenceError(false);
     }
     tileGrid.createTiles();
+    groundQuadHeight = 0;
     update();
 }
 
@@ -205,9 +237,8 @@ void MyGL::clearTileGrid() {
 }
 
 void MyGL::clearNonUserTiles() {
-    // TODO
-    for (int i = 0; i < buildIndices.size(); i++) {
-    }
+    tileGrid.clearNonUserTiles(buildIndices);
+    update();
 }
 
 
@@ -229,21 +260,21 @@ void MyGL::setVisualizeEmptyTiles(bool visualize) {
 
 void MyGL::setDimX(int x) {
     this->dim.x = x;
-    tileGrid.setDim(dim, buildMode, buildIndices);
+    tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.createTiles();
     update();
 }
 
 void MyGL::setDimY(int y) {
     this->dim.y = y;
-    tileGrid.setDim(dim, buildMode, buildIndices);
+    tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.createTiles();
     update();
 }
 
 void MyGL::setDimZ(int z) {
     this->dim.z = z;
-    tileGrid.setDim(dim, buildMode, buildIndices);
+    tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.createTiles();
     update();
 }
@@ -268,17 +299,16 @@ void MyGL::setSelectedTile(std::string tile) {
     this->selectedTile = tile;
 }
 
+/*
 void MyGL::drawSelectionQuad(glm::vec3 pos) {
     float voxelSize = tileGrid.getVoxelSize();
     glm::mat4 quadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize));
-    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(pos.x * voxelSize, 0.01, pos.z * voxelSize));
+    glm::mat4 quadTrans = glm::translate(glm::mat4(), glm::vec3(pos.x * voxelSize, groundQuadHeight * voxelSize + 0.01, pos.z * voxelSize));
     glm::mat4 quadTransform = quadTrans * quadScale;
     m_progFlat.setModelMatrix(quadTransform);
-    m_progFlat.setGeometryColor(selectionQuadColor);
     // TODO: getting GL INVALID VALUES for this
-    //m_progFlat.draw(selectionQuad);
-    //update();
-}
+    m_progFlat.draw(selectionQuad);
+}*/
 
 glm::vec3 MyGL::convertWorldSpacePosToTileIndex(glm::vec3 pos) const {
     glm::vec3 tileIndex;
@@ -324,34 +354,51 @@ bool MyGL::getIntersectionWithGroundQuad(glm::vec3* posToDraw) const {
     return false;
 }
 
-
-// TODO: there is some kind of bug, causes crashing
-// try to place tiles at larger indices and run WFC
 void MyGL::mouseReleaseEvent(QMouseEvent *e) {
     if (buildMode) {
-        // user left clicks to place tile
         if (e->button() == Qt::LeftButton) {
+            // user left clicks to place tile
             glm::vec3 indices;
             if (getIntersectionWithGroundQuad(&indices)) {
 
-                buildIndices.push_back(indices);
+                // check if location already has tile in it
+                if (std::find(buildIndices.begin(), buildIndices.end(), indices) != buildIndices.end()) {
+                    Tile tile = tileGrid.getTileAt(indices.x, indices.y, indices.z);
+                    // if user is trying to place same tile that is already there
+                    if (tile.getName() == selectedTile) {
+                        // TODO:
+                        // update rotation ///////////////
+                        glm::mat4 rotMat = glm::mat4();
+                        tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
 
-                // get tile to set
-                Tile tile = Tile(this, &tileGrid, tileset);
-                tile.setName(selectedTile);
+                        tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
+                    } else {
+                        // get tile to set
+                        Tile tile = Tile(this, &tileGrid, tileset);
+                        tile.setName(selectedTile);
 
-                // TODO: also control rotation somehow??
-                glm::mat4 rotMat = glm::mat4();
-                tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
+                        glm::mat4 rotMat = glm::mat4(); // set default rotation
+                        tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
 
-                tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
+                        tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
+                    }
+                } else {
+                    buildIndices.push_back(indices);
+
+                    // get tile to set
+                    Tile tile = Tile(this, &tileGrid, tileset);
+                    tile.setName(selectedTile);
+
+                    glm::mat4 rotMat = glm::mat4(); // set default rotation
+                    tile.setTransform(tileGrid.getTileTransform(indices, rotMat));
+
+                    tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
+                }
                 tileGrid.createTiles();
                 update();
             }
-
-        // user right clicks to remove tile
         } else if (e->button() == Qt::RightButton) {
-
+            // user right clicks to remove tile
             glm::vec3 indices;
             if (getIntersectionWithGroundQuad(&indices)) {
                 if (std::find(buildIndices.begin(), buildIndices.end(), indices) != buildIndices.end()) {
@@ -380,10 +427,8 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
 void MyGL::mouseMoveEvent(QMouseEvent *e) {
     glm::vec3 posToDraw;
     if (buildMode) {
-        if (getIntersectionWithGroundQuad(&posToDraw)) {
-            posToDraw = glm::vec3(0, 0, 0);
-            drawSelectionQuad(posToDraw);
-        }
+        drawSelectionQuad = getIntersectionWithGroundQuad(&selectionQuadPos);
+        update();
     }
 }
 

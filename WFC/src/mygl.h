@@ -33,7 +33,10 @@ private:
     Quad groundQuad;
     glm::vec4 groundQuadColor;
     glm::mat4 groundQuadTransform;
+    float groundQuadHeight;
 
+    glm::vec3 selectionQuadPos;
+    bool drawSelectionQuad;
     Quad selectionQuad;
     glm::vec4 selectionQuadColor;
 
@@ -53,7 +56,7 @@ private:
     bool checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) const;
     glm::vec3 convertWorldSpacePosToTileIndex(glm::vec3 pos) const;
     bool getIntersectionWithGroundQuad(glm::vec3* posToDraw) const;
-    void drawSelectionQuad(glm::vec3 pos);
+    //void drawSelectionQuad(glm::vec3 pos);
 
 
 public:
@@ -91,6 +94,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
 
+signals:
+    void wfcConvergenceError(bool);
 };
 
 

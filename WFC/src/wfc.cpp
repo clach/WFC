@@ -274,8 +274,6 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
         parseTileset();
     }
 
-    //sky= false;
-
     if (sky && !ground) {
         dim += 2;
     }

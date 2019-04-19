@@ -36,7 +36,8 @@ private slots:
 
     // user can use check boxes to set boundary conditions
     void slot_setPeriodic(bool);
-    void slot_setSky(bool);
+    void slot_setClean(bool);
+    void slot_setNone(bool);
 
     // user can press button to clear current WFC output
     void slot_clearTileGrid();
@@ -54,6 +55,8 @@ private slots:
 
     // user can select tile from list
     void slot_setTile();
+
+    void slot_setErrorLabel(bool);
 
 
 private:

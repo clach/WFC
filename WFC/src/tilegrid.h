@@ -26,12 +26,14 @@ public:
     void setSky(bool sky);
 
     void visualizeEmptyTiles(bool visualize);
-
     bool visualizeEmptyTiles() const;
+
+    void clearNonUserTiles(std::vector<glm::vec3> buildIndices);
 
     bool runWFC();
 
-    void setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3> buildIndices);
+    // want setDim to be able to modify buildIndices
+    void setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* buildIndices);
     glm::vec3 getDim() const;
 
     glm::mat4 getTileTransform(glm::vec3 pos, glm::mat4 rotMat) const;

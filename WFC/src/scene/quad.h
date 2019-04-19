@@ -12,4 +12,7 @@ class Quad : public Drawable
 public:
     Quad(GLWidget277* mp_context);
     virtual void create();
+    void setColor(glm::vec4 color);
+private:
+    glm::vec4 color;
 };

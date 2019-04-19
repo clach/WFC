@@ -1,6 +1,6 @@
 #include "quad.h"
 
-Quad::Quad(GLWidget277 *context) : Drawable(context)
+Quad::Quad(GLWidget277 *context) : Drawable(context), color(glm::vec4(1, 1, 1, 1))
 {}
 
 void Quad::create()
@@ -18,10 +18,10 @@ void Quad::create()
                            glm::vec4(0.f, 1.f, 0.f, 0.f),
                            glm::vec4(0.f, 1.f, 0.f, 0.f)};
 
-    glm::vec4 vert_col[4] {glm::vec4(0.f, 1.f, 0.f, 1.f),
-                           glm::vec4(0.f, 1.f, 0.f, 1.f),
-                           glm::vec4(0.f, 1.f, 0.f, 1.f),
-                           glm::vec4(0.f, 1.f, 0.f, 1.f)};
+    glm::vec4 vert_col[4] { color,
+                            color,
+                            color,
+                            color};
     count = 6;
 
     generateIdx();
@@ -41,3 +41,8 @@ void Quad::create()
     mp_context->glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(glm::vec4), vert_col, GL_STATIC_DRAW);
 
 }
+
+void Quad::setColor(glm::vec4 color) {
+    this->color = color;
+}
+
