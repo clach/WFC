@@ -227,7 +227,7 @@
      <string>Clear non-user tiles</string>
     </property>
    </widget>
-   <widget class="QLabel" name="dimLabel_2">
+   <widget class="QLabel" name="boundaryConditionsLabel">
     <property name="geometry">
      <rect>
       <x>900</x>
@@ -340,7 +340,7 @@
     <property name="geometry">
      <rect>
       <x>910</x>
-      <y>180</y>
+      <y>170</y>
       <width>100</width>
       <height>20</height>
      </rect>
@@ -353,7 +353,7 @@
     <property name="geometry">
      <rect>
       <x>910</x>
-      <y>150</y>
+      <y>140</y>
       <width>100</width>
       <height>20</height>
      </rect>
@@ -369,7 +369,7 @@
     <property name="geometry">
      <rect>
       <x>910</x>
-      <y>210</y>
+      <y>200</y>
       <width>100</width>
       <height>20</height>
      </rect>
@@ -389,6 +389,22 @@
     </property>
     <property name="text">
      <string>Build mode</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="showPreviewCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>230</y>
+      <width>171</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string>Repeat structure</string>
     </property>
    </widget>
   </widget>

@@ -9,21 +9,16 @@ TileGrid::TileGrid(GLWidget277 *context) : TileGrid(context, "", 0, 0, 0)
 }
 
 TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim, int zDim) :
-    dim(glm::vec3(xDim, yDim, zDim)), context(context), tileset(tileset)
+    context(context), dim(glm::vec3(xDim, yDim, zDim)), tileset(tileset)
 {
+    std::vector<Tile> tilesZ(dim.z, Tile(context, tileset));
+    std::vector<std::vector<Tile>> tilesY(dim.y, tilesZ);
     for (int x = 0; x < dim.x; x++) {
-        std::vector<std::vector<Tile>> tilesY;
-        for (int y = 0; y < dim.y; y++) {
-            std::vector<Tile> tilesZ;
-            for (int z = 0; z < dim.z; z++) {
-                tilesZ.push_back(Tile(context, this, tileset));
-            }
-            tilesY.push_back(tilesZ);
-        }
         tiles.push_back(tilesY);
     }
+
     wfc = new WFC(context);
-    wfc->tileGrid = this;
+    //wfc->tileGrid = this;
 }
 
 TileGrid::~TileGrid() {
@@ -82,6 +77,10 @@ void TileGrid::destroyTiles() {
     }
 }
 
+std::string TileGrid::getTileset() const {
+    return tileset;
+}
+
 glm::vec3 TileGrid::getDim() const {
     return dim;
 }
@@ -93,15 +92,9 @@ void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* bui
 
     // create new tiles array with new dimensions
     tiles.clear();
+    std::vector<Tile> tilesZ(dim.z, Tile(context, tileset));
+    std::vector<std::vector<Tile>> tilesY(dim.y, tilesZ);
     for (int x = 0; x < dim.x; x++) {
-        std::vector<std::vector<Tile>> tilesY;
-        for (int y = 0; y < dim.y; y++) {
-            std::vector<Tile> tilesZ;
-            for (int z = 0; z < dim.z; z++) {
-                tilesZ.push_back(Tile(context, this, tileset));
-            }
-            tilesY.push_back(tilesZ);
-        }
         tiles.push_back(tilesY);
     }
 
@@ -111,7 +104,7 @@ void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* bui
         int minY = std::min((int)dim.y, (int)tilesCopy[0].size());
         int minZ = std::min((int)dim.z, (int)tilesCopy[0][0].size());
 
-        std::vector<int> buildIndicesToErase;
+        std::vector<glm::vec3> buildIndicesToErase;
         for (int i = 0; i < buildIndices->size(); i++) {
             int x  = (*buildIndices)[i].x;
             int y  = (*buildIndices)[i].y;
@@ -120,12 +113,16 @@ void TileGrid::setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* bui
             if (x < minX && y < minY && z < minZ) {
                 tiles[x][y][z] = tilesCopy[x][y][z];
             } else {
-                buildIndicesToErase.push_back(i);
+                buildIndicesToErase.push_back(glm::vec3(x, y, z));
             }
         }
 
-        for (int i : buildIndicesToErase) {
-            buildIndices->erase(buildIndices->begin() + i);
+        // remove all build indices that no longer fit in the grid dimensions
+        for (glm::vec3 indices : buildIndicesToErase) {
+            std::vector<glm::vec3>::iterator it = std::find(buildIndices->begin(), buildIndices->end(), indices);
+            if (it != buildIndices->end()) {
+                buildIndices->erase(it);
+            }
         }
     }
 
@@ -163,7 +160,7 @@ void TileGrid::clear() {
     for (int x = 0; x < dim.x; x++) {
         for (int y = 0; y < dim.y; y++) {
             for (int z = 0; z < dim.z; z++) {
-                Tile emptyTile = Tile(context, this, tileset);
+                Tile emptyTile = Tile(context, tileset);
                 tiles[x][y][z] = emptyTile;
             }
         }
@@ -184,7 +181,7 @@ void TileGrid::clearNonUserTiles(std::vector<glm::vec3> buildIndices) {
             for (int z = 0; z < dim.z; z++) {
                 glm::vec3 index = glm::vec3(x, y, z);
                 if (std::find(buildIndices.begin(), buildIndices.end(), index) == buildIndices.end()) {
-                    Tile emptyTile = Tile(context, this, tileset);
+                    Tile emptyTile = Tile(context, tileset);
                     tiles[x][y][z] = emptyTile;
                 }
             }

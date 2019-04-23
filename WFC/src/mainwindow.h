@@ -39,6 +39,8 @@ private slots:
     void slot_setClean(bool);
     void slot_setNone(bool);
 
+    void slot_setPeriodicPreview(bool);
+
     // user can press button to clear current WFC output
     void slot_clearTileGrid();
 

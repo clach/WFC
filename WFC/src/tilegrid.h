@@ -2,8 +2,8 @@
 #include <tile.h>
 #include <wfc.h>
 
-class Tile;
-class WFC;
+//class Tile;
+//class WFC;
 
 class TileGrid
 {
@@ -31,6 +31,8 @@ public:
     void clearNonUserTiles(std::vector<glm::vec3> buildIndices);
 
     bool runWFC();
+
+    std::string getTileset() const;
 
     // want setDim to be able to modify buildIndices
     void setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* buildIndices);

@@ -4,8 +4,8 @@
 #include "utils.h"
 #include "tile.h"
 
-class Tile;
-class TileGrid;
+//class Tile;
+//class TileGrid;
 
 class WFC
 {
@@ -26,7 +26,7 @@ public:
 
     glm::mat4 calculateTileTransform(glm::vec3 pos, int cardinality) const;
 
-    TileGrid* tileGrid;
+    //TileGrid* tileGrid;
 
     int getMaxCardinality(std::string tileName);
 
@@ -73,11 +73,10 @@ private:
 
     std::map<std::string, int> firstOccurence;
 
+    std::map<std::string, int> maxCardinalities;
+
     std::vector<std::string> tileNames; // tile names
     std::vector<double> tileWeights; // tile weights (frequencies in input)
-    //std::vector<glm::mat4> tileRotations;
-    //std::vector<int> tileCardinalities;
-    std::map<std::string, int> maxCardinalities;
 
     std::vector<std::vector<std::vector<std::vector<bool>>>> wave;
     std::vector<std::vector<std::vector<bool>>> changes;

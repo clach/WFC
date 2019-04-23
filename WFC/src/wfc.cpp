@@ -128,9 +128,8 @@ void WFC::parseTileset() {
         }
         }
 
+        // keep track of cardinality of each tile type
         maxCardinalities[tileName] = cardinality;
-
-        //maxCardinalities.insert(std::pair<std::string, int>(tileName, cardinality));
 
         actionCount = action.size();
 
@@ -174,8 +173,6 @@ void WFC::parseTileset() {
         {
             tileNames.push_back(tileName + " " + std::to_string(c));
             tileWeights.push_back(tileWeight);
-            //tileRotations.push_back(glm::eulerAngleY(c * PI / 2.0f));
-            //tileCardinalities.push_back(c);
         }
     }
 
@@ -280,30 +277,17 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
     // for each cell in grid, value of wave is vector of trues
     // value of changes is false
     // value of observed is -1
+    std::vector<bool> bools(actionCount, true);
+
+    std::vector<std::vector<bool>> waveZ(dim.z, bools);
+    std::vector<bool> changesZ(dim.z, false);
+    std::vector<int> observedZ(dim.z, -1);
+
+    std::vector<std::vector<std::vector<bool>>> waveY(dim.y, waveZ);
+    std::vector<std::vector<bool>> changesY(dim.y, changesZ);
+    std::vector<std::vector<int>> observedY(dim.y, observedZ);
+
     for (int x = 0; x < dim.x; x++) {
-        std::vector<std::vector<std::vector<bool>>> waveY;
-        std::vector<std::vector<bool>> changesY;
-        std::vector<std::vector<int>> observedY;
-
-        for (int y = 0; y < dim.y; y++) {
-            std::vector<std::vector<bool>> waveZ;
-            std::vector<bool> changesZ;
-            std::vector<int> observedZ;
-
-            for (int z = 0; z < dim.z; z++) {
-                std::vector<bool> bools;
-                for (int t = 0; t < actionCount; t++) {
-                    bools.push_back(true);
-                }
-                waveZ.push_back(bools);
-                changesZ.push_back(false);
-                observedZ.push_back(-1);
-            }
-
-            waveY.push_back(waveZ);
-            changesY.push_back(changesZ);
-            observedY.push_back(observedZ);
-        }
         wave.push_back(waveY);
         changes.push_back(changesY);
         observed.push_back(observedY);
@@ -363,10 +347,10 @@ void WFC::clear() {
     if (tilesetChanged) {
         actionCount = 0;
         firstOccurence.clear();
+        maxCardinalities.clear();
         tileNames.clear();
         tileWeights.clear();
         propagator.clear();
-        maxCardinalities.clear();
     }
     wave.clear();
     changes.clear();
@@ -630,7 +614,7 @@ bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles)
         for (int y = 0; y < yBound; y++) {
             for (int z = 0; z < zBound; z++) {
                 int tileIndex = observed[x + observedIndexOffset][y + observedIndexOffset][z + observedIndexOffset];
-                Tile tile = Tile(context, tileGrid, tileset);
+                Tile tile = Tile(context, tileset);
 
                 if (valid && tileIndex == -1) {
                     valid = false;

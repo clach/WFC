@@ -1,11 +1,15 @@
 #include "tile.h"
 
-Tile::Tile(GLWidget277 *context, TileGrid* tileGrid, std::string tileset) : Tile(context, tileGrid, tileset, "empty")
+Tile::Tile() : Tile(nullptr, "")
 {}
 
-Tile::Tile(GLWidget277 *context, TileGrid* tileGrid, std::string tileset, std::string name) :
-    cardinality(0), objName(""), textureName(""), tileGrid(tileGrid), tileset(tileset), name(name),
-    modelMat(glm::mat4()), context(context), mesh(context), visualizeEmptyTiles(false)
+Tile::Tile(GLWidget277 *context, std::string tileset) :
+    Tile(context, tileset, "empty")
+{}
+
+Tile::Tile(GLWidget277 *context, std::string tileset, std::string name) :
+    cardinality(0), objName(""), textureName(""), tileset(tileset), name(name),
+    modelMat(glm::mat4()), context(context), mesh(context)//, visualizeEmptyTiles(false)
 {
     setName(name);
 }
@@ -17,9 +21,9 @@ Tile::Tile(const Tile &tile) : mesh(tile.context) {
     this->modelMat = tile.modelMat;
     this->context = tile.context;
     this->tileset = tile.tileset;
-    this->tileGrid = tile.tileGrid;
+    //this->tileGrid = tile.tileGrid;
     this->cardinality = tile.cardinality;
-    this->visualizeEmptyTiles = tile.visualizeEmptyTiles;
+    //this->visualizeEmptyTiles = tile.visualizeEmptyTiles;
 }
 
 Tile& Tile::operator=(Tile& tile) {
@@ -29,12 +33,11 @@ Tile& Tile::operator=(Tile& tile) {
     this->modelMat = tile.modelMat;
     this->context = tile.context;
     this->tileset = tile.tileset;
-    this->tileGrid = tile.tileGrid;
+    //this->tileGrid = tile.tileGrid;
     this->cardinality = tile.cardinality;
-    this->visualizeEmptyTiles = tile.visualizeEmptyTiles;
+    //this->visualizeEmptyTiles = tile.visualizeEmptyTiles;
     return *this;
 }
-
 
 Tile::~Tile() {
     // TODO
@@ -73,26 +76,27 @@ void Tile::createTileMesh() {
 
         mesh.createFromOBJ(objNameChar, textureNameChar);
         mesh.loadTexture();
-    } else if (tileGrid->visualizeEmptyTiles()) {
-        mesh.createCube();
+   // } else if (tileGrid->visualizeEmptyTiles()) {
+     //   mesh.createCube();
     }
 }
 
 void Tile::drawTileMesh(ShaderProgram& sp){
-    if (name != "empty" || tileGrid->visualizeEmptyTiles()) {
+    if (name != "empty") {// || tileGrid->visualizeEmptyTiles()) {
         sp.setModelMatrix(modelMat);
         sp.draw(mesh);
     }
 }
 
 void Tile::destroyTileMesh() {
-    if (name != "empty" || tileGrid->visualizeEmptyTiles()) {
+    if (name != "empty") {// || tileGrid->visualizeEmptyTiles()) {
         mesh.destroy();
     }
 }
 
+/*
 void Tile::setVisualizeEmptyTiles(bool visualize) {
     this->visualizeEmptyTiles = visualize;
-}
+}*/
 
 

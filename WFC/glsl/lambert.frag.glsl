@@ -36,7 +36,22 @@ void main()
                                                             //to simulate ambient lighting. This ensures that faces that are not
                                                             //lit by our point light are not completely black.
 
+
+
+    // add some distance fog
+    vec3 fogColor = vec3(0.53, 0.81, 0.92);
+
+    // get "depth" from eye to fragment
+
+    float depth = (gl_FragCoord.z / gl_FragCoord.w) / 150.f;
+    depth = clamp(depth, 0, 1);
+
     // Compute final shaded color
-    out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+    // linearly interpolate with fog color based on depth
+    out_Col = vec4(mix(diffuseColor.rgb * lightIntensity, fogColor, depth), diffuseColor.a);
+
+
+    // Compute final shaded color
+    //out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
 }
 

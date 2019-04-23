@@ -22,7 +22,8 @@ SOURCES += \
     $$PWD/wfc.cpp \
     $$PWD/scene/ray.cpp \
     $$PWD/scene/boundarylines.cpp \
-    $$PWD/scene/cube.cpp
+    $$PWD/scene/cube.cpp \
+    $$PWD/tilegridrepeater.cpp
 
 
 HEADERS += \
@@ -46,5 +47,6 @@ HEADERS += \
     $$PWD/wfc.h \
     $$PWD/scene/ray.h \
     $$PWD/scene/boundarylines.h \
-    $$PWD/scene/cube.h
+    $$PWD/scene/cube.h \
+    $$PWD/tilegridrepeater.h
 

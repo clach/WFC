@@ -12,6 +12,7 @@
 #include <mainwindow.h>
 #include <scene/mesh.h>
 #include <tilegrid.h>
+#include <tilegridrepeater.h>
 #include <wfc.h>
 
 #include <QOpenGLVertexArrayObject>
@@ -23,6 +24,7 @@ class MyGL : public GLWidget277
 
 private:
     ShaderProgram m_progLambert;// A shader program that uses lambertian reflection
+    ShaderProgram m_progLambertPrev;
     ShaderProgram m_progFlat;// A shader program that uses "flat" reflection (no shadowing at all)
 
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.
@@ -46,10 +48,14 @@ private:
 
     bool buildMode;
 
+    bool drawPeriodicPreview;
+
     TileGrid tileGrid;
     glm::vec3 dim;
     std::string tileset;
     std::string selectedTile;
+
+    TileGridRepeater tileGridRepeater;
 
     std::vector<glm::vec3> buildIndices;
 
@@ -88,6 +94,8 @@ public:
 
     void setPeriodic(bool periodic);
     void setSky(bool sky);
+
+    void showPeriodicPreview(bool preview);
 
 protected:
     void keyPressEvent(QKeyEvent *e);

@@ -8,11 +8,13 @@
 MyGL::MyGL(QWidget *parent)
     : GLWidget277(parent), buildMode(false),
       groundQuad(this), selectionQuad(this),
-      groundQuadColor(glm::vec4(0.13, 0.55, 0.13, 1.0)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
-      m_progLambert(this), m_progFlat(this),
+      groundQuadColor(glm::vec4(0.13, 0.55, 0.13, 0.6)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
+      m_progLambert(this), m_progLambertPrev(this), m_progFlat(this),
       m_glCamera(), someMesh(this), lines(this),
       tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset("knots"),
-      selectedTile("empty"), groundQuadHeight(0), drawSelectionQuad(false)
+      selectedTile("empty"), groundQuadHeight(0), drawSelectionQuad(false),
+      drawPeriodicPreview(false),
+      tileGridRepeater(this, 3)
 {
     setMouseTracking(true);
 }
@@ -26,6 +28,7 @@ MyGL::~MyGL()
     someMesh.destroy();
     lines.destroy();
     tileGrid.destroyTiles();
+    tileGridRepeater.destroyTiles();
 }
 
 void MyGL::initializeGL()
@@ -69,9 +72,11 @@ void MyGL::initializeGL()
 
     // create shaders
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
+    m_progLambertPrev.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
     m_progFlat.create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
     m_progLambert.setGeometryColor(glm::vec4(1, 0, 0, 1));
+    m_progLambertPrev.setGeometryColor(glm::vec4(1, 0.4, 0.4, 1));
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
@@ -87,6 +92,7 @@ void MyGL::resizeGL(int w, int h)
     glm::mat4 viewproj = m_glCamera.getViewProj();
 
     m_progLambert.setViewProjMatrix(viewproj);
+    m_progLambertPrev.setViewProjMatrix(viewproj);
     m_progFlat.setViewProjMatrix(viewproj);
 
     printGLErrorLog();
@@ -101,7 +107,7 @@ void MyGL::paintGL()
 
     m_progFlat.setViewProjMatrix(m_glCamera.getViewProj());
     m_progLambert.setViewProjMatrix(m_glCamera.getViewProj());
-    m_progLambert.setModelMatrix(glm::mat4());
+    m_progLambertPrev.setViewProjMatrix(m_glCamera.getViewProj());
 
     float voxelSize = tileGrid.getVoxelSize();
 
@@ -109,6 +115,14 @@ void MyGL::paintGL()
     glm::mat4 linesScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, voxelSize * dim.y, voxelSize * dim.z));
     m_progFlat.setModelMatrix(linesScale);
     m_progFlat.draw(lines);
+
+    // draw tiles
+    tileGrid.drawTiles(m_progLambert);
+
+    // draw preview of periodic tilegrid tiling
+    if (drawPeriodicPreview) {
+        tileGridRepeater.drawTiles(m_progLambertPrev);
+    }
 
     // draw ground quad
     glm::mat4 groundQuadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, 1, voxelSize * dim.z));
@@ -127,9 +141,6 @@ void MyGL::paintGL()
         m_progFlat.setModelMatrix(selectionQuadTransform);
         m_progFlat.draw(selectionQuad);
     }
-
-    // draw tiles
-    tileGrid.drawTiles(m_progLambert);
 }
 
 
@@ -223,6 +234,13 @@ void MyGL::runWFC() {
         emit wfcConvergenceError(false);
     }
     tileGrid.createTiles();
+
+    if (drawPeriodicPreview) {
+        tileGridRepeater.setTileGrid(tileGrid);
+        tileGridRepeater.createTiles();
+        update();
+    }
+
     groundQuadHeight = 0;
     update();
 }
@@ -259,6 +277,8 @@ void MyGL::setDimX(int x) {
     this->dim.x = x;
     tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.createTiles();
+    tileGridRepeater.clear();
+    tileGridRepeater.createTiles();
     update();
 }
 
@@ -266,6 +286,13 @@ void MyGL::setDimY(int y) {
     this->dim.y = y;
     tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.createTiles();
+    tileGridRepeater.clear();
+    tileGridRepeater.createTiles();
+
+    // ensure ground quad is never out of bounds of dim
+    if (groundQuadHeight > dim.y - 1) {
+        groundQuadHeight = dim.y - 1;
+    }
     update();
 }
 
@@ -273,6 +300,8 @@ void MyGL::setDimZ(int z) {
     this->dim.z = z;
     tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.createTiles();
+    tileGridRepeater.clear();
+    tileGridRepeater.createTiles();
     update();
 }
 
@@ -283,6 +312,18 @@ void MyGL::setPeriodic(bool periodic) {
 void MyGL::setSky(bool sky) {
     tileGrid.setSky(sky);
 }
+
+void MyGL::showPeriodicPreview(bool preview) {
+    drawPeriodicPreview = preview;
+    if (preview) {
+        tileGridRepeater.setTileGrid(tileGrid);
+    } else {
+        tileGridRepeater.clear();
+    }
+    tileGridRepeater.createTiles();
+    update();
+}
+
 
 void MyGL::setTileset(std::string tileset) {
     if (this->tileset != tileset) {
@@ -357,7 +398,7 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
                         cardinality++;
                         int maxCardinality = tileGrid.getMaxCardinality(tile.getName());
                         if (maxCardinality != 0) {
-                            cardinality = cardinality % maxCardinality;
+                            cardinality %= maxCardinality;
                         }
                         tile.setCardinality(cardinality);
                         tile.setTransform(tileGrid.calculateTileTransform(indices, cardinality));
@@ -365,7 +406,7 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
                         tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);
                     } else {
                         // get tile to set
-                        Tile tile = Tile(this, &tileGrid, tileset);
+                        Tile tile = Tile(this, tileset);
                         tile.setName(selectedTile);
                         tile.setTransform(tileGrid.calculateTileTransform(indices, 0));
 
@@ -375,7 +416,7 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
                     buildIndices.push_back(indices);
 
                     // get tile to set
-                    Tile tile = Tile(this, &tileGrid, tileset);
+                    Tile tile = Tile(this, tileset);
                     tile.setName(selectedTile);
                     tile.setTransform(tileGrid.calculateTileTransform(indices, 0));
 
@@ -389,15 +430,12 @@ void MyGL::mouseReleaseEvent(QMouseEvent *e) {
             glm::vec3 indices;
             if (getIntersectionWithGroundQuad(&indices)) {
                 if (std::find(buildIndices.begin(), buildIndices.end(), indices) != buildIndices.end()) {
-
                     // remove tile grid position from build indices
                     std::vector<glm::vec3>::iterator iter = std::find(buildIndices.begin(), buildIndices.end(), indices);
-                    int index = std::distance(buildIndices.begin(), iter);
-                    buildIndices.erase(buildIndices.begin() + index);
+                    buildIndices.erase(iter);
 
                     // set empty tile in place
-                    Tile tile = Tile(this, &tileGrid, tileset);
-                    tile.setName("empty");
+                    Tile tile = Tile(this, tileset);
                     tile.setTransform(tileGrid.calculateTileTransform(indices, 0));
 
                     tileGrid.setTileAt(tile, indices.x, indices.y, indices.z);

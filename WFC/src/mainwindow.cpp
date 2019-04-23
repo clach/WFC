@@ -38,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->periodicRadioButton, SIGNAL(toggled(bool)), this, SLOT(slot_setPeriodic(bool)));
     slot_setPeriodic(ui->periodicRadioButton->isChecked());
 
+    connect(ui->showPreviewCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setPeriodicPreview(bool)));
+
     // connect sky/clean boundary check box
     connect(ui->cleanRadioButton, SIGNAL(toggled(bool)), this, SLOT(slot_setClean(bool)));
     slot_setClean(ui->cleanRadioButton->isChecked());
@@ -115,19 +117,20 @@ void MainWindow::slot_setDimZ(int z) {
 void MainWindow::slot_setPeriodic(bool periodic) {
     ui->mygl->setPeriodic(periodic);
     ui->mygl->setSky(!periodic);
-    //ui->cleanRadioButton->setChecked(!periodic);
 }
 
 void MainWindow::slot_setClean(bool clean) {
     ui->mygl->setSky(clean);
     ui->mygl->setPeriodic(!clean);
-    //ui->periodicRadioButton->setChecked(!clean);
 }
 
 void MainWindow::slot_setNone(bool none) {
     ui->mygl->setSky(!none);
     ui->mygl->setPeriodic(!none);
-    //ui->periodicRadioButton->setChecked(!clean);
+}
+
+void MainWindow::slot_setPeriodicPreview(bool preview) {
+    ui->mygl->showPeriodicPreview(preview);
 }
 
 void MainWindow::slot_setTileset() {
