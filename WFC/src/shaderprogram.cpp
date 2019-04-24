@@ -7,7 +7,7 @@ ShaderProgram::ShaderProgram(GLWidget277 *context)
     : vertShader(), fragShader(), prog(),
       attrPos(-1), attrNor(-1), attrUV(-1), attrCol(-1),
       unifModel(-1), unifModelInvTr(-1), unifViewProj(-1), unifColor(-1),
-      context(context)
+      unifSampler2D(-1), context(context)
 {}
 
 void ShaderProgram::create(const char *vertfile, const char *fragfile)
@@ -56,8 +56,6 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
     }
 
     // Get the handles to the variables stored in our shaders
-    // See shaderprogram.h for more information about these variables
-
     attrPos = context->glGetAttribLocation(prog, "vs_Pos");
     attrNor = context->glGetAttribLocation(prog, "vs_Nor");
     attrUV = context->glGetAttribLocation(prog, "vs_UV");
@@ -67,6 +65,7 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
     unifModelInvTr = context->glGetUniformLocation(prog, "u_ModelInvTr");
     unifViewProj   = context->glGetUniformLocation(prog, "u_ViewProj");
     unifColor      = context->glGetUniformLocation(prog, "u_Color");
+    unifSampler2D  = context->glGetUniformLocation(prog, "u_Texture");
 
 }
 
@@ -137,6 +136,12 @@ void ShaderProgram::setGeometryColor(glm::vec4 color)
 void ShaderProgram::draw(Drawable &d)
 {
         useMe();
+
+        if (unifSampler2D != -1)
+        {
+            context->glUniform1i(unifSampler2D, 0);
+            //context->glUniform1i(unifSampler2D, /*GL_TEXTURE*/textureSlot);
+        }
 
     // Each of the following blocks checks that:
     //   * This shader has this attribute, and

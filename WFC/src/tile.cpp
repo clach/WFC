@@ -40,7 +40,6 @@ Tile& Tile::operator=(Tile& tile) {
 }
 
 Tile::~Tile() {
-    // TODO
 }
 
 void Tile::setName(std::string name) {
@@ -84,6 +83,7 @@ void Tile::createTileMesh() {
 void Tile::drawTileMesh(ShaderProgram& sp){
     if (name != "empty") {// || tileGrid->visualizeEmptyTiles()) {
         sp.setModelMatrix(modelMat);
+        mesh.bindTexture();
         sp.draw(mesh);
     }
 }

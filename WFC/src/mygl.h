@@ -62,8 +62,6 @@ private:
     bool checkToAddTile(glm::mat4 groundQuadTransMat, glm::vec3* posToDraw) const;
     glm::vec3 convertWorldSpacePosToTileIndex(glm::vec3 pos) const;
     bool getIntersectionWithGroundQuad(glm::vec3* posToDraw) const;
-    //void drawSelectionQuad(glm::vec3 pos);
-
 
 public:
     explicit MyGL(QWidget *parent = 0);
@@ -73,18 +71,13 @@ public:
     void resizeGL(int w, int h);
     void paintGL();
 
-    void createMeshes();
-
     void runWFC();
 
     void clearTileGrid();
-
     void clearNonUserTiles();
 
     void setTileset(std::string tileset);
-
     void setSelectedTile(std::string tile);
-
     void setBuildMode(bool buildMode);
     void setVisualizeEmptyTiles(bool visualize);
 
@@ -94,7 +87,6 @@ public:
 
     void setPeriodic(bool periodic);
     void setSky(bool sky);
-
     void showPeriodicPreview(bool preview);
 
 protected:

@@ -1,28 +1,19 @@
 #version 150
 // ^ Change this to version 130 if you have compatibility issues
 
-uniform vec4 u_Color; // The color with which to render this instance of geometry.
-uniform sampler2D u_Texture; // The texture to be read from by this shader
+uniform vec4 u_Color;
+uniform sampler2D u_Texture;
 
-// These are the interpolated values out of the rasterizer, so you can't know
-// their specific values without knowing the vertices that contributed to them
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 in vec2 fs_UV;
 
-out vec4 out_Col; // This is the final output color that you will see on your
-                  // screen for the pixel that is currently being processed.
+out vec4 out_Col;
 
 void main()
 {
-    // Material base color (before shading)
-    //vec4 diffuseColor = fs_Col;
-
-    // TODO: textures not working lol
     vec4 diffuseColor = texture(u_Texture, fs_UV);
-
-    diffuseColor = u_Color;
 
     // Calculate the diffuse term for Lambert shading
     float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));

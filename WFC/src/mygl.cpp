@@ -65,7 +65,6 @@ void MyGL::initializeGL()
     selectionQuad.setColor(selectionQuadColor);
     selectionQuad.create();
     lines.create();
-    createMeshes();
 
     // run initial wave function collapse
     runWFC();
@@ -210,12 +209,6 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     update();  // Calls paintGL, among other things
 }
 
-void MyGL::createMeshes() {
-    //someMesh.createFromOBJ(":/objs/tower_top.obj", ":/objs/tower_top.png");
-    someMesh.createFromOBJ(":/objs/wahoo.obj", ":/objs/wahoo.bmp");
-    someMesh.loadTexture();
-}
-
 void MyGL::runWFC() {
     if (!buildMode) {
         tileGrid.destroyTiles();
@@ -324,7 +317,6 @@ void MyGL::showPeriodicPreview(bool preview) {
     tileGridRepeater.createTiles();
     update();
 }
-
 
 void MyGL::setTileset(std::string tileset) {
     if (this->tileset != tileset) {
