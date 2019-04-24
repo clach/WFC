@@ -249,6 +249,8 @@ void MyGL::clearTileGrid() {
     tileGrid.destroyTiles();
     tileGrid.clear();
     buildIndices.clear();
+    tileGridRepeater.clear();
+    tileGridRepeater.createTiles();
     update();
 }
 
@@ -256,7 +258,6 @@ void MyGL::clearNonUserTiles() {
     tileGrid.clearNonUserTiles(buildIndices);
     update();
 }
-
 
 void MyGL::setBuildMode(bool buildMode) {
     this->buildMode = buildMode;
