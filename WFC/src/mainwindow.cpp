@@ -187,6 +187,11 @@ void MainWindow::populateTilesetList() {
         filename.chop(5); // remove ".json" from end
         ui->tilesetList->addItem(filename);
     }
+
+    // automatically select the first item
+    if (ui->tilesetList->count() > 0) {
+        ui->tilesetList->setCurrentRow(0);
+    }
 }
 
 void MainWindow::populateTilesetList2() {
@@ -228,11 +233,6 @@ void MainWindow::populateTileList(std::string tileset) {
         QJsonObject jsonTile = tilesArray[i].toObject();
         QString tileName = jsonTile["name"].toString();
         ui->tileList->addItem(tileName);
-    }
-
-    // automatically select the first item
-    if (ui->tileList->count() > 0) {
-        ui->tileList->setCurrentRow(0);
     }
 }
 

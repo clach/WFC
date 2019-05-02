@@ -108,8 +108,6 @@ void MyGL::paintGL()
     m_progLambert.setViewProjMatrix(m_glCamera.getViewProj());
     m_progLambertPrev.setViewProjMatrix(m_glCamera.getViewProj());
 
-    float voxelSize = tileGrid.getVoxelSize();
-
     // draw boundary lines
     glm::mat4 linesScale = glm::scale(glm::mat4(), glm::vec3(tileDrawSize * dim.x, tileDrawSize * dim.y, tileDrawSize * dim.z));
     m_progFlat.setModelMatrix(linesScale);
@@ -125,7 +123,7 @@ void MyGL::paintGL()
 
     // draw ground quad
     glm::mat4 groundQuadScale = glm::scale(glm::mat4(), glm::vec3(tileDrawSize * dim.x, 1, tileDrawSize * dim.z));
-    glm::mat4 groundQuadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, voxelSize * groundQuadHeight, 0.0));
+    glm::mat4 groundQuadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, tileDrawSize * groundQuadHeight, 0.0));
     groundQuadTransform = groundQuadTrans * groundQuadScale;
     m_progFlat.setModelMatrix(groundQuadTransform);
     m_progFlat.draw(groundQuad);
