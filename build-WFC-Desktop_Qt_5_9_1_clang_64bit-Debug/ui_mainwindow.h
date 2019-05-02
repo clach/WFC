@@ -57,6 +57,7 @@ public:
     QRadioButton *noneRadioButton;
     QCheckBox *buildModeCheckBox;
     QCheckBox *showPreviewCheckBox;
+    QCheckBox *showProgressCheckBox;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuHelp;
@@ -168,11 +169,14 @@ public:
         noneRadioButton->setGeometry(QRect(910, 190, 100, 20));
         buildModeCheckBox = new QCheckBox(centralWidget);
         buildModeCheckBox->setObjectName(QStringLiteral("buildModeCheckBox"));
-        buildModeCheckBox->setGeometry(QRect(740, 30, 87, 20));
+        buildModeCheckBox->setGeometry(QRect(740, 30, 101, 20));
         showPreviewCheckBox = new QCheckBox(centralWidget);
         showPreviewCheckBox->setObjectName(QStringLiteral("showPreviewCheckBox"));
         showPreviewCheckBox->setGeometry(QRect(910, 220, 171, 20));
         showPreviewCheckBox->setAutoFillBackground(false);
+        showProgressCheckBox = new QCheckBox(centralWidget);
+        showProgressCheckBox->setObjectName(QStringLiteral("showProgressCheckBox"));
+        showProgressCheckBox->setGeometry(QRect(910, 320, 151, 20));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -218,6 +222,7 @@ public:
         noneRadioButton->setText(QApplication::translate("MainWindow", "None", Q_NULLPTR));
         buildModeCheckBox->setText(QApplication::translate("MainWindow", "Build mode", Q_NULLPTR));
         showPreviewCheckBox->setText(QApplication::translate("MainWindow", "Repeat structure", Q_NULLPTR));
+        showProgressCheckBox->setText(QApplication::translate("MainWindow", "Progressive preview", Q_NULLPTR));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", Q_NULLPTR));
         menuHelp->setTitle(QApplication::translate("MainWindow", "Help", Q_NULLPTR));
     } // retranslateUi

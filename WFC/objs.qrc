@@ -17,5 +17,38 @@
         <file>objs/knots/vertical.obj</file>
         <file>objs/knots/vertical.png</file>
         <file>objs/knots/cube.obj</file>
+        <file>objs/building/2corner.mtl</file>
+        <file>objs/building/2corner.png</file>
+        <file>objs/building/3corner.mtl</file>
+        <file>objs/building/3corner.png</file>
+        <file>objs/building/side.mtl</file>
+        <file>objs/building/side.png</file>
+        <file>objs/building/sideLeftShutter.mtl</file>
+        <file>objs/building/sideLeftShutter.png</file>
+        <file>objs/building/topEdge.mtl</file>
+        <file>objs/building/topEdge.png</file>
+        <file>objs/building/topMiddle.mtl</file>
+        <file>objs/building/topMiddle.png</file>
+        <file>objs/building/window1.mtl</file>
+        <file>objs/building/window1.png</file>
+        <file>objs/building/window2.mtl</file>
+        <file>objs/building/window2.png</file>
+        <file>objs/building/window2.obj</file>
+        <file>objs/building/sideLeftShutter.obj</file>
+        <file>objs/building/3corner.obj</file>
+        <file>objs/building/2corner.obj</file>
+        <file>objs/building/topMiddle.obj</file>
+        <file>objs/building/window1.obj</file>
+        <file>objs/building/side.obj</file>
+        <file>objs/building/topEdge.obj</file>
+        <file>objs/building/doorTop.obj</file>
+        <file>objs/building/doorTop.mtl</file>
+        <file>objs/building/doorTop.png</file>
+        <file>objs/building/doorBottom.png</file>
+        <file>objs/building/doorBottom.mtl</file>
+        <file>objs/building/doorBottom.obj</file>
+        <file>objs/building/sideRightShutter.png</file>
+        <file>objs/building/sideRightShutter.mtl</file>
+        <file>objs/building/sideRightShutter.obj</file>
     </qresource>
 </RCC>

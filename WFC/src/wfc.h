@@ -21,6 +21,8 @@ public:
     void setBuildIndices(std::vector<glm::vec3> buildIndices);
     std::vector<glm::vec3> getBuildIndices() const;
     bool run(std::vector<std::vector<std::vector<Tile>>>* tiles);
+    bool runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles);
+
 
     float getVoxelSize() const;
 
@@ -41,13 +43,15 @@ private:
     bool observe();
 
     // return true if changes are still propagating
-    bool propogate();
+    bool propagate();
 
     // returns true if all cells at zero entropy (each cell has one remaining pattern)
     // returns false if not all cells at zero entropy, and returns cell
     // with lowest non-zero entropy
     // throws exception if contradiction (cell has no remaining patterns)
     bool findLowestEntropy(glm::vec3& cell, std::vector<int>& indices);
+
+    void findObserved();
 
     bool outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const;
 
@@ -56,6 +60,7 @@ private:
     bool inSubset(std::string tileName);
 
     int emptyIndex;
+    int groundIndex;
 
     GLWidget277 *context;
     glm::vec3 dim; // desired dimensions of grid to fill with WFC

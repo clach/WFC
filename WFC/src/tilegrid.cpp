@@ -30,6 +30,9 @@ bool TileGrid::runWFC() {
     return wfc->run(&tiles);
 }
 
+bool TileGrid::runWFCIteration() {
+    return wfc->runIteration(&tiles);
+}
 
 Tile TileGrid::getTileAt(int x, int y, int z) const {
     if (x < 0 || x >= dim.x || y < 0 || y >= dim.y || z < 0 || z >= dim.z) {

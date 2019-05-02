@@ -60,6 +60,8 @@ private slots:
 
     void slot_setErrorLabel(bool);
 
+    void slot_setProgressivePreview(bool);
+
 
 private:
     Ui::MainWindow *ui;

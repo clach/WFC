@@ -811,6 +811,39 @@ qrc_objs.cpp: ../WFC/objs.qrc \
 		../WFC/objs/wahoo.bmp \
 		../WFC/objs/tower_top.obj \
 		../WFC/objs/tower_top.png \
+		../WFC/objs/building/sideLeftShutter.mtl \
+		../WFC/objs/building/doorBottom.mtl \
+		../WFC/objs/building/window1.png \
+		../WFC/objs/building/window2.png \
+		../WFC/objs/building/topEdge.png \
+		../WFC/objs/building/window1.obj \
+		../WFC/objs/building/window2.obj \
+		../WFC/objs/building/side.png \
+		../WFC/objs/building/topEdge.obj \
+		../WFC/objs/building/topMiddle.png \
+		../WFC/objs/building/sideRightShutter.mtl \
+		../WFC/objs/building/side.obj \
+		../WFC/objs/building/2corner.png \
+		../WFC/objs/building/topMiddle.obj \
+		../WFC/objs/building/3corner.png \
+		../WFC/objs/building/2corner.obj \
+		../WFC/objs/building/window1.mtl \
+		../WFC/objs/building/topEdge.mtl \
+		../WFC/objs/building/window2.mtl \
+		../WFC/objs/building/3corner.obj \
+		../WFC/objs/building/doorTop.png \
+		../WFC/objs/building/side.mtl \
+		../WFC/objs/building/doorTop.obj \
+		../WFC/objs/building/topMiddle.mtl \
+		../WFC/objs/building/2corner.mtl \
+		../WFC/objs/building/3corner.mtl \
+		../WFC/objs/building/doorTop.mtl \
+		../WFC/objs/building/sideLeftShutter.png \
+		../WFC/objs/building/doorBottom.png \
+		../WFC/objs/building/sideLeftShutter.obj \
+		../WFC/objs/building/doorBottom.obj \
+		../WFC/objs/building/sideRightShutter.png \
+		../WFC/objs/building/sideRightShutter.obj \
 		../WFC/objs/knots/vertical.png \
 		../WFC/objs/knots/ground.png \
 		../WFC/objs/knots/up.png \
@@ -828,6 +861,7 @@ qrc_objs.cpp: ../WFC/objs.qrc \
 
 qrc_json.cpp: ../WFC/json.qrc \
 		../../../../Qt5.9.1/5.9.1/clang_64/bin/rcc \
+		../WFC/json/building.json \
 		../WFC/json/knots.json \
 		../WFC/json/dontSelectMe.json
 	/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/bin/rcc -name json ../WFC/json.qrc -o qrc_json.cpp
@@ -2597,10 +2631,7 @@ tile.o: ../WFC/src/tile.cpp ../WFC/src/tile.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
-		../WFC/src/shaderprogram.h \
-		../WFC/src/tilegrid.h \
-		../WFC/src/wfc.h \
-		../WFC/src/utils.h
+		../WFC/src/shaderprogram.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tile.o ../WFC/src/tile.cpp
 
 tilegrid.o: ../WFC/src/tilegrid.cpp ../WFC/src/tilegrid.h \
@@ -2826,7 +2857,6 @@ wfc.o: ../WFC/src/wfc.cpp ../WFC/src/wfc.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
 		../WFC/src/shaderprogram.h \
-		../WFC/src/tilegrid.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QFile \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qfile.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QJsonDocument \
@@ -3159,6 +3189,7 @@ cube.o: ../WFC/src/scene/cube.cpp ../WFC/src/scene/cube.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cube.o ../WFC/src/scene/cube.cpp
 
 tilegridrepeater.o: ../WFC/src/tilegridrepeater.cpp ../WFC/src/tilegridrepeater.h \
+		../WFC/src/tilegrid.h \
 		../WFC/src/tile.h \
 		../WFC/src/scene/mesh.h \
 		../WFC/src/drawable.h \
@@ -3267,7 +3298,6 @@ tilegridrepeater.o: ../WFC/src/tilegridrepeater.cpp ../WFC/src/tilegridrepeater.
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
 		../WFC/src/shaderprogram.h \
-		../WFC/src/tilegrid.h \
 		../WFC/src/wfc.h \
 		../WFC/src/utils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tilegridrepeater.o ../WFC/src/tilegridrepeater.cpp

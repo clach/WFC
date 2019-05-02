@@ -13,8 +13,8 @@ MyGL::MyGL(QWidget *parent)
       m_glCamera(), someMesh(this), lines(this),
       tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset("knots"),
       selectedTile("empty"), groundQuadHeight(0), drawSelectionQuad(false),
-      drawPeriodicPreview(false),
-      tileGridRepeater(this, 3)
+      periodicPreview(false), progressivePreview(false),
+      tileGridRepeater(this, 3), tileDrawSize(3.f)
 {
     setMouseTracking(true);
 }
@@ -111,7 +111,7 @@ void MyGL::paintGL()
     float voxelSize = tileGrid.getVoxelSize();
 
     // draw boundary lines
-    glm::mat4 linesScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, voxelSize * dim.y, voxelSize * dim.z));
+    glm::mat4 linesScale = glm::scale(glm::mat4(), glm::vec3(tileDrawSize * dim.x, tileDrawSize * dim.y, tileDrawSize * dim.z));
     m_progFlat.setModelMatrix(linesScale);
     m_progFlat.draw(lines);
 
@@ -119,12 +119,12 @@ void MyGL::paintGL()
     tileGrid.drawTiles(m_progLambert);
 
     // draw preview of periodic tilegrid tiling
-    if (drawPeriodicPreview) {
+    if (periodicPreview) {
         tileGridRepeater.drawTiles(m_progLambertPrev);
     }
 
     // draw ground quad
-    glm::mat4 groundQuadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize * dim.x, 1, voxelSize * dim.z));
+    glm::mat4 groundQuadScale = glm::scale(glm::mat4(), glm::vec3(tileDrawSize * dim.x, 1, tileDrawSize * dim.z));
     glm::mat4 groundQuadTrans = glm::translate(glm::mat4(), glm::vec3(0.0, voxelSize * groundQuadHeight, 0.0));
     groundQuadTransform = groundQuadTrans * groundQuadScale;
     m_progFlat.setModelMatrix(groundQuadTransform);
@@ -132,10 +132,10 @@ void MyGL::paintGL()
 
     // draw selection quad if desired
     if (drawSelectionQuad) {
-        glm::mat4 selectionQuadScale = glm::scale(glm::mat4(), glm::vec3(voxelSize));
-        glm::mat4 selectionQuadTrans = glm::translate(glm::mat4(), glm::vec3(selectionQuadPos.x * voxelSize,
-                                                                             voxelSize * groundQuadHeight + 0.01,
-                                                                             selectionQuadPos.z * voxelSize));
+        glm::mat4 selectionQuadScale = glm::scale(glm::mat4(), glm::vec3(tileDrawSize));
+        glm::mat4 selectionQuadTrans = glm::translate(glm::mat4(), glm::vec3(selectionQuadPos.x * tileDrawSize,
+                                                                             tileDrawSize * groundQuadHeight + 0.01,
+                                                                             selectionQuadPos.z * tileDrawSize));
         glm::mat4 selectionQuadTransform = selectionQuadTrans * selectionQuadScale;
         m_progFlat.setModelMatrix(selectionQuadTransform);
         m_progFlat.draw(selectionQuad);
@@ -206,35 +206,61 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     }
 
     m_glCamera.RecomputeAttributes();
-    update();  // Calls paintGL, among other things
+    update();
 }
 
-void MyGL::runWFC() {
+void MyGL::runIterativeWFC() {
     if (!buildMode) {
         tileGrid.destroyTiles();
         tileGrid.clear();
     }
     tileGrid.setDim(dim, buildMode, &buildIndices);
     tileGrid.setTileset(tileset);
-    if (!tileGrid.runWFC()) {
-        emit wfcConvergenceError(true);
-        if (buildMode) {
-            // if the WFC did not converge, clear the build indices
-            // TODO: this is a little hacky, it's not necessarily the user's fault
-            buildIndices.clear();
-        }
+
+    tileGrid.runWFCIteration();
+
+    tileGrid.createTiles();
+
+    if (periodicPreview) {
+        tileGridRepeater.setTileGrid(tileGrid);
+        tileGridRepeater.createTiles();
+    }
+
+    update();
+}
+
+void MyGL::runWFC() {
+    groundQuadHeight = 0;
+    if (!buildMode) {
+        tileGrid.destroyTiles();
+        tileGrid.clear();
+    }
+    tileGrid.setDim(dim, buildMode, &buildIndices);
+    tileGrid.setTileset(tileset);
+
+    if (progressivePreview) {
+        tileGrid.runWFCIteration();
+
     } else {
-        emit wfcConvergenceError(false);
+
+        if (!tileGrid.runWFC()) {
+            emit wfcConvergenceError(true);
+            if (buildMode) {
+                // if the WFC did not converge, clear the build indices
+                // TODO: this is a little hacky, it's not necessarily the user's fault
+                buildIndices.clear();
+            }
+        } else {
+            emit wfcConvergenceError(false);
+        }
     }
     tileGrid.createTiles();
 
-    if (drawPeriodicPreview) {
+    if (periodicPreview) {
         tileGridRepeater.setTileGrid(tileGrid);
         tileGridRepeater.createTiles();
-        update();
     }
 
-    groundQuadHeight = 0;
     update();
 }
 
@@ -308,7 +334,7 @@ void MyGL::setSky(bool sky) {
 }
 
 void MyGL::showPeriodicPreview(bool preview) {
-    drawPeriodicPreview = preview;
+    periodicPreview = preview;
     if (preview) {
         tileGridRepeater.setTileGrid(tileGrid);
     } else {
@@ -316,6 +342,10 @@ void MyGL::showPeriodicPreview(bool preview) {
     }
     tileGridRepeater.createTiles();
     update();
+}
+
+void MyGL::showProgressivePreview(bool preview) {
+    this->progressivePreview = preview;
 }
 
 void MyGL::setTileset(std::string tileset) {
@@ -332,10 +362,9 @@ void MyGL::setSelectedTile(std::string tile) {
 
 glm::vec3 MyGL::convertWorldSpacePosToTileIndex(glm::vec3 pos) const {
     glm::vec3 tileIndex;
-    float voxelSize = tileGrid.getVoxelSize();
-    tileIndex.x = (int)(pos.x / voxelSize);
-    tileIndex.y = (int)(pos.y / voxelSize);
-    tileIndex.z = (int)(pos.z / voxelSize);
+    tileIndex.x = (int)(pos.x / tileDrawSize);
+    tileIndex.y = (int)(pos.y / tileDrawSize);
+    tileIndex.z = (int)(pos.z / tileDrawSize);
     return tileIndex;
 }
 

@@ -383,7 +383,7 @@
      <rect>
       <x>740</x>
       <y>30</y>
-      <width>87</width>
+      <width>101</width>
       <height>20</height>
      </rect>
     </property>
@@ -405,6 +405,19 @@
     </property>
     <property name="text">
      <string>Repeat structure</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="showProgressCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>320</y>
+      <width>151</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Progressive preview</string>
     </property>
    </widget>
   </widget>

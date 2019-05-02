@@ -47,8 +47,10 @@ private:
     BoundaryLines lines;
 
     bool buildMode;
+    bool periodicPreview;
+    bool progressivePreview;
 
-    bool drawPeriodicPreview;
+    float tileDrawSize;
 
     TileGrid tileGrid;
     glm::vec3 dim;
@@ -72,6 +74,7 @@ public:
     void paintGL();
 
     void runWFC();
+    void runIterativeWFC();
 
     void clearTileGrid();
     void clearNonUserTiles();
@@ -88,6 +91,9 @@ public:
     void setPeriodic(bool periodic);
     void setSky(bool sky);
     void showPeriodicPreview(bool preview);
+
+    void showProgressivePreview(bool preview);
+
 
 protected:
     void keyPressEvent(QKeyEvent *e);

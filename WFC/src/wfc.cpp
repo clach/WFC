@@ -17,7 +17,8 @@ WFC::WFC(GLWidget277 *context) : WFC(context, " ", 0, 0, 0)
 
 WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
     context(context), dim(glm::vec3(x, y, z)), periodic(false), sky(false), ground(false),
-    voxelSize(1), actionCount(0), tileset(tileset), tilesetChanged(true), emptyIndex(-1)
+    voxelSize(1), actionCount(0), tileset(tileset), tilesetChanged(true), emptyIndex(-1),
+    groundIndex(-1)
 {}
 
 WFC::~WFC()
@@ -32,10 +33,21 @@ bool WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
             break;
         }
         // keep propogating until no more changes occur
-        while (propogate()) {}
+        while (propagate()) {}
     }
 
     // WFC is complete, output results
+    return outputObservations(tiles);
+}
+
+bool WFC::runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles) {
+    setup(tiles);
+
+    if (!observe()) {
+        while (propagate()) {}
+    }
+
+    findObserved();
     return outputObservations(tiles);
 }
 
@@ -139,6 +151,9 @@ void WFC::parseTileset() {
         if (tileName == "empty") {
             emptyIndex = actionCount;
         }
+        if (tileName == "ground") {
+            groundIndex = actionCount;
+        }
 
         // handle mirrored and rotated tiles
         // (think symmetry of a square)
@@ -188,7 +203,7 @@ void WFC::parseTileset() {
         propagator.push_back(propagatorY);
     }
 
-    // fill propogator based on neighbors array
+    // fill propagator based on neighbors array
     for (int i = 0; i < neighborsArray.size(); i++) {
         QJsonArray jsonNeighbor = neighborsArray[i].toArray();
         std::string neighborType = jsonNeighbor[0].toString().toStdString();
@@ -269,8 +284,10 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
         parseTileset();
     }
 
-    if (sky && !ground) {
+    if (sky) {
         dim += 2;
+    } else if (ground) {
+        dim.y += 1;
     }
 
     // instantiate wave, changes, observed structures
@@ -308,15 +325,30 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
                 }
             }
         }
+    }
 
-        propogate();
+    // fill bottom level with ground tiles
+    if (ground && groundIndex != -1) {
+        for (int x = 0; x < dim.x; x++) {
+            for (int z = 0; z < dim.z; z++) {
+                for (int t = 0; t < actionCount; t++) {
+                    wave[x][0][z][t] = t == groundIndex;
+                }
+                changes[x][0][z] = true;
+            }
+
+        }
     }
 
     // fill with tiles passed from user
-    int indexOffset = 0;
+    int xzIndexOffset = 0;
+    int yIndexOffset = 0;
 
     if (sky) {
-        indexOffset = 1;
+        xzIndexOffset = 1;
+        yIndexOffset = 1;
+    } else if (ground) {
+        yIndexOffset = 1;
     }
 
     // update structures to account for user-placed tiles at buildIndices
@@ -328,18 +360,18 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
         Tile tile = (*tiles)[x][y][z];
         int tileIndex = firstOccurence[tile.getName()] + tile.getCardinality();
 
-        std::vector<bool> bools = wave[x + indexOffset][y + indexOffset][z + indexOffset];
+        std::vector<bool> bools = wave[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset];
         // set bool array of selected cell to false, except for chosen tile
         for (int t = 0; t < actionCount; t++) {
             bools[t] = t == tileIndex;
         }
 
-        wave[x + indexOffset][y + indexOffset][z + indexOffset] = bools;
-        changes[x + indexOffset][y + indexOffset][z + indexOffset] = true;
+        wave[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset] = bools;
+        changes[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset] = true;
     }
 
     // TODO: algorithm assumes all user input is valid
-    propogate();
+    propagate();
 
 }
 
@@ -387,7 +419,7 @@ bool WFC::observe()
     return false;
 }
 
-bool WFC::propogate()
+bool WFC::propagate()
 {
     bool change = false; // did a change occur?
 
@@ -575,24 +607,29 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
 
     // if all cells have zero entropy, WFC is complete
     if (allCellsAtZeroEntropy) {
-        for (int x = 0; x < dim.x; x++) {
-            for (int y = 0; y < dim.y; y++) {
-                for (int z = 0; z < dim.z; z++) {
-                    for (int t = 0; t < actionCount; t++) {
-                        if (wave[x][y][z][t]) {
-                            // indicate index of "observed" tile for each cell
-                            observed[x][y][z] = t;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        findObserved();
         return true;
     }
 
     return false;
 }
+
+void WFC::findObserved() {
+    for (int x = 0; x < dim.x; x++) {
+        for (int y = 0; y < dim.y; y++) {
+            for (int z = 0; z < dim.z; z++) {
+                for (int t = 0; t < actionCount; t++) {
+                    if (wave[x][y][z][t]) {
+                        // indicate index of "observed" tile for each cell
+                        observed[x][y][z] = t;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const {
     bool valid = true;
@@ -602,18 +639,23 @@ bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles)
     int yBound = dim.y;
     int zBound = dim.z;
     int observedIndexOffset = 0;
+    int observedYIndexOffset = 0;
 
     if (sky) {
         xBound = dim.x - 2;
         yBound = dim.y - 2;
         zBound = dim.z - 2;
         observedIndexOffset = 1;
+        observedYIndexOffset = 1;
+    } else if (ground) {
+        yBound = dim.y - 1;
+        observedYIndexOffset = 1;
     }
 
     for (int x = 0; x < xBound; x++) {
         for (int y = 0; y < yBound; y++) {
             for (int z = 0; z < zBound; z++) {
-                int tileIndex = observed[x + observedIndexOffset][y + observedIndexOffset][z + observedIndexOffset];
+                int tileIndex = observed[x + observedIndexOffset][y + observedYIndexOffset][z + observedIndexOffset];
                 Tile tile = Tile(context, tileset);
 
                 if (valid && tileIndex == -1) {
@@ -628,15 +670,6 @@ bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles)
                 }
                 tile.setName(tileName);
                 tile.setCardinality(cardinality);
-
-                float offset = voxelSize / 2.f;
-
-                //glm::mat4 rotMat = glm::mat4();
-                //int cardinality = 0;
-                if (tileIndex != -1) {
-                    //rotMat = tileRotations[tileIndex];
-                    //cardinality = tileCardinalities[tileIndex];
-                }
                 tile.setTransform(calculateTileTransform(glm::vec3(x, y, z), cardinality));
 
                 (*tiles)[x][y][z] = tile;
@@ -677,19 +710,20 @@ float WFC::getVoxelSize() const {
 }
 
 glm::mat4 WFC::calculateTileTransform(glm::vec3 pos, int cardinality) const {
-    float offset = voxelSize / 2.f;
+    float tileDrawSize = 3.f; // TODO: fix hardcoding
+    float offset = tileDrawSize / 2.f;
 
     glm::mat4 trans1Mat = glm::translate(glm::mat4(),
-                                         glm::vec3(voxelSize * pos.x,
-                                                   voxelSize * pos.y,
-                                                   voxelSize * pos.z)
+                                         glm::vec3(tileDrawSize * pos.x,
+                                                   tileDrawSize * pos.y,
+                                                   tileDrawSize * pos.z)
                                          + glm::vec3(offset));
-    glm::mat4 scaleMat = glm::mat4();
+    glm::mat4 scaleMat = glm::scale(glm::mat4(), glm::vec3(tileDrawSize / voxelSize));
 
     glm::mat4 rotMat = glm::eulerAngleY(cardinality * PI / 2.0f);
 
     // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
-    glm::mat4 trans2Mat = glm::translate(glm::mat4(), glm::vec3(0, -offset, 0));
+    glm::mat4 trans2Mat = glm::translate(glm::mat4(), glm::vec3(0, -voxelSize / 2.f, 0));
 
     glm::mat4 transformMat = trans1Mat * rotMat * scaleMat * trans2Mat;
 

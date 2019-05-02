@@ -44,7 +44,7 @@ Tile::~Tile() {
 
 void Tile::setName(std::string name) {
     this->name = name;
-    if (name != "empty") {
+    if (name != "empty" && name != "ground") {
         objName = ":/objs/" + tileset + "/" + name + ".obj";
         textureName = ":/objs/" + tileset + "/" + name + ".png";
     }
@@ -67,7 +67,7 @@ void Tile::setTransform(glm::mat4 transform) {
 }
 
 void Tile::createTileMesh() {
-    if (name != "empty") {
+    if (name != "empty" && name != "ground") {
         const char* objNameChar = new char[objName.size()];
         const char* textureNameChar = new char[textureName.size()];
         objNameChar = &objName[0u];
@@ -81,7 +81,7 @@ void Tile::createTileMesh() {
 }
 
 void Tile::drawTileMesh(ShaderProgram& sp){
-    if (name != "empty") {// || tileGrid->visualizeEmptyTiles()) {
+    if (name != "empty" && name != "ground") {// || tileGrid->visualizeEmptyTiles()) {
         sp.setModelMatrix(modelMat);
         mesh.bindTexture();
         sp.draw(mesh);
@@ -89,7 +89,7 @@ void Tile::drawTileMesh(ShaderProgram& sp){
 }
 
 void Tile::destroyTileMesh() {
-    if (name != "empty") {// || tileGrid->visualizeEmptyTiles()) {
+    if (name != "empty" && name != "ground") {// || tileGrid->visualizeEmptyTiles()) {
         mesh.destroy();
     }
 }

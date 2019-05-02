@@ -31,6 +31,7 @@ public:
     void clearNonUserTiles(std::vector<glm::vec3> buildIndices);
 
     bool runWFC();
+    bool runWFCIteration();
 
     std::string getTileset() const;
 

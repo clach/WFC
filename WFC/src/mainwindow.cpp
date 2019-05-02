@@ -61,9 +61,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // connect tile list view
     connect(ui->tileList, SIGNAL(currentRowChanged(int)), this, SLOT(slot_setTile()));
 
-    // select second item // TODO fix later
-    ui->tilesetList->setCurrentRow(1);
-
     // connect clear button
     connect(ui->clearButton, SIGNAL(clicked(bool)), this, SLOT(slot_clearTileGrid()));
 
@@ -72,6 +69,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // connect run WFC button
     connect(ui->runWFCButton, SIGNAL(clicked(bool)), this, SLOT(slot_runWFC()));
+
+    connect(ui->showProgressCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setProgressivePreview(bool)));
 
     connect(ui->mygl, SIGNAL(wfcConvergenceError(bool)), this, SLOT(slot_setErrorLabel(bool)));
 
@@ -157,6 +156,10 @@ void MainWindow::slot_setTile() {
 
 }
 
+void MainWindow::slot_setProgressivePreview(bool preview) {
+    ui->mygl->showProgressivePreview(preview);
+}
+
 void MainWindow::slot_runWFC() {
     ui->mygl->runWFC();
 }
@@ -232,7 +235,6 @@ void MainWindow::populateTileList(std::string tileset) {
         ui->tileList->setCurrentRow(0);
     }
 }
-
 
 void MainWindow::slot_setErrorLabel(bool error) {
     if (error) {

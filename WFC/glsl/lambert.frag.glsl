@@ -37,6 +37,8 @@ void main()
     float depth = (gl_FragCoord.z / gl_FragCoord.w) / 150.f;
     depth = clamp(depth, 0, 1);
 
+    depth = 0;
+
     // Compute final shaded color
     // linearly interpolate with fog color based on depth
     out_Col = vec4(mix(diffuseColor.rgb * lightIntensity, fogColor, depth), diffuseColor.a);
