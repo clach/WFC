@@ -378,7 +378,13 @@
             "vertical",
             "empty",
             "ground"
+         ],
+         [  
+            "vertical",
+            "ground",
+            "empty"
          ]
+
       ]
    }
 }

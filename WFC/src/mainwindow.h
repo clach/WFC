@@ -23,11 +23,8 @@ private slots:
     void on_actionQuit_triggered();
     void on_actionCamera_Controls_triggered();
 
-//public slots:
     // user can use radio button to toggle build mode
     void slot_setBuildMode(bool);
-
-    void slot_setVisualizeEmptyTiles(bool);
 
     // user can use spin boxes to edit grid dimensions
     void slot_setDimX(int);
@@ -49,18 +46,20 @@ private slots:
 
     // user can press button to run WFC
     void slot_runWFC();
+    void slot_runIterativeWFC();
 
     // user can select tileset from list
     void slot_setTileset();
-
     void slot_setTileset2();
 
     // user can select tile from list
     void slot_setTile();
 
+    // show error label if WFC failed to converge
     void slot_setErrorLabel(bool);
 
-    void slot_setProgressivePreview(bool);
+    // enable/disable controls
+    void slot_disableControls(bool);
 
 
 private:
@@ -70,8 +69,6 @@ private:
     void populateTilesetList2();
     void populateTileList(std::string tileset);
 
-
-signals:
 };
 
 

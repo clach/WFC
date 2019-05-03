@@ -1,9 +1,11 @@
 #pragma once
 #include "scene/mesh.h"
+#include "scene/boundarylines.h"
 #include "shaderprogram.h"
-//#include "tilegrid.h"
 
-//class TileGrid;
+const std::string EMPTY = "empty";
+const std::string GROUND = "ground";
+const std::string BOUNDS = "bounds";
 
 class Tile
 {
@@ -27,12 +29,9 @@ public:
     void drawTileMesh(ShaderProgram& sp);
     void destroyTileMesh();
     void setTransform(const glm::mat4 transform);
-    //void setVisualizeEmptyTiles(bool visualize);
 
 private:
     GLWidget277 *context;
-
-    //TileGrid* tileGrid;
 
     std::string tileset;
     std::string name;
@@ -41,8 +40,7 @@ private:
     std::string textureName;
 
     Mesh mesh;
-    //bool visualizeEmptyTiles;
-
+    BoundaryLines bounds;
     glm::mat4 modelMat;
 
 };

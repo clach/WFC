@@ -9,7 +9,7 @@ TileGrid::TileGrid(GLWidget277 *context) : TileGrid(context, "", 0, 0, 0)
 }
 
 TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim, int zDim) :
-    context(context), dim(glm::vec3(xDim, yDim, zDim)), tileset(tileset)
+    context(context), dim(glm::vec3(xDim, yDim, zDim)), tileset(tileset), buildMode(false)
 {
     std::vector<Tile> tilesZ(dim.z, Tile(context, tileset));
     std::vector<std::vector<Tile>> tilesY(dim.y, tilesZ);
@@ -18,7 +18,6 @@ TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim
     }
 
     wfc = new WFC(context);
-    //wfc->tileGrid = this;
 }
 
 TileGrid::~TileGrid() {
@@ -26,12 +25,16 @@ TileGrid::~TileGrid() {
     delete wfc;
 }
 
+void TileGrid::setupWFC() {
+    wfc->setup(&tiles);
+}
+
 bool TileGrid::runWFC() {
     return wfc->run(&tiles);
 }
 
-bool TileGrid::runWFCIteration() {
-    return wfc->runIteration(&tiles);
+bool TileGrid::runWFCIteration(bool& done) {
+    return wfc->runIteration(&tiles, done);
 }
 
 Tile TileGrid::getTileAt(int x, int y, int z) const {
@@ -146,6 +149,11 @@ void TileGrid::setSky(bool sky) {
     wfc->setSky(sky);
 }
 
+void TileGrid::setBuildMode(bool buildMode) {
+    this->buildMode = buildMode;
+}
+
+
 float TileGrid::getVoxelSize() const {
     return wfc->getVoxelSize();
 }
@@ -168,14 +176,6 @@ void TileGrid::clear() {
             }
         }
     }
-}
-
-void TileGrid::visualizeEmptyTiles(bool visualize) {
-    this->visualize = visualize;
-}
-
-bool TileGrid::visualizeEmptyTiles() const {
-    return visualize;
 }
 
 void TileGrid::clearNonUserTiles(std::vector<glm::vec3> buildIndices) {

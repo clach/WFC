@@ -12,13 +12,15 @@
 // d used for direction
 // i, j, k used for everything else
 
-WFC::WFC(GLWidget277 *context) : WFC(context, " ", 0, 0, 0)
+const std::string SPACE = " ";
+
+WFC::WFC(GLWidget277 *context) : WFC(context, "", 0, 0, 0)
 {}
 
 WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
     context(context), dim(glm::vec3(x, y, z)), periodic(false), sky(false), ground(false),
     voxelSize(1), actionCount(0), tileset(tileset), tilesetChanged(true), emptyIndex(-1),
-    groundIndex(-1)
+    groundIndex(-1), tileDrawSize(3.f)
 {}
 
 WFC::~WFC()
@@ -37,18 +39,23 @@ bool WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
     }
 
     // WFC is complete, output results
-    return outputObservations(tiles);
+    std::vector<std::vector<std::vector<int>>> placeholder; // TODO: this is dumb
+    return outputObservations(tiles, false, placeholder);
 }
 
-bool WFC::runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles) {
-    setup(tiles);
-
+bool WFC::runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles, bool& done) {
     if (!observe()) {
         while (propagate()) {}
+    } else {
+        // WFC has completed
+        done = true;
+        std::vector<std::vector<std::vector<int>>> placeholder;
+        return outputObservations(tiles, false, placeholder);
     }
 
-    findObserved();
-    return outputObservations(tiles);
+    std::vector<std::vector<std::vector<int>>> possibleTiles = markUnobserved();
+    findObserved(true);
+    return outputObservations(tiles, true, possibleTiles);
 }
 
 bool WFC::inSubset(std::string tileName) {
@@ -148,10 +155,10 @@ void WFC::parseTileset() {
         // keep track of first occurence of a tile within action
         firstOccurence[tileName] = actionCount;
 
-        if (tileName == "empty") {
+        if (tileName == EMPTY) {
             emptyIndex = actionCount;
         }
-        if (tileName == "ground") {
+        if (tileName == GROUND) {
             groundIndex = actionCount;
         }
 
@@ -186,7 +193,7 @@ void WFC::parseTileset() {
         // (all possible tile variants can be made with just rotation)
         for (int c = 0; c < cardinality; c++)
         {
-            tileNames.push_back(tileName + " " + std::to_string(c));
+            tileNames.push_back(tileName + SPACE + std::to_string(c));
             tileWeights.push_back(tileWeight);
         }
     }
@@ -210,7 +217,7 @@ void WFC::parseTileset() {
 
         std::string left = jsonNeighbor[1].toString().toStdString();
         std::string right = jsonNeighbor[2].toString().toStdString();
-        std::string delimiter = " ";
+        std::string delimiter = SPACE;
         std::string leftName;
         std::string rightName;
         int leftNum;
@@ -276,6 +283,7 @@ void WFC::parseTileset() {
     }
 }
 
+// TODO: there is some redundancy between the clear/parseTileset/setTileset
 void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
     // clear everything
     clear();
@@ -308,6 +316,7 @@ void WFC::setup(std::vector<std::vector<std::vector<Tile>>>* tiles) {
         wave.push_back(waveY);
         changes.push_back(changesY);
         observed.push_back(observedY);
+        observedCopy.push_back(observedY);
     }
 
     // add empty tiles on boundaries
@@ -385,8 +394,10 @@ void WFC::clear() {
         propagator.clear();
     }
     wave.clear();
+    waveCopy.clear();
     changes.clear();
     observed.clear();
+    observedCopy.clear();
 }
 
 bool WFC::observe()
@@ -607,22 +618,65 @@ bool WFC::findLowestEntropy(glm::vec3& cell, std::vector<int>& indices)
 
     // if all cells have zero entropy, WFC is complete
     if (allCellsAtZeroEntropy) {
-        findObserved();
+        findObserved(false);
         return true;
     }
 
     return false;
 }
 
-void WFC::findObserved() {
+// if a certain grid location has more than one valid tile (not observed),
+// set all options to false
+std::vector<std::vector<std::vector<int>>> WFC::markUnobserved() {
+    waveCopy = wave;
+
+    std::vector<bool> bools(actionCount, true);
+
+    std::vector<int> possibleTilesZ(dim.z, 0);
+    std::vector<std::vector<int>> possibleTilesY(dim.y, possibleTilesZ);
+    std::vector<std::vector<std::vector<int>>> possibleTiles(dim.x, possibleTilesY);
+
+    std::vector<bool> falseBools(actionCount, false);
+
+    for (int x = 0; x < dim.x; x++) {
+        for (int y = 0; y < dim.y; y++) {
+            for (int z = 0; z < dim.z; z++) {
+                int numPossibleTiles = 0;
+                for (int t = 0; t < actionCount; t++) {
+                    if (wave[x][y][z][t]) {
+                        numPossibleTiles++;
+                    }
+                }
+                possibleTiles[x][y][z] = numPossibleTiles;
+                if (numPossibleTiles > 1) {
+                    waveCopy[x][y][z] = falseBools;
+                }
+            }
+        }
+    }
+
+    return possibleTiles;
+}
+
+// each location should only have one valid tile when this function is called
+void WFC::findObserved(bool copy) {
     for (int x = 0; x < dim.x; x++) {
         for (int y = 0; y < dim.y; y++) {
             for (int z = 0; z < dim.z; z++) {
                 for (int t = 0; t < actionCount; t++) {
-                    if (wave[x][y][z][t]) {
-                        // indicate index of "observed" tile for each cell
-                        observed[x][y][z] = t;
-                        break;
+                    if (copy) {
+                        if (waveCopy[x][y][z][t]) {
+                            // indicate index of "observed" tile for each cell
+                            observedCopy[x][y][z] = t;
+                            break;
+                        }
+
+                    } else {
+                        if (wave[x][y][z][t]) {
+                            // indicate index of "observed" tile for each cell
+                            observed[x][y][z] = t;
+                            break;
+                        }
                     }
                 }
             }
@@ -631,46 +685,59 @@ void WFC::findObserved() {
 }
 
 
-bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const {
+bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles, bool copy,
+                             std::vector<std::vector<std::vector<int>>> possibleTiles) const {
     bool valid = true;
 
-    // TODO: fix this nonsense
     int xBound = dim.x;
     int yBound = dim.y;
     int zBound = dim.z;
-    int observedIndexOffset = 0;
-    int observedYIndexOffset = 0;
+    int xzIndexOffset = 0;
+    int yIndexOffset = 0;
 
     if (sky) {
         xBound = dim.x - 2;
         yBound = dim.y - 2;
         zBound = dim.z - 2;
-        observedIndexOffset = 1;
-        observedYIndexOffset = 1;
+        xzIndexOffset = 1;
+        yIndexOffset = 1;
     } else if (ground) {
         yBound = dim.y - 1;
-        observedYIndexOffset = 1;
+        yIndexOffset = 1;
     }
 
     for (int x = 0; x < xBound; x++) {
         for (int y = 0; y < yBound; y++) {
             for (int z = 0; z < zBound; z++) {
-                int tileIndex = observed[x + observedIndexOffset][y + observedYIndexOffset][z + observedIndexOffset];
+                int tileIndex = -1;
+                if (copy) {
+                    tileIndex = observedCopy[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset];
+                } else {
+                    tileIndex = observed[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset];
+                }
                 Tile tile = Tile(context, tileset);
 
-                if (valid && tileIndex == -1) {
+                if (valid && tileIndex == -1 && !copy) {
                     valid = false;
                 }
 
-                std::string tileName = "empty";
+                std::string tileName = EMPTY;
+                if (copy) {
+                    tileName = BOUNDS;
+                }
                 int cardinality = 0;
                 if (tileIndex != -1) {
-                    tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(" "));
-                    cardinality = stoi(tileNames[tileIndex].substr(tileNames[tileIndex].find(" ") + 1));
+                    tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(SPACE));
+                    cardinality = stoi(tileNames[tileIndex].substr(tileNames[tileIndex].find(SPACE) + 1));
                 }
                 tile.setName(tileName);
                 tile.setCardinality(cardinality);
-                tile.setTransform(calculateTileTransform(glm::vec3(x, y, z), cardinality));
+                glm::mat4 tileTransform = calculateTileTransform(glm::vec3(x, y, z), cardinality);
+                if (tileName == BOUNDS) {
+                    float scale = (float)possibleTiles[x][y][z] / (float)actionCount;
+                    tileTransform = calculateTileTransformBounds(glm::vec3(x, y, z), scale);
+                }
+                tile.setTransform(tileTransform);
 
                 (*tiles)[x][y][z] = tile;
             }
@@ -694,7 +761,11 @@ void WFC::setSky(bool sky) {
 
 void WFC::setTileset(std::string tileset) {
     tilesetChanged = this->tileset != tileset;
-    this->tileset = tileset;
+    if (tilesetChanged) {
+        this->tileset = tileset;
+        clear();
+        parseTileset();
+    }
 }
 
 void WFC::setBuildIndices(std::vector<glm::vec3> buildIndices) {
@@ -710,7 +781,6 @@ float WFC::getVoxelSize() const {
 }
 
 glm::mat4 WFC::calculateTileTransform(glm::vec3 pos, int cardinality) const {
-    float tileDrawSize = 3.f; // TODO: fix hardcoding
     float offset = tileDrawSize / 2.f;
 
     glm::mat4 trans1Mat = glm::translate(glm::mat4(),
@@ -718,9 +788,8 @@ glm::mat4 WFC::calculateTileTransform(glm::vec3 pos, int cardinality) const {
                                                    tileDrawSize * pos.y,
                                                    tileDrawSize * pos.z)
                                          + glm::vec3(offset));
-    glm::mat4 scaleMat = glm::scale(glm::mat4(), glm::vec3(tileDrawSize / voxelSize));
-
     glm::mat4 rotMat = glm::eulerAngleY(cardinality * PI / 2.0f);
+    glm::mat4 scaleMat = glm::scale(glm::mat4(), glm::vec3(tileDrawSize / voxelSize));
 
     // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
     glm::mat4 trans2Mat = glm::translate(glm::mat4(), glm::vec3(0, -voxelSize / 2.f, 0));
@@ -730,9 +799,20 @@ glm::mat4 WFC::calculateTileTransform(glm::vec3 pos, int cardinality) const {
     return transformMat;
 }
 
-int WFC::getMaxCardinality(std::string tileName) {
-    return maxCardinalities[tileName];
+glm::mat4 WFC::calculateTileTransformBounds(glm::vec3 pos, float scaleFactor) const {
+    glm::mat4 transMat = glm::translate(glm::mat4(),
+                                         glm::vec3(tileDrawSize * pos.x,
+                                                   tileDrawSize * pos.y,
+                                                   tileDrawSize * pos.z)
+                                        + glm::vec3(((1.f - scaleFactor) * tileDrawSize) / 2.f));
+    glm::mat4 scaleMat = glm::scale(glm::mat4(), glm::vec3(scaleFactor * tileDrawSize));
+
+    glm::mat4 transformMat = transMat * scaleMat;
+
+    return transformMat;
 }
 
 
-
+int WFC::getMaxCardinality(std::string tileName) {
+    return maxCardinalities[tileName];
+}

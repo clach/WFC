@@ -862,8 +862,7 @@ qrc_objs.cpp: ../WFC/objs.qrc \
 qrc_json.cpp: ../WFC/json.qrc \
 		../../../../Qt5.9.1/5.9.1/clang_64/bin/rcc \
 		../WFC/json/building.json \
-		../WFC/json/knots.json \
-		../WFC/json/dontSelectMe.json
+		../WFC/json/knots.json
 	/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/bin/rcc -name json ../WFC/json.qrc -o qrc_json.cpp
 
 compiler_moc_predefs_make_all: moc_predefs.h
@@ -897,7 +896,9 @@ moc_glwidget277.cpp: ../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/
 		../../../../Qt5.9.1/5.9.1/clang_64/bin/moc
 	/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/bin/moc $(DEFINES) --include ./moc_predefs.h -I/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/mkspecs/macx-clang -I/Users/carolinelachanski/Documents/CIS_497/WFC/WFC -I/Users/carolinelachanski/Documents/CIS_497/WFC/WFC/include -I/Users/carolinelachanski/Documents/CIS_497/WFC/WFC/src -I/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers -I/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers -I/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/usr/include -F/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/lib ../WFC/src/glwidget277.h -o moc_glwidget277.cpp
 
-moc_mygl.cpp: ../WFC/src/glwidget277.h \
+moc_mygl.cpp: ../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QTimer \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qtimer.h \
+		../WFC/src/glwidget277.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QOpenGLWidget \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qopenglwidget.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QOpenGLFunctions_3_2_Core \
@@ -1052,6 +1053,8 @@ compiler_uic_clean:
 ui_mainwindow.h: ../WFC/forms/mainwindow.ui \
 		../../../../Qt5.9.1/5.9.1/clang_64/bin/uic \
 		../WFC/src/mygl.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QTimer \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qtimer.h \
 		../WFC/src/glwidget277.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QOpenGLWidget \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qopenglwidget.h \
@@ -1233,6 +1236,8 @@ mainwindow.o: ../WFC/src/mainwindow.cpp ../WFC/src/mainwindow.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qlistwidget.h \
 		ui_mainwindow.h \
 		../WFC/src/mygl.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QTimer \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qtimer.h \
 		../WFC/src/glwidget277.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QOpenGLWidget \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qopenglwidget.h \
@@ -1393,6 +1398,8 @@ glwidget277.o: ../WFC/src/glwidget277.cpp ../WFC/src/glwidget277.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glwidget277.o ../WFC/src/glwidget277.cpp
 
 mygl.o: ../WFC/src/mygl.cpp ../WFC/src/mygl.h \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QTimer \
+		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qtimer.h \
 		../WFC/src/glwidget277.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/QOpenGLWidget \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtWidgets.framework/Headers/qopenglwidget.h \

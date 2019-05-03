@@ -4,9 +4,6 @@
 #include "utils.h"
 #include "tile.h"
 
-//class Tile;
-//class TileGrid;
-
 class WFC
 {
 public:
@@ -21,19 +18,17 @@ public:
     void setBuildIndices(std::vector<glm::vec3> buildIndices);
     std::vector<glm::vec3> getBuildIndices() const;
     bool run(std::vector<std::vector<std::vector<Tile>>>* tiles);
-    bool runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles);
+    bool runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles, bool& done);
 
+    void setup(std::vector<std::vector<std::vector<Tile>>>* tiles);
 
     float getVoxelSize() const;
-
-    glm::mat4 calculateTileTransform(glm::vec3 pos, int cardinality) const;
-
-    //TileGrid* tileGrid;
-
     int getMaxCardinality(std::string tileName);
 
+    glm::mat4 calculateTileTransform(glm::vec3 pos, int cardinality) const;
+    glm::mat4 calculateTileTransformBounds(glm::vec3 pos, float scaleFactor) const;
+
 private:
-    void setup(std::vector<std::vector<std::vector<Tile>>>* tiles);
 
     void parseTileset();
 
@@ -51,9 +46,12 @@ private:
     // throws exception if contradiction (cell has no remaining patterns)
     bool findLowestEntropy(glm::vec3& cell, std::vector<int>& indices);
 
-    void findObserved();
+    void findObserved(bool copy);
 
-    bool outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles) const;
+    std::vector<std::vector<std::vector<int>>> markUnobserved();
+
+    bool outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles, bool copy,
+                            std::vector<std::vector<std::vector<int>>> possibleTiles) const;
 
     bool tilesetChanged;
 
@@ -69,6 +67,7 @@ private:
     bool periodic;
     bool sky;
     bool ground;
+    float tileDrawSize;
     float voxelSize; // size of input voxel obj
     int actionCount; // number of total tile variant options
 
@@ -84,8 +83,10 @@ private:
     std::vector<double> tileWeights; // tile weights (frequencies in input)
 
     std::vector<std::vector<std::vector<std::vector<bool>>>> wave;
+    std::vector<std::vector<std::vector<std::vector<bool>>>> waveCopy;
     std::vector<std::vector<std::vector<bool>>> changes;
     std::vector<std::vector<std::vector<int>>> observed;
+    std::vector<std::vector<std::vector<int>>> observedCopy;
     std::vector<std::vector<std::vector<bool>>> propagator;
 
 };

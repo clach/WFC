@@ -21,9 +21,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->buildModeCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setBuildMode(bool)));
     slot_setBuildMode(ui->buildModeCheckBox->isChecked());
 
-    // connect visualize empties check box
-    connect(ui->visualizeEmptiesCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setVisualizeEmptyTiles(bool)));
-
     // connect grid dimension spin boxes
     connect(ui->dimX, SIGNAL(valueChanged(int)), this, SLOT(slot_setDimX(int)));
     connect(ui->dimY, SIGNAL(valueChanged(int)), this, SLOT(slot_setDimY(int)));
@@ -70,9 +67,11 @@ MainWindow::MainWindow(QWidget *parent) :
     // connect run WFC button
     connect(ui->runWFCButton, SIGNAL(clicked(bool)), this, SLOT(slot_runWFC()));
 
-    connect(ui->showProgressCheckBox, SIGNAL(clicked(bool)), this, SLOT(slot_setProgressivePreview(bool)));
+    // connect run iterative WFC button
+    connect(ui->runIterButton, SIGNAL(clicked(bool)), this, SLOT(slot_runIterativeWFC()));
 
     connect(ui->mygl, SIGNAL(wfcConvergenceError(bool)), this, SLOT(slot_setErrorLabel(bool)));
+    connect(ui->mygl, SIGNAL(wfcIterationInProgress(bool)), this, SLOT(slot_disableControls(bool)));
 
 }
 
@@ -95,10 +94,6 @@ void MainWindow::on_actionCamera_Controls_triggered()
 void MainWindow::slot_setBuildMode(bool buildMode) {
     ui->mygl->setBuildMode(buildMode);
     ui->clearNonUserTilesButton->setEnabled(buildMode);
-}
-
-void MainWindow::slot_setVisualizeEmptyTiles(bool visualize) {
-    ui->mygl->setVisualizeEmptyTiles(visualize);
 }
 
 void MainWindow::slot_setDimX(int x) {
@@ -156,12 +151,12 @@ void MainWindow::slot_setTile() {
 
 }
 
-void MainWindow::slot_setProgressivePreview(bool preview) {
-    ui->mygl->showProgressivePreview(preview);
-}
-
 void MainWindow::slot_runWFC() {
     ui->mygl->runWFC();
+}
+
+void MainWindow::slot_runIterativeWFC(){
+    ui->mygl->startIterativeWFC();
 }
 
 void MainWindow::slot_clearTileGrid() {
@@ -242,6 +237,23 @@ void MainWindow::slot_setErrorLabel(bool error) {
     } else {
         ui->errorLabel->setText(QString(""));
     }
+}
+
+void MainWindow::slot_disableControls(bool iterationInProgress) {
+    ui->buildModeCheckBox->setEnabled(!iterationInProgress);
+    ui->dimX->setEnabled(!iterationInProgress);
+    ui->dimY->setEnabled(!iterationInProgress);
+    ui->dimZ->setEnabled(!iterationInProgress);
+    ui->cleanRadioButton->setEnabled(!iterationInProgress);
+    ui->periodicRadioButton->setEnabled(!iterationInProgress);
+    ui->noneRadioButton->setEnabled(!iterationInProgress);
+    ui->showPreviewCheckBox->setEnabled(!iterationInProgress);
+    ui->tilesetList->setEnabled(!iterationInProgress);
+    ui->tileList->setEnabled(!iterationInProgress);
+    ui->runWFCButton->setEnabled(!iterationInProgress);
+    ui->runIterButton->setEnabled(!iterationInProgress);
+    ui->clearButton->setEnabled(!iterationInProgress);
+    ui->clearNonUserTilesButton->setEnabled(!iterationInProgress);
 }
 
 

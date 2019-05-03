@@ -21,6 +21,7 @@ void TileGridRepeater::setTileGrid(const TileGrid& tileGrid) {
         tiles.push_back(tilesY);
     }
 
+    // TODO: I think this is buggy
     for (int x = 0; x < dim.x * numCopies; x++) {
         for (int y = 0; y < dim.y * numCopies; y++) {
             for (int z = 0; z < dim.z * numCopies; z++) {

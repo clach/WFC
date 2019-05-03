@@ -2,9 +2,6 @@
 #include <tile.h>
 #include <wfc.h>
 
-//class Tile;
-//class WFC;
-
 class TileGrid
 {
 public:
@@ -18,22 +15,19 @@ public:
     void drawTiles(ShaderProgram& sp);
     void destroyTiles();
     void clear(); // fills TileGrid with empty tiles
+    void clearNonUserTiles(std::vector<glm::vec3> buildIndices);
 
     float getVoxelSize() const;
+    std::string getTileset() const;
 
     void setTileset(std::string tileset);
     void setPeriodic(bool periodic);
     void setSky(bool sky);
+    void setBuildMode(bool buildMode);
 
-    void visualizeEmptyTiles(bool visualize);
-    bool visualizeEmptyTiles() const;
-
-    void clearNonUserTiles(std::vector<glm::vec3> buildIndices);
-
+    void setupWFC();
     bool runWFC();
-    bool runWFCIteration();
-
-    std::string getTileset() const;
+    bool runWFCIteration(bool& done);
 
     // want setDim to be able to modify buildIndices
     void setDim(glm::vec3 dim, bool keepTiles, std::vector<glm::vec3>* buildIndices);
@@ -48,8 +42,7 @@ private:
     glm::vec3 dim;
     std::string tileset;
     std::vector<std::vector<std::vector<Tile>>> tiles;
-
-    bool visualize;
+    bool buildMode;
 
     // TODO: info like this is shared between mygl, wfc, tilegrid, and tile
     // don't need to make members for each separate class?

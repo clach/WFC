@@ -1,6 +1,7 @@
 #ifndef MYGL_H
 #define MYGL_H
 
+#include <QTimer>
 #include <glwidget277.h>
 #include <utils.h>
 #include <shaderprogram.h>
@@ -14,6 +15,7 @@
 #include <tilegrid.h>
 #include <tilegridrepeater.h>
 #include <wfc.h>
+
 
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
@@ -37,18 +39,21 @@ private:
     glm::mat4 groundQuadTransform;
     float groundQuadHeight;
 
+    BoundaryLines lines;
+
     glm::vec3 selectionQuadPos;
     bool drawSelectionQuad;
     Quad selectionQuad;
     glm::vec4 selectionQuadColor;
 
-    Mesh someMesh;
+    /// Timer linked to timerUpdate(). Fires approx. 60 times per second
+    QTimer timer;
 
-    BoundaryLines lines;
+    int iterTimer;
 
+    bool iterativeWFC;
     bool buildMode;
     bool periodicPreview;
-    bool progressivePreview;
 
     float tileDrawSize;
 
@@ -74,7 +79,8 @@ public:
     void paintGL();
 
     void runWFC();
-    void runIterativeWFC();
+    void startIterativeWFC();
+    void runWFCIteration();
 
     void clearTileGrid();
     void clearNonUserTiles();
@@ -82,7 +88,6 @@ public:
     void setTileset(std::string tileset);
     void setSelectedTile(std::string tile);
     void setBuildMode(bool buildMode);
-    void setVisualizeEmptyTiles(bool visualize);
 
     void setDimX(int x);
     void setDimY(int y);
@@ -92,8 +97,6 @@ public:
     void setSky(bool sky);
     void showPeriodicPreview(bool preview);
 
-    void showProgressivePreview(bool preview);
-
 
 protected:
     void keyPressEvent(QKeyEvent *e);
@@ -102,6 +105,11 @@ protected:
 
 signals:
     void wfcConvergenceError(bool);
+    void wfcIterationInProgress(bool);
+
+private slots:
+    /// Slot that gets called ~60 times per second
+    void timerUpdate();
 };
 
 

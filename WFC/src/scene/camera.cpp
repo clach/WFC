@@ -13,7 +13,7 @@ Camera::Camera():
 }
 
 Camera::Camera(unsigned int w, unsigned int h):
-    Camera(w, h, glm::vec3(0,10,10), glm::vec3(0,0,0), glm::vec3(0,1,0))
+    Camera(w, h, glm::vec3(15,18,20), glm::vec3(0,0,0), glm::vec3(0,1,0))
 {}
 
 Camera::Camera(unsigned int w, unsigned int h, const glm::vec3 &eye, const glm::vec3 &ref,

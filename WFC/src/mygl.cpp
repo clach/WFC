@@ -10,13 +10,17 @@ MyGL::MyGL(QWidget *parent)
       groundQuad(this), selectionQuad(this),
       groundQuadColor(glm::vec4(0.13, 0.55, 0.13, 0.6)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
       m_progLambert(this), m_progLambertPrev(this), m_progFlat(this),
-      m_glCamera(), someMesh(this), lines(this),
-      tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset("knots"),
-      selectedTile("empty"), groundQuadHeight(0), drawSelectionQuad(false),
-      periodicPreview(false), progressivePreview(false),
-      tileGridRepeater(this, 3), tileDrawSize(3.f)
+      m_glCamera(), lines(this), tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset(""),
+      selectedTile(EMPTY), groundQuadHeight(0), drawSelectionQuad(false),
+      periodicPreview(false), tileGridRepeater(this, 3), tileDrawSize(3.f),
+      iterTimer(0), iterativeWFC(false)
 {
     setMouseTracking(true);
+
+    // connect the timer to a function so that when the timer ticks the function is executed
+    connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
+    // tell the timer to redraw 60 times per second
+    timer.start(16);
 }
 
 MyGL::~MyGL()
@@ -25,7 +29,6 @@ MyGL::~MyGL()
     glDeleteVertexArrays(1, &vao);
     groundQuad.destroy();
     selectionQuad.destroy();
-    someMesh.destroy();
     lines.destroy();
     tileGrid.destroyTiles();
     tileGridRepeater.destroyTiles();
@@ -138,8 +141,18 @@ void MyGL::paintGL()
         m_progFlat.setModelMatrix(selectionQuadTransform);
         m_progFlat.draw(selectionQuad);
     }
+
 }
 
+void MyGL::timerUpdate() {
+    //int time = 1000 / (dim.x * dim.y * dim.z); // TODO: be smart
+    int time = 30;
+    if (iterativeWFC && iterTimer % time == 0) {
+        runWFCIteration();
+    }
+    iterTimer++;
+    update();
+}
 
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
@@ -207,15 +220,24 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     update();
 }
 
-void MyGL::runIterativeWFC() {
+void MyGL::runWFC() {
+    groundQuadHeight = 0;
     if (!buildMode) {
         tileGrid.destroyTiles();
         tileGrid.clear();
     }
     tileGrid.setDim(dim, buildMode, &buildIndices);
-    tileGrid.setTileset(tileset);
 
-    tileGrid.runWFCIteration();
+    if (!tileGrid.runWFC()) {
+        emit wfcConvergenceError(true);
+        if (buildMode) {
+            // if the WFC did not converge, clear the build indices
+            // TODO: this is a little hacky, it's not necessarily the user's fault
+            buildIndices.clear();
+        }
+    } else {
+        emit wfcConvergenceError(false);
+    }
 
     tileGrid.createTiles();
 
@@ -227,39 +249,46 @@ void MyGL::runIterativeWFC() {
     update();
 }
 
-void MyGL::runWFC() {
+void MyGL::startIterativeWFC() {
     groundQuadHeight = 0;
     if (!buildMode) {
         tileGrid.destroyTiles();
         tileGrid.clear();
     }
     tileGrid.setDim(dim, buildMode, &buildIndices);
-    tileGrid.setTileset(tileset);
+    tileGrid.setupWFC();
+    tileGrid.createTiles();
 
-    if (progressivePreview) {
-        tileGrid.runWFCIteration();
+    iterativeWFC = true;
+    emit wfcIterationInProgress(true);
 
-    } else {
+    update();
+}
 
-        if (!tileGrid.runWFC()) {
-            emit wfcConvergenceError(true);
-            if (buildMode) {
-                // if the WFC did not converge, clear the build indices
-                // TODO: this is a little hacky, it's not necessarily the user's fault
-                buildIndices.clear();
-            }
-        } else {
-            emit wfcConvergenceError(false);
+void MyGL::runWFCIteration() {
+    bool done = false;
+    if (!tileGrid.runWFCIteration(done)) {
+        emit wfcConvergenceError(true);
+        if (buildMode) {
+            // if the WFC did not converge, clear the build indices
+            // TODO: this is a little hacky, it's not necessarily the user's fault
+            buildIndices.clear();
         }
+    } else {
+        emit wfcConvergenceError(false);
     }
+
+    if (done) {
+        iterativeWFC = false;
+        emit wfcIterationInProgress(false);
+    }
+
     tileGrid.createTiles();
 
     if (periodicPreview) {
         tileGridRepeater.setTileGrid(tileGrid);
         tileGridRepeater.createTiles();
     }
-
-    update();
 }
 
 void MyGL::clearTileGrid() {
@@ -282,13 +311,6 @@ void MyGL::setBuildMode(bool buildMode) {
     if (!buildMode) {
         buildIndices.clear();
     }
-}
-
-void MyGL::setVisualizeEmptyTiles(bool visualize) {
-    // TODO
-    tileGrid.visualizeEmptyTiles(visualize);
-    tileGrid.createTiles();
-    update();
 }
 
 void MyGL::setDimX(int x) {
@@ -342,16 +364,15 @@ void MyGL::showPeriodicPreview(bool preview) {
     update();
 }
 
-void MyGL::showProgressivePreview(bool preview) {
-    this->progressivePreview = preview;
-}
-
 void MyGL::setTileset(std::string tileset) {
     if (this->tileset != tileset) {
         tileGrid.destroyTiles();
         tileGrid.clear();
+        tileGridRepeater.destroyTiles();
+        tileGrid.clear();
     }
     this->tileset = tileset;
+    tileGrid.setTileset(tileset);
 }
 
 void MyGL::setSelectedTile(std::string tile) {
