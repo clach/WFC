@@ -50,5 +50,29 @@
         <file>objs/building/sideRightShutter.png</file>
         <file>objs/building/sideRightShutter.mtl</file>
         <file>objs/building/sideRightShutter.obj</file>
+        <file>objs/castle/bridge.mtl</file>
+        <file>objs/castle/bridge.png</file>
+        <file>objs/castle/cross.mtl</file>
+        <file>objs/castle/cross.png</file>
+        <file>objs/castle/crossMiddle.mtl</file>
+        <file>objs/castle/crossMiddle.png</file>
+        <file>objs/castle/crossTop.mtl</file>
+        <file>objs/castle/crossTop.png</file>
+        <file>objs/castle/wall.mtl</file>
+        <file>objs/castle/wall.png</file>
+        <file>objs/castle/crossTop.obj</file>
+        <file>objs/castle/crossMiddle.obj</file>
+        <file>objs/castle/cross.obj</file>
+        <file>objs/castle/wall.obj</file>
+        <file>objs/castle/bridge.obj</file>
+        <file>objs/castle/L.png</file>
+        <file>objs/castle/L.mtl</file>
+        <file>objs/castle/L.obj</file>
+        <file>objs/castle/Ltop.mtl</file>
+        <file>objs/castle/Ltop.obj</file>
+        <file>objs/castle/Ltop.png</file>
+        <file>objs/castle/Lmiddle.png</file>
+        <file>objs/castle/Lmiddle.mtl</file>
+        <file>objs/castle/Lmiddle.obj</file>
     </qresource>
 </RCC>

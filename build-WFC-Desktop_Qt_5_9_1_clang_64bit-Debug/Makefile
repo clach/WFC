@@ -811,6 +811,30 @@ qrc_objs.cpp: ../WFC/objs.qrc \
 		../WFC/objs/wahoo.bmp \
 		../WFC/objs/tower_top.obj \
 		../WFC/objs/tower_top.png \
+		../WFC/objs/castle/cross.png \
+		../WFC/objs/castle/bridge.png \
+		../WFC/objs/castle/cross.obj \
+		../WFC/objs/castle/crossMiddle.png \
+		../WFC/objs/castle/Ltop.mtl \
+		../WFC/objs/castle/bridge.obj \
+		../WFC/objs/castle/crossMiddle.obj \
+		../WFC/objs/castle/cross.mtl \
+		../WFC/objs/castle/wall.png \
+		../WFC/objs/castle/wall.obj \
+		../WFC/objs/castle/bridge.mtl \
+		../WFC/objs/castle/crossMiddle.mtl \
+		../WFC/objs/castle/L.png \
+		../WFC/objs/castle/L.obj \
+		../WFC/objs/castle/wall.mtl \
+		../WFC/objs/castle/Lmiddle.png \
+		../WFC/objs/castle/L.mtl \
+		../WFC/objs/castle/Lmiddle.obj \
+		../WFC/objs/castle/crossTop.png \
+		../WFC/objs/castle/crossTop.obj \
+		../WFC/objs/castle/Lmiddle.mtl \
+		../WFC/objs/castle/Ltop.png \
+		../WFC/objs/castle/crossTop.mtl \
+		../WFC/objs/castle/Ltop.obj \
 		../WFC/objs/building/sideLeftShutter.mtl \
 		../WFC/objs/building/doorBottom.mtl \
 		../WFC/objs/building/window1.png \
@@ -862,7 +886,8 @@ qrc_objs.cpp: ../WFC/objs.qrc \
 qrc_json.cpp: ../WFC/json.qrc \
 		../../../../Qt5.9.1/5.9.1/clang_64/bin/rcc \
 		../WFC/json/building.json \
-		../WFC/json/knots.json
+		../WFC/json/knots.json \
+		../WFC/json/castle.json
 	/Users/carolinelachanski/Qt5.9.1/5.9.1/clang_64/bin/rcc -name json ../WFC/json.qrc -o qrc_json.cpp
 
 compiler_moc_predefs_make_all: moc_predefs.h
@@ -2638,6 +2663,7 @@ tile.o: ../WFC/src/tile.cpp ../WFC/src/tile.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/shaderprogram.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tile.o ../WFC/src/tile.cpp
 
@@ -2749,6 +2775,7 @@ tilegrid.o: ../WFC/src/tilegrid.cpp ../WFC/src/tilegrid.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/shaderprogram.h \
 		../WFC/src/wfc.h \
 		../WFC/src/utils.h
@@ -2863,6 +2890,7 @@ wfc.o: ../WFC/src/wfc.cpp ../WFC/src/wfc.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/shaderprogram.h \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/QFile \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtCore.framework/Headers/qfile.h \
@@ -3304,6 +3332,7 @@ tilegridrepeater.o: ../WFC/src/tilegridrepeater.cpp ../WFC/src/tilegridrepeater.
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/QVector4D \
 		../../../../Qt5.9.1/5.9.1/clang_64/lib/QtGui.framework/Headers/qvector4d.h \
 		../WFC/src/texture.h \
+		../WFC/src/scene/boundarylines.h \
 		../WFC/src/shaderprogram.h \
 		../WFC/src/wfc.h \
 		../WFC/src/utils.h
