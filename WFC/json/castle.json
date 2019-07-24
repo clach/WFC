@@ -106,8 +106,18 @@
          ], 
          [  
             "horizontal",
-            "L",
-            "wall"
+            "empty",
+            "L"
+         ],
+         [  
+            "horizontal",
+            "empty",
+            "Lmiddle"
+         ],
+         [  
+            "horizontal",
+            "empty",
+            "Ltop"
          ],
          [  
             "horizontal",
@@ -116,32 +126,7 @@
          ],
          [  
             "horizontal",
-            "empty",
-            "L 1"
-         ],
-         [  
-            "horizontal",
             "Lmiddle",
-            "wall"
-         ],
-         [  
-            "horizontal",
-            "Lmiddle",
-            "bridge"
-         ],
-         [  
-            "horizontal",
-            "empty",
-            "Lmiddle 1"
-         ],
-         [  
-            "horizontal",
-            "Ltop",
-            "wall"
-         ],
-         [  
-            "horizontal",
-            "Ltop",
             "bridge"
          ],
          [  
@@ -151,8 +136,78 @@
          ],
          [  
             "horizontal",
-            "empty",
+            "bridge 1",
+            "L"
+         ],
+         [  
+            "horizontal",
+            "bridge 1",
+            "Lmiddle"
+         ],
+         [  
+            "horizontal",
+            "L",
+            "L 1"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle",
+            "Lmiddle 1"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle 1",
+            "Lmiddle"
+         ],
+         [  
+            "horizontal",
+            "L",
+            "Lmiddle 1"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle 1",
+            "L"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle",
+            "L 1"
+         ],
+         [  
+            "horizontal",
+            "L 1",
+            "Lmiddle"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle 1",
+            "Ltop"
+         ],
+         [  
+            "horizontal",
+            "Ltop",
+            "Lmiddle 1"
+         ],
+         [  
+            "horizontal",
+            "Ltop 1",
+            "Lmiddle"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle",
             "Ltop 1"
+         ],
+         [  
+            "horizontal",
+            "L",
+            "crossMiddle"
+         ],
+         [  
+            "horizontal",
+            "Ltop",
+            "crossMiddle"
          ],
          [  
             "horizontal",
@@ -166,8 +221,43 @@
          ],
          [  
             "horizontal",
+            "Lmiddle",
+            "cross"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle",
+            "wall"
+         ],
+         [  
+            "horizontal",
+            "Lmiddle",
+            "bridge"
+         ],
+                  [  
+            "horizontal",
             "Ltop",
-            "crossTop"
+            "crossMiddle"
+         ],
+         [  
+            "horizontal",
+            "Ltop",
+            "cross"
+         ],
+         [  
+            "horizontal",
+            "Ltop",
+            "wall"
+         ],
+         [  
+            "horizontal",
+            "Ltop",
+            "bridge"
+         ],
+         [  
+            "horizontal",
+            "empty",
+            "Ltop 1"
          ],
          [  
             "horizontal",
@@ -247,11 +337,6 @@
          ],
          [  
             "vertical",
-            "Ltop",
-            "ground"
-         ],
-         [  
-            "vertical",
             "L",
             "Lmiddle"
          ],
@@ -294,13 +379,7 @@
             "vertical",
             "empty",
             "Ltop"
-         ],
-         [  
-            "vertical",
-            "Ltop",
-            "empty"
          ]
-
 
       ]
    }
