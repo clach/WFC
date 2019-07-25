@@ -10,7 +10,7 @@
 
 class ShaderProgram
 {
-public:
+protected:
     GLuint vertShader; // A handle for the vertex shader stored in this shader program
     GLuint fragShader; // A handle for the fragment shader stored in this shader program
     GLuint prog;       // A handle for the linked shader program stored in this class
@@ -29,7 +29,7 @@ public:
 public:
     ShaderProgram(GLWidget277* context);
     // Sets up the requisite GL data and shaders from the given .glsl files
-    void create(const char *vertfile, const char *fragfile);
+    virtual void create(const char *vertfile, const char *fragfile);
     // Tells our OpenGL context to use this shader to draw things
     void useMe();
     // Pass the given model matrix to this shader on the GPU
@@ -39,7 +39,7 @@ public:
     // Pass the given color to this shader on the GPU
     void setGeometryColor(glm::vec4 color);
     // Draw the given object to our screen using this ShaderProgram's shaders
-    void draw(Drawable &d);
+    virtual void draw(Drawable &d);
     // Utility function used in create()
     char* textFileRead(const char*);
     // Utility function that prints any shader compilation errors to the console
@@ -49,7 +49,7 @@ public:
 
     QString qTextFileRead(const char*);
 
-private:
+protected:
     GLWidget277* context;   // Since Qt's OpenGL support is done through classes like QOpenGLFunctions_3_2_Core,
                             // we need to pass our OpenGL context to the Drawable in order to call GL functions
                             // from within this class.

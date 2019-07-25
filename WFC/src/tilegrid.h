@@ -27,6 +27,7 @@ public:
 
     void setupWFC();
     bool runWFC();
+    bool runWFC2();
     bool runWFCIteration(bool& done);
 
     // want setDim to be able to modify buildIndices
@@ -44,7 +45,14 @@ private:
     std::vector<std::vector<std::vector<Tile>>> tiles;
     bool buildMode;
 
+    int numTiles;
+    std::vector<Mesh*> meshes;
+    std::vector<std::string> tileNames;
+    std::vector<std::vector<glm::vec3>> tileTrans;
+    std::vector<std::vector<glm::vec3>> tileRots;
+
     // TODO: info like this is shared between mygl, wfc, tilegrid, and tile
     // don't need to make members for each separate class?
+
 
 };

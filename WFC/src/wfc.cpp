@@ -26,8 +26,7 @@ WFC::WFC(GLWidget277 *context, std::string tileset, int x, int y, int z) :
 WFC::~WFC()
 {}
 
-bool WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
-{
+bool WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles) {
     setup(tiles);
 
     while (true) {
@@ -41,6 +40,25 @@ bool WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles)
     // WFC is complete, output results
     std::vector<std::vector<std::vector<int>>> placeholder; // TODO: this is dumb
     return outputObservations(tiles, false, placeholder);
+}
+
+bool WFC::run(std::vector<std::vector<std::vector<Tile>>>* tiles,
+              std::vector<std::string>* names,
+              std::vector<std::vector<glm::vec3>>* trans,
+              std::vector<std::vector<glm::vec3>>* rots) {
+    setup(tiles);
+
+    while (true) {
+        if (observe()) { // returns true when WFC is complete
+            break;
+        }
+        // keep propogating until no more changes occur
+        while (propagate()) {}
+    }
+
+    // WFC is complete, output results
+    std::vector<std::vector<std::vector<int>>> placeholder; // TODO: this is dumb
+    return outputObservations2(tiles, false, placeholder, names, trans, rots);
 }
 
 bool WFC::runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles, bool& done) {
@@ -715,16 +733,15 @@ bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles,
                 } else {
                     tileIndex = observed[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset];
                 }
+
                 Tile tile = Tile(context, tileset);
 
                 if (valid && tileIndex == -1 && !copy) {
                     valid = false;
                 }
 
-                std::string tileName = EMPTY;
-                if (copy) {
-                    tileName = BOUNDS;
-                }
+                std::string tileName = copy ? BOUNDS : EMPTY;
+
                 int cardinality = 0;
                 if (tileIndex != -1) {
                     tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(SPACE));
@@ -740,6 +757,123 @@ bool WFC::outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles,
                 tile.setTransform(tileTransform);
 
                 (*tiles)[x][y][z] = tile;
+            }
+        }
+    }
+
+    return valid;
+}
+
+
+glm::vec3 WFC::calculateTileTrans(glm::vec3 pos) const {
+    float offset = tileDrawSize / 2.f;
+
+    glm::mat4 trans1Mat = glm::translate(glm::mat4(),
+                                         glm::vec3(tileDrawSize * pos.x,
+                                                   tileDrawSize * pos.y,
+                                                   tileDrawSize * pos.z)
+                                         + glm::vec3(offset));
+    glm::mat4 scaleMat = glm::scale(glm::mat4(), glm::vec3(tileDrawSize / voxelSize));
+
+    // MagicaVoxel places voxels on top of 0 in y-dir, not centered at 0
+    glm::mat4 trans2Mat = glm::translate(glm::mat4(), glm::vec3(0, -voxelSize / 2.f, 0));
+
+    return  glm::vec3(tileDrawSize * pos.x,
+                      tileDrawSize * pos.y,
+                      tileDrawSize * pos.z) + glm::vec3(offset);
+}
+
+glm::vec3 calculateTileRot(int cardinality) {
+    return glm::vec3(0, cardinality * PI / 2.0f, 0);
+}
+
+bool WFC::outputObservations2(std::vector<std::vector<std::vector<Tile>>>* tiles, bool copy,
+                              std::vector<std::vector<std::vector<int>>> possibleTiles,
+                             std::vector<std::string>* names,
+                             std::vector<std::vector<glm::vec3>>* trans,
+                             std::vector<std::vector<glm::vec3>>* rots) const {
+
+    bool valid = true;
+
+    int xBound = dim.x;
+    int yBound = dim.y;
+    int zBound = dim.z;
+    int xzIndexOffset = 0;
+    int yIndexOffset = 0;
+
+    if (sky) {
+        xBound = dim.x - 2;
+        yBound = dim.y - 2;
+        zBound = dim.z - 2;
+        xzIndexOffset = 1;
+        yIndexOffset = 1;
+    } else if (ground) {
+        yBound = dim.y - 1;
+        yIndexOffset = 1;
+    }
+
+    std::map<std::string, int> tileIndicesMap;
+    int lastIndex = 0;
+
+    for (int x = 0; x < xBound; x++) {
+        for (int y = 0; y < yBound; y++) {
+            for (int z = 0; z < zBound; z++) {
+                int tileIndex = -1;
+                if (copy) {
+                    tileIndex = observedCopy[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset];
+                } else {
+                    tileIndex = observed[x + xzIndexOffset][y + yIndexOffset][z + xzIndexOffset];
+                }
+
+                Tile tile = Tile(context, tileset);
+
+                if (valid && tileIndex == -1 && !copy) {
+                    valid = false;
+                }
+
+                std::string tileName = copy ? BOUNDS : EMPTY;
+
+                int cardinality = 0;
+                if (tileIndex != -1) {
+                    tileName = tileNames[tileIndex].substr(0, tileNames[tileIndex].find(SPACE));
+                    cardinality = stoi(tileNames[tileIndex].substr(tileNames[tileIndex].find(SPACE) + 1));
+                }
+                tile.setName(tileName);
+                tile.setCardinality(cardinality);
+                glm::mat4 tileTransform = calculateTileTransform(glm::vec3(x, y, z), cardinality);
+                if (tileName == BOUNDS) {
+                    float scale = (float)possibleTiles[x][y][z] / (float)actionCount;
+                    tileTransform = calculateTileTransformBounds(glm::vec3(x, y, z), scale);
+                }
+                tile.setTransform(tileTransform);
+
+                (*tiles)[x][y][z] = tile;
+
+
+////////////////////////////
+                // if name is already in map
+                if (tileIndicesMap.find(tileName) != tileIndicesMap.end()) {
+                    int otherTileIndex = tileIndicesMap[tileName];
+                    std::vector<glm::vec3> tileTrans = trans->at(otherTileIndex);
+                    std::vector<glm::vec3> tileRot = rots->at(otherTileIndex);
+                    tileTrans.push_back(calculateTileTrans(glm::vec3(x, y, z)));
+                    tileRot.push_back(calculateTileRot(cardinality));
+                    trans->at(otherTileIndex) = tileTrans;
+                    rots->at(otherTileIndex) = tileRot;
+
+                } else {
+                    names->push_back(tileName);
+                    std::vector<glm::vec3> tileTrans;
+                    std::vector<glm::vec3> tileRot;
+                    tileTrans.push_back(calculateTileTrans(glm::vec3(x, y, z)));
+                    tileRot.push_back(calculateTileRot(cardinality));
+                    trans->push_back(tileTrans);
+                    rots->push_back(tileRot);
+                    tileIndicesMap[tileName] = lastIndex;
+                    lastIndex++;
+                }
+
+
             }
         }
     }

@@ -4,8 +4,7 @@
 #include <QFile>
 
 Mesh::Mesh(GLWidget277 *context)
-    : Drawable(context),
-      mp_texture(nullptr), mp_bgTexture(nullptr)
+    : Drawable(context), mp_texture(nullptr)
 {}
 
 void Mesh::createCube()
@@ -102,117 +101,17 @@ void Mesh::createCube()
 
 void Mesh::create()
 {
-    // Does nothing, as we have two separate VBO data
-    // creation functions: createFromOBJ, which creates
-    // our mesh VBOs from OBJ file data, and createCube,
-    // which you will implement.
 }
 
 void Mesh::bindTexture() const
 {
-    mp_texture->bind(0);
+    //mp_texture->bind(0);
 }
 
 void Mesh::loadTexture() const
 {
     mp_texture->load(0);
 }
-
-
-void Mesh::bindBGTexture() const
-{
-    mp_bgTexture->bind(2);
-}
-
-void Mesh::loadBGTexture() const
-{
-    mp_bgTexture->load(2);
-}
-
-void Mesh::createFromOBJ(const char* filename, const char *textureFile, const char *bgTextureFile)
-{
-    std::vector<tinyobj::shape_t> shapes; std::vector<tinyobj::material_t> materials;
-    std::string errors = tinyobj::QLoadObj(shapes, materials, filename);
-    std::cout << errors << std::endl;
-    if(errors.size() == 0)
-    {
-        count = 0;
-        //Read the information from the vector of shape_ts
-        for(unsigned int i = 0; i < shapes.size(); i++)
-        {
-            std::vector<float> &positions = shapes[i].mesh.positions;
-            std::vector<float> &normals = shapes[i].mesh.normals;
-            std::vector<float> &uvs = shapes[i].mesh.texcoords;
-            std::vector<unsigned int> &indices = shapes[i].mesh.indices;
-
-            bool normalsExist = normals.size() > 0;
-            bool uvsExist = uvs.size() > 0;
-
-
-            std::vector<GLuint> glIndices;
-            for(unsigned int ui : indices)
-            {
-                glIndices.push_back(ui);
-            }
-            std::vector<glm::vec4> glPos;
-            std::vector<glm::vec4> glNor;
-            std::vector<glm::vec2> glUV;
-
-            for(int x = 0; x < positions.size(); x += 3)
-            {
-                glPos.push_back(glm::vec4(positions[x], positions[x + 1], positions[x + 2], 1.f));
-                if(normalsExist)
-                {
-                    glNor.push_back(glm::vec4(normals[x], normals[x + 1], normals[x + 2], 1.f));
-                }
-            }
-
-            if(uvsExist)
-            {
-                for(int x = 0; x < uvs.size(); x += 2)
-                {
-                    glUV.push_back(glm::vec2(uvs[x], uvs[x + 1]));
-                }
-            }
-
-            generateIdx();
-            mp_context->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufIdx);
-            mp_context->glBufferData(GL_ELEMENT_ARRAY_BUFFER, glIndices.size() * sizeof(GLuint), glIndices.data(), GL_STATIC_DRAW);
-
-            generatePos();
-            mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufPos);
-            mp_context->glBufferData(GL_ARRAY_BUFFER, glPos.size() * sizeof(glm::vec4), glPos.data(), GL_STATIC_DRAW);
-
-            if(normalsExist)
-            {
-                generateNor();
-                mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufNor);
-                mp_context->glBufferData(GL_ARRAY_BUFFER, glNor.size() * sizeof(glm::vec4), glNor.data(), GL_STATIC_DRAW);
-            }
-
-            if(uvsExist)
-            {
-                generateUV();
-                mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufUV);
-                mp_context->glBufferData(GL_ARRAY_BUFFER, glUV.size() * sizeof(glm::vec2), glUV.data(), GL_STATIC_DRAW);
-            }
-
-            count += indices.size();
-        }
-    }
-    else
-    {
-        //An error loading the OBJ occurred!
-        std::cout << errors << std::endl;
-    }
-
-    mp_texture = std::unique_ptr<Texture>(new Texture(mp_context));
-    mp_texture->create(textureFile);
-
-    mp_bgTexture = std::unique_ptr<Texture>(new Texture(mp_context));
-    mp_bgTexture->create(bgTextureFile);
-}
-
 
 void Mesh::createFromOBJ(const char* filename, const char *textureFile)
 {
@@ -295,3 +194,14 @@ void Mesh::createFromOBJ(const char* filename, const char *textureFile)
     mp_texture->create(textureFile);
 
 }
+
+void Mesh::setInstanceVBOs(std::vector<glm::vec3> trans, std::vector<glm::vec3> rot) {
+    generateTrans();
+    mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufTrans);
+    mp_context->glBufferData(GL_ARRAY_BUFFER, trans.size() * sizeof(glm::vec3), trans.data(), GL_STATIC_DRAW);
+
+    generateRot();
+    mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufRot);
+    mp_context->glBufferData(GL_ARRAY_BUFFER, rot.size() * sizeof(glm::vec3), rot.data(), GL_STATIC_DRAW);
+}
+

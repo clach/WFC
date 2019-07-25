@@ -11,15 +11,13 @@ public:
     void create() override;
 
     void createFromOBJ(const char *filename, const char* textureFile);
-    void createFromOBJ(const char *filename, const char* textureFile, const char* bgTextureFile);
     void createCube();
 
     void bindTexture() const;
     void loadTexture() const;
-    void bindBGTexture() const;
-    void loadBGTexture() const;
+
+    void setInstanceVBOs(std::vector<glm::vec3> trans, std::vector<glm::vec3> rot);
 
 private:
     std::unique_ptr<Texture> mp_texture;
-    std::unique_ptr<Texture> mp_bgTexture;
 };

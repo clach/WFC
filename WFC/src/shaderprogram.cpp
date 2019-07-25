@@ -132,7 +132,6 @@ void ShaderProgram::setGeometryColor(glm::vec4 color)
     }
 }
 
-//This function, as its name implies, uses the passed in GL widget
 void ShaderProgram::draw(Drawable &d)
 {
         useMe();
@@ -179,7 +178,7 @@ void ShaderProgram::draw(Drawable &d)
 
     if (attrPos != -1) context->glDisableVertexAttribArray(attrPos);
     if (attrNor != -1) context->glDisableVertexAttribArray(attrNor);
-    if (attrNor != -1) context->glDisableVertexAttribArray(attrUV);
+    if (attrUV != -1) context->glDisableVertexAttribArray(attrUV);
     if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
 
     context->printGLErrorLog();

@@ -9,7 +9,7 @@ MyGL::MyGL(QWidget *parent)
     : GLWidget277(parent), buildMode(false),
       groundQuad(this), selectionQuad(this),
       groundQuadColor(glm::vec4(0.13, 0.55, 0.13, 0.6)), selectionQuadColor(glm::vec4(1.0, 1.0, 1.0, 0.5)),
-      m_progLambert(this), m_progLambertPrev(this), m_progFlat(this),
+      m_progLambert(this), m_progLambertInstancing(this), m_progLambertPrev(this), m_progFlat(this),
       m_glCamera(), lines(this), tileGrid(this), dim(glm::vec3(5, 2, 5)), tileset(""),
       selectedTile(EMPTY), groundQuadHeight(0), drawSelectionQuad(false),
       periodicPreview(false), tileGridRepeater(this, 3), tileDrawSize(3.f),
@@ -74,10 +74,12 @@ void MyGL::initializeGL()
 
     // create shaders
     m_progLambert.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
+    m_progLambertInstancing.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
     m_progLambertPrev.create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
     m_progFlat.create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
     m_progLambert.setGeometryColor(glm::vec4(1, 0, 0, 1));
+    m_progLambertInstancing.setGeometryColor(glm::vec4(1, 0, 0, 1));
     m_progLambertPrev.setGeometryColor(glm::vec4(1, 0.4, 0.4, 1));
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
@@ -94,6 +96,7 @@ void MyGL::resizeGL(int w, int h)
     glm::mat4 viewproj = m_glCamera.getViewProj();
 
     m_progLambert.setViewProjMatrix(viewproj);
+    m_progLambertInstancing.setViewProjMatrix(viewproj);
     m_progLambertPrev.setViewProjMatrix(viewproj);
     m_progFlat.setViewProjMatrix(viewproj);
 
@@ -107,9 +110,11 @@ void MyGL::paintGL()
     // Clear the screen so that we only see newly drawn images
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    m_progFlat.setViewProjMatrix(m_glCamera.getViewProj());
     m_progLambert.setViewProjMatrix(m_glCamera.getViewProj());
+    m_progLambertInstancing.setViewProjMatrix(m_glCamera.getViewProj());
     m_progLambertPrev.setViewProjMatrix(m_glCamera.getViewProj());
+    m_progFlat.setViewProjMatrix(m_glCamera.getViewProj());
+
 
     // draw boundary lines
     glm::mat4 linesScale = glm::scale(glm::mat4(), glm::vec3(tileDrawSize * dim.x, tileDrawSize * dim.y, tileDrawSize * dim.z));
@@ -117,7 +122,7 @@ void MyGL::paintGL()
     m_progFlat.draw(lines);
 
     // draw tiles
-    tileGrid.drawTiles(m_progLambert);
+    tileGrid.drawTiles(m_progLambertInstancing);
 
     // draw preview of periodic tilegrid tiling
     if (periodicPreview) {
@@ -228,7 +233,7 @@ void MyGL::runWFC() {
     }
     tileGrid.setDim(dim, buildMode, &buildIndices);
 
-    if (!tileGrid.runWFC()) {
+    if (!tileGrid.runWFC2()) {
         emit wfcConvergenceError(true);
         if (buildMode) {
             // if the WFC did not converge, clear the build indices

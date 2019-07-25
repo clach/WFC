@@ -18,6 +18,10 @@ public:
     void setBuildIndices(std::vector<glm::vec3> buildIndices);
     std::vector<glm::vec3> getBuildIndices() const;
     bool run(std::vector<std::vector<std::vector<Tile>>>* tiles);
+    bool run(std::vector<std::vector<std::vector<Tile>>>* tiles,
+                  std::vector<std::string>* names,
+                  std::vector<std::vector<glm::vec3>>* trans,
+                  std::vector<std::vector<glm::vec3>>* rots);
     bool runIteration(std::vector<std::vector<std::vector<Tile>>>* tiles, bool& done);
 
     void setup(std::vector<std::vector<std::vector<Tile>>>* tiles);
@@ -27,6 +31,8 @@ public:
 
     glm::mat4 calculateTileTransform(glm::vec3 pos, int cardinality) const;
     glm::mat4 calculateTileTransformBounds(glm::vec3 pos, float scaleFactor) const;
+    glm::vec3 calculateTileTrans(glm::vec3 pos) const;
+
 
 private:
 
@@ -52,6 +58,12 @@ private:
 
     bool outputObservations(std::vector<std::vector<std::vector<Tile>>>* tiles, bool copy,
                             std::vector<std::vector<std::vector<int>>> possibleTiles) const;
+
+    bool outputObservations2(std::vector<std::vector<std::vector<Tile>>>* tiles, bool copy,
+                             std::vector<std::vector<std::vector<int>>> possibleTiles,
+                             std::vector<std::string>* names,
+                             std::vector<std::vector<glm::vec3>>* trans,
+                             std::vector<std::vector<glm::vec3>>* rots) const;
 
     bool tilesetChanged;
 

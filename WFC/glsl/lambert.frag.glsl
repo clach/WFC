@@ -23,11 +23,7 @@ void main()
 
     float ambientTerm = 0.2;
 
-    float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
-                                                            //to simulate ambient lighting. This ensures that faces that are not
-                                                            //lit by our point light are not completely black.
-
-
+    float lightIntensity = diffuseTerm + ambientTerm;
 
     // add some distance fog
     vec3 fogColor = vec3(0.53, 0.81, 0.92);

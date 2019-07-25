@@ -5,6 +5,7 @@
 #include <glwidget277.h>
 #include <utils.h>
 #include <shaderprogram.h>
+#include <shaderprograminstancing.h>
 #include <scene/cylinder.h>
 #include <scene/sphere.h>
 #include <scene/quad.h>
@@ -25,9 +26,10 @@ class MyGL : public GLWidget277
     Q_OBJECT
 
 private:
-    ShaderProgram m_progLambert;// A shader program that uses lambertian reflection
+    ShaderProgram m_progLambert;
+    ShaderProgramInstancing m_progLambertInstancing;
     ShaderProgram m_progLambertPrev;
-    ShaderProgram m_progFlat;// A shader program that uses "flat" reflection (no shadowing at all)
+    ShaderProgram m_progFlat;
 
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.
                 // Don't worry too much about this. Just know it is necessary in order to render geometry.

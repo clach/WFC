@@ -9,7 +9,8 @@ TileGrid::TileGrid(GLWidget277 *context) : TileGrid(context, "", 0, 0, 0)
 }
 
 TileGrid::TileGrid(GLWidget277 *context, std::string tileset, int xDim, int yDim, int zDim) :
-    context(context), dim(glm::vec3(xDim, yDim, zDim)), tileset(tileset), buildMode(false)
+    context(context), dim(glm::vec3(xDim, yDim, zDim)), tileset(tileset), buildMode(false),
+    numTiles(0)
 {
     std::vector<Tile> tilesZ(dim.z, Tile(context, tileset));
     std::vector<std::vector<Tile>> tilesY(dim.y, tilesZ);
@@ -33,6 +34,10 @@ bool TileGrid::runWFC() {
     return wfc->run(&tiles);
 }
 
+bool TileGrid::runWFC2() {
+    return wfc->run(&tiles, &tileNames, &tileTrans, &tileRots);
+}
+
 bool TileGrid::runWFCIteration(bool& done) {
     return wfc->runIteration(&tiles, done);
 }
@@ -54,33 +59,84 @@ void TileGrid::setTileAt(Tile tile, int x, int y, int z) {
 }
 
 void TileGrid::createTiles() {
-    for (int x = 0; x < dim.x; x++) {
-        for (int y = 0; y < dim.y; y++) {
-            for (int z = 0; z < dim.z; z++) {
-                tiles[x][y][z].createTileMesh();
-            }
+    numTiles = tileNames.size();
+    for (int i = 0; i < numTiles; i++) {
+        std::string name = tileNames[i];
+        if (name == BOUNDS) {
+            //bounds.create();
+        } else if (name != EMPTY && name != GROUND) {
+            std::string objName = ":/objs/" + tileset + "/" + name + ".obj";
+            std::string textureName = ":/objs/" + tileset + "/" + name + ".png";
+            const char* objNameChar = new char[objName.size()];
+            const char* textureNameChar = new char[textureName.size()];
+            objNameChar = &objName[0u];
+            textureNameChar = &textureName[0u];
+
+            Mesh* mesh = new Mesh(context);
+            mesh->createFromOBJ(objNameChar, textureNameChar);
+            mesh->setInstanceVBOs(tileTrans[i], tileRots[i]);
+            mesh->setNumInstances(tileTrans[i].size());
+            mesh->loadTexture();
+            meshes.push_back(mesh);
         }
     }
+//    for (int x = 0; x < dim.x; x++) {
+//        for (int y = 0; y < dim.y; y++) {
+//            for (int z = 0; z < dim.z; z++) {
+//                tiles[x][y][z].createTileMesh();
+//            }
+//        }
+//    }
 }
 
 void TileGrid::drawTiles(ShaderProgram& sp) {
-    for (int x = 0; x < dim.x; x++) {
-        for (int y = 0; y < dim.y; y++) {
-            for (int z = 0; z < dim.z; z++) {
-                tiles[x][y][z].drawTileMesh(sp);
-            }
-        }
+//    for (int x = 0; x < dim.x; x++) {
+//        for (int y = 0; y < dim.y; y++) {
+//            for (int z = 0; z < dim.z; z++) {
+//                tiles[x][y][z].drawTileMesh(sp);
+//            }
+//        }
+//    }
+//    for (int i = 0; i < numTiles; i++) {
+//        std::string name = tileNames[i];
+//        if (name == BOUNDS) {
+//            //sp.setModelMatrix(modelMat);
+//            //sp.draw(bounds);
+//        } else if (name != EMPTY && name != GROUND) {
+//            //sp.setModelMatrix(modelMat);
+//            meshes[i]->bindTexture();
+//            sp.draw(*meshes[i]);
+//        }
+//    }
+    for (Mesh* m : meshes ) {
+        //sp.setModelMatrix(modelMat);
+        m->bindTexture();
+        sp.draw(*m);
     }
 }
 
 void TileGrid::destroyTiles() {
-    for (int x = 0; x < dim.x; x++) {
-        for (int y = 0; y < dim.y; y++) {
-            for (int z = 0; z < dim.z; z++) {
-                tiles[x][y][z].destroyTileMesh();
-            }
-        }
+//    for (int x = 0; x < dim.x; x++) {
+//        for (int y = 0; y < dim.y; y++) {
+//            for (int z = 0; z < dim.z; z++) {
+//                tiles[x][y][z].destroyTileMesh();
+//            }
+//        }
+//    }
+//    for (int i = 0; i < numTiles; i++) {
+//        std::string name = tileNames[i];
+//        if (name == BOUNDS) {
+//            //bounds.destroy();
+//        } else if (name != EMPTY && name != GROUND) {
+//            meshes[i]->destroy();
+//            delete meshes[i];
+//        }
+//    }
+    for (Mesh* m : meshes ) {
+        m->destroy();
+        delete m;
     }
+    meshes.clear();
 }
 
 std::string TileGrid::getTileset() const {

@@ -23,7 +23,9 @@ SOURCES += \
     $$PWD/scene/ray.cpp \
     $$PWD/scene/boundarylines.cpp \
     $$PWD/scene/cube.cpp \
-    $$PWD/tilegridrepeater.cpp
+    $$PWD/tilegridrepeater.cpp \
+    $$PWD/instancedmesh.cpp \
+    $$PWD/shaderprograminstancing.cpp
 
 
 HEADERS += \
@@ -48,5 +50,7 @@ HEADERS += \
     $$PWD/scene/ray.h \
     $$PWD/scene/boundarylines.h \
     $$PWD/scene/cube.h \
-    $$PWD/tilegridrepeater.h
+    $$PWD/tilegridrepeater.h \
+    $$PWD/instancedmesh.h \
+    $$PWD/shaderprograminstancing.h
 
